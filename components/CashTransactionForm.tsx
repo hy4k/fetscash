@@ -38,7 +38,7 @@ export const CashTransactionForm: React.FC<CashTransactionFormProps> = ({
         custom_id: transaction.custom_id || nextId
       });
     } else {
-        setFormData(prev => ({ ...prev, custom_id: nextId, category: categories[0]?.name || '' }));
+      setFormData(prev => ({ ...prev, custom_id: nextId, category: categories[0]?.name || '' }));
     }
   }, [transaction, nextId, categories]);
 
@@ -53,7 +53,7 @@ export const CashTransactionForm: React.FC<CashTransactionFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Manual entries in Cash Book are ALWAYS expenses (money leaving the box)
     // Replenishments (money entering) come automatically from the Expense Register
     const finalAmount = -Math.abs(formData.amount);
@@ -72,12 +72,12 @@ export const CashTransactionForm: React.FC<CashTransactionFormProps> = ({
 
   const inputClass = "w-full neo-input rounded-xl p-4 text-sm font-medium placeholder-text-tertiary focus:border-money-gold/30 transition-all";
   const labelClass = "block text-xs font-bold text-text-secondary mb-2 ml-1 uppercase tracking-wider";
-  
+
   const displayId = transaction?.custom_id || nextId;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" style={{ '--active-color': primaryColor } as React.CSSProperties}>
-      
+
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className={labelClass}>Date</label>
@@ -92,8 +92,8 @@ export const CashTransactionForm: React.FC<CashTransactionFormProps> = ({
         </div>
         <div>
           <label className={labelClass}>Transaction No.</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             readOnly
             value={displayId}
             className={`${inputClass} opacity-70 cursor-not-allowed border border-money-gold/20 text-money-gold`}
@@ -105,16 +105,16 @@ export const CashTransactionForm: React.FC<CashTransactionFormProps> = ({
       <div>
         <label className={labelClass}>Category</label>
         <div className="relative">
-            <select 
+          <select
             name="category" required
             value={formData.category} onChange={handleChange}
             className={`${inputClass} appearance-none cursor-pointer`}
-            >
-                {categories.map(c => (
-                    <option key={c.id || c.name} value={c.name}>{c.name}</option>
-                ))}
-            </select>
-            <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none text-xs"></i>
+          >
+            {categories.map(c => (
+              <option key={c.id || c.name} value={c.name}>{c.name}</option>
+            ))}
+          </select>
+          <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none text-xs"></i>
         </div>
       </div>
 
@@ -131,16 +131,23 @@ export const CashTransactionForm: React.FC<CashTransactionFormProps> = ({
         />
       </div>
 
+      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+        <p className="text-xs text-red-400 font-bold flex items-center gap-2">
+          <i className="fas fa-info-circle"></i>
+          Note: This will be recorded as a Credit (Expense) and deducted from the Cash Balance.
+        </p>
+      </div>
+
       <div>
         <label className={labelClass}>Amount (₹)</label>
         <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary font-serif">₹</span>
-            <input 
-                type="number" name="amount" required step="0.01" min="0"
-                value={formData.amount} onChange={handleChange}
-                className={`${inputClass} pl-8 text-lg font-serif tracking-wider`}
-                placeholder="0.00"
-            />
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary font-serif">₹</span>
+          <input
+            type="number" name="amount" required step="0.01" min="0"
+            value={formData.amount} onChange={handleChange}
+            className={`${inputClass} pl-8 text-lg font-serif tracking-wider`}
+            placeholder="0.00"
+          />
         </div>
       </div>
 
