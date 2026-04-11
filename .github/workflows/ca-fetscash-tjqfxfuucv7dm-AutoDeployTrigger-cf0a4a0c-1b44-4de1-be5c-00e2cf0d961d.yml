@@ -1,0 +1,49 @@
+name: Trigger auto deployment for ca-fetscash-tjqfxfuucv7dm
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ master ]
+    paths:
+    - '**'
+    - '.github/workflows/ca-fetscash-tjqfxfuucv7dm-AutoDeployTrigger-cf0a4a0c-1b44-4de1-be5c-00e2cf0d961d.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.CAFETSCASHTJQFXFUUCV7DM_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CAFETSCASHTJQFXFUUCV7DM_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.CAFETSCASHTJQFXFUUCV7DM_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          _targetLabelKey_: _targetLabel_
+          registryUrl: crip2feo65pm6my.azurecr.io
+          registryUsername: ${{ secrets.CAFETSCASHTJQFXFUUCV7DM_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CAFETSCASHTJQFXFUUCV7DM_REGISTRY_PASSWORD }}
+          containerAppName: ca-fetscash-tjqfxfuucv7dm
+          resourceGroup: rg-fetscash
+          imageToBuild: crip2feo65pm6my.azurecr.io/ca-fetscash-tjqfxfuucv7dm:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
