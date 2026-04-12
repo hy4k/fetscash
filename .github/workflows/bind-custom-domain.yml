@@ -40,10 +40,12 @@ jobs:
           import json, sys
           data = json.load(sys.stdin)
           ingress = data['properties']['configuration']['ingress']
-          existing = {d['name'] for d in (ingress.get('customDomains') or [])}
+          if not ingress.get('customDomains'):
+              ingress['customDomains'] = []
+          existing = {d['name'] for d in ingress['customDomains']}
           for hostname in ['fets.cash', 'paybook.fets.cash']:
               if hostname not in existing:
-                  ingress.setdefault('customDomains', []).append({
+                  ingress['customDomains'].append({
                       'name': hostname,
                       'bindingType': 'Disabled'
                   })
