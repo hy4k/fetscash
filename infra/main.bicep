@@ -84,6 +84,9 @@ module containerApp 'modules/containerapp.bicep' = {
     location: location
     environmentId: containerAppEnvironment.outputs.id
     containerImage: containerRegistryEndpoint != '' ? containerRegistryEndpoint : '${containerRegistry.outputs.loginServer}/fetscash:latest'
+    acrLoginServer: containerRegistry.outputs.loginServer
+    acrUsername: containerRegistry.outputs.username
+    acrPassword: containerRegistry.outputs.password
     buildArgs: {
       VITE_SUPABASE_URL: supabaseUrl
       VITE_SUPABASE_ANON_KEY: supabaseAnonKey

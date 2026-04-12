@@ -36,6 +36,17 @@ param tags object = {}
 @description('Enable external ingress (public access)')
 param external bool = true
 
+@description('ACR login server (e.g. myregistry.azurecr.io)')
+param acrLoginServer string = ''
+
+@description('ACR admin username')
+@secure()
+param acrUsername string = ''
+
+@description('ACR admin password')
+@secure()
+param acrPassword string = ''
+
 // Convert buildArgs to environment variables for the container
 var environmentVariables = [for item in items(buildArgs): {
   name: item.key
@@ -60,6 +71,19 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         allowInsecure: false
       }
       activeRevisionsMode: 'Single'
+      secrets: acrLoginServer != '' ? [
+        {
+          name: 'acr-password'
+          value: acrPassword
+        }
+      ] : []
+      registries: acrLoginServer != '' ? [
+        {
+          server: acrLoginServer
+          username: acrUsername
+          passwordSecretRef: 'acr-password'
+        }
+      ] : []
     }
     template: {
       containers: [
