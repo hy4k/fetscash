@@ -1,0 +1,32 @@
+name: Build and push frontend image
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Login to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build and push image
+        run: |
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/fetscash:${{ github.sha }} -f Dockerfile .
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/fetscash:${{ github.sha }}
+      - name: Write image reference
+        run: echo "${{ secrets.ACR_LOGIN_SERVER }}/fetscash:${{ github.sha }}" > infra/latest_image.txt

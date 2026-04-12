@@ -54,3 +54,29 @@ Support notes for Midhun (no-code friendly)
   parameter file and the template will reference it.
 - I will always present exact commands and plain-English summaries before any
   execution.
+
+GitHub Actions (CI/CD) — artifacts only
+- `CI: Build and push frontend image` (`.github/workflows/ci-build-push.yml`)
+  - Builds the static frontend, builds a Docker image, and pushes it to your
+    ACR. Requires these repository secrets to be configured: `ACR_LOGIN_SERVER`,
+    `ACR_USERNAME`, `ACR_PASSWORD`.
+  - It writes the pushed image reference to `infra/latest_image.txt` for
+    downstream use.
+- `Validate Bicep (manual)` (`.github/workflows/validate-bicep.yml`)
+  - Manual workflow to build the Bicep template and run a `what-if` (dry-run)
+    at subscription scope. Requires an Azure service principal stored as
+    `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_CLIENT_SECRET` in
+    repository secrets.
+
+How to enable
+1) Add repository secrets via GitHub > Settings > Secrets:
+   - `ACR_LOGIN_SERVER`, `ACR_USERNAME`, `ACR_PASSWORD`
+   - `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_CLIENT_SECRET`
+2) Trigger `ci-build-push` by pushing to `master` or via `Actions` → `Run workflow`.
+3) Trigger `validate-bicep` via `Actions` → `Run workflow` (manual).
+
+Security and approval
+- Workflows are created as artifacts only. They will not be triggered by me.
+- The `validate-bicep` workflow performs dry-run checks only; it does not apply
+  changes. Any apply step will require explicit approval and additional
+  automation with protected environments or manual confirmation.
