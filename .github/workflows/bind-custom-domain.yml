@@ -43,7 +43,8 @@ jobs:
           if not ingress.get('customDomains'):
               ingress['customDomains'] = []
           existing = {d['name'] for d in ingress['customDomains']}
-          for hostname in ['fets.cash', 'paybook.fets.cash']:
+          # paybook.fets.cash requires asuid.paybook TXT record — added separately below
+          for hostname in ['fets.cash']:
               if hostname not in existing:
                   ingress['customDomains'].append({
                       'name': hostname,
@@ -63,6 +64,12 @@ jobs:
             --headers "Content-Type=application/json"
           echo "Custom domains added with bindingType=Disabled."
           echo "Azure will issue managed TLS certificates via HTTP validation automatically."
+
+      - name: "NOTE: paybook.fets.cash DNS prerequisite"
+        run: |
+          echo "paybook.fets.cash is skipped until its verification TXT record is added:"
+          echo "  Type: TXT  |  Name: asuid.paybook  |  TTL: 300"
+          echo "  Value: 6E5EDF6D86B72205B9E60EF1ECD706BD643F3EF3EA7D9B78C5F3FFDE6BCE9D92"
 
       - name: Wait for certificate issuance (up to 5 min)
         env:
