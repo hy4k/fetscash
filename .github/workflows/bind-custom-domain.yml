@@ -81,7 +81,7 @@ jobs:
               python3 -c "
           import json, sys
           data = json.load(sys.stdin)
-          domains = data['properties']['configuration']['ingress'].get('customDomains', [])
+          domains = data['properties']['configuration']['ingress'].get('customDomains') or []
           for d in domains:
               print(d['name'], d.get('bindingType','?'))
               ")
@@ -102,7 +102,7 @@ jobs:
             python3 -c "
           import json, sys
           data = json.load(sys.stdin)
-          domains = data['properties']['configuration']['ingress'].get('customDomains', [])
+          domains = data['properties']['configuration']['ingress'].get('customDomains') or []
           print('--- Custom Domains ---')
           for d in domains:
               print(f\"  {d['name']}  binding={d.get('bindingType','?')}\")
