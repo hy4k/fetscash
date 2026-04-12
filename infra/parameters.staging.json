@@ -4,9 +4,9 @@
   "parameters": {
     "environmentName": { "value": "staging" },
     "location": { "value": "eastus2" },
-    "supabaseUrl": { "value": "<SUPABASE_URL>" },
-    "supabaseAnonKey": { "value": "<SUPABASE_ANON_KEY>" },
-    "containerRegistryEndpoint": { "value": "<ACR_LOGIN_SERVER>/fetscash:latest" },
+    "supabaseUrl": { "value": "" },
+    "supabaseAnonKey": { "value": "" },
+    "containerRegistryEndpoint": { "value": "" },
     "tags": { "value": { "owner": "Midhun", "project": "fetscash" } }
   }
 }
