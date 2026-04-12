@@ -80,3 +80,21 @@ Security and approval
 - The `validate-bicep` workflow performs dry-run checks only; it does not apply
   changes. Any apply step will require explicit approval and additional
   automation with protected environments or manual confirmation.
+
+Creating a protected environment for validation (recommended)
+1) In GitHub, go to `Settings` → `Environments` → `New environment` and create
+  an environment named `staging`.
+2) Under `Deployment protection rules`, add at least one required reviewer
+  (for example your GitHub username) so manual approvals are required before
+  the `validate-bicep` workflow runs.
+3) Add the required secrets to the environment (optional): `AZURE_CLIENT_ID`,
+  `AZURE_TENANT_ID`, `AZURE_CLIENT_SECRET`. Secrets added to an environment are
+  only available to runs that target that environment.
+
+Notes:
+- The `validate-bicep` workflow references the `staging` environment; when the
+  environment has protection rules the workflow run will pause and require an
+  approver to confirm. This ensures no dry-run or apply happens without your
+  explicit approval.
+- I will not run any workflows or attempt to deploy resources until you both
+  (a) provide the necessary secrets and (b) give an explicit `I approve`.

@@ -6,6 +6,7 @@ on:
 jobs:
   validate-bicep:
     runs-on: ubuntu-latest
+    environment: staging
     steps:
       - uses: actions/checkout@v4
       - name: Setup Azure CLI
