@@ -1,0 +1,11 @@
+{
+  "environmentName": "staging",
+  "location": "eastus2",
+  "supabaseUrl": "<SUPABASE_URL>",
+  "supabaseAnonKey": "<SUPABASE_ANON_KEY>",
+  "containerRegistryEndpoint": "<ACR_LOGIN_SERVER>/fetscash:latest",
+  "tags": {
+    "owner": "Midhun",
+    "project": "fetscash"
+  }
+}
