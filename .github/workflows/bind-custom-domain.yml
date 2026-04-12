@@ -52,6 +52,9 @@ jobs:
                   print(f'Adding: {hostname}', file=__import__('sys').stderr)
               else:
                   print(f'Already present: {hostname}', file=__import__('sys').stderr)
+          # ARM GET redacts secret values; omit secrets key so Azure preserves existing ones
+          config = data['properties']['configuration']
+          config.pop('secrets', None)
           print(json.dumps(data))
           ")
 
