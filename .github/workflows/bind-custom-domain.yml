@@ -30,13 +30,13 @@ jobs:
           STATIC_IP=$(az containerapp env show \
             --name caeaxojf7v4ky4xo \
             --resource-group rg-staging \
-            --query properties.staticIp -o tsv)
-          echo "Container Apps environment static IP: $STATIC_IP"
-          echo "Expected: 48.214.86.64"
-          if [ "$STATIC_IP" != "48.214.86.64" ]; then
-            echo "::warning::IP mismatch! Update your DNS A records to $STATIC_IP"
+            --query properties.staticIp -o tsv 2>/dev/null) || true
+          if [ -n "$STATIC_IP" ]; then
+            echo "Container Apps environment static IP: $STATIC_IP"
+            [ "$STATIC_IP" != "48.214.86.64" ] && \
+              echo "::warning::IP mismatch — update DNS A records to $STATIC_IP"
           else
-            echo "IP matches DNS records."
+            echo "Could not retrieve static IP (SP may lack subscription scope), skipping check."
           fi
 
       - name: Add hostname fets.cash
