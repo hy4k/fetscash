@@ -1,11 +1,12 @@
 {
-  "environmentName": "staging",
-  "location": "eastus2",
-  "supabaseUrl": "<SUPABASE_URL>",
-  "supabaseAnonKey": "<SUPABASE_ANON_KEY>",
-  "containerRegistryEndpoint": "<ACR_LOGIN_SERVER>/fetscash:latest",
-  "tags": {
-    "owner": "Midhun",
-    "project": "fetscash"
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": { "value": "staging" },
+    "location": { "value": "eastus2" },
+    "supabaseUrl": { "value": "<SUPABASE_URL>" },
+    "supabaseAnonKey": { "value": "<SUPABASE_ANON_KEY>" },
+    "containerRegistryEndpoint": { "value": "<ACR_LOGIN_SERVER>/fetscash:latest" },
+    "tags": { "value": { "owner": "Midhun", "project": "fetscash" } }
   }
 }
