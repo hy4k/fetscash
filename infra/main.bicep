@@ -22,6 +22,17 @@ param containerRegistryEndpoint string = ''
 // "myregistry.azurecr.io/fetscash:latest" to use a prebuilt image from ACR.
 // See infra/parameters.staging.json for a template.
 
+@description('External ACR login server to authenticate against (overrides the Bicep-created ACR)')
+param acrLoginServerOverride string = ''
+
+@description('External ACR admin username')
+@secure()
+param acrUsernameOverride string = ''
+
+@description('External ACR admin password')
+@secure()
+param acrPasswordOverride string = ''
+
 // Tags
 param tags object = {
   azdEnvName: environmentName
@@ -84,9 +95,9 @@ module containerApp 'modules/containerapp.bicep' = {
     location: location
     environmentId: containerAppEnvironment.outputs.id
     containerImage: containerRegistryEndpoint != '' ? containerRegistryEndpoint : '${containerRegistry.outputs.loginServer}/fetscash:latest'
-    acrLoginServer: containerRegistry.outputs.loginServer
-    acrUsername: containerRegistry.outputs.username
-    acrPassword: containerRegistry.outputs.password
+    acrLoginServer: acrLoginServerOverride != '' ? acrLoginServerOverride : containerRegistry.outputs.loginServer
+    acrUsername: acrUsernameOverride != '' ? acrUsernameOverride : containerRegistry.outputs.username
+    acrPassword: acrPasswordOverride != '' ? acrPasswordOverride : containerRegistry.outputs.password
     buildArgs: {
       VITE_SUPABASE_URL: supabaseUrl
       VITE_SUPABASE_ANON_KEY: supabaseAnonKey

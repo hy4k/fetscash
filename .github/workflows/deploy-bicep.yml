@@ -42,10 +42,15 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
         run: |
           az deployment sub create \
             --location eastus2 \
             --template-file infra/main.json \
             --parameters @infra/parameters.staging.json \
             --parameters supabaseUrl="$SUPABASE_URL" supabaseAnonKey="$SUPABASE_ANON_KEY" \
-            --parameters containerRegistryEndpoint="${ACR_LOGIN_SERVER}/fetscash:latest"
+            --parameters containerRegistryEndpoint="${ACR_LOGIN_SERVER}/fetscash:latest" \
+            --parameters acrLoginServerOverride="$ACR_LOGIN_SERVER" \
+            --parameters acrUsernameOverride="$ACR_USERNAME" \
+            --parameters acrPasswordOverride="$ACR_PASSWORD"
