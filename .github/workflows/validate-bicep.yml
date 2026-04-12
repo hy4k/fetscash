@@ -1,0 +1,23 @@
+name: Validate Bicep (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate-bicep:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Azure CLI
+        uses: azure/setup-azure@v3
+      - name: Install Bicep
+        run: az bicep install
+      - name: Build Bicep
+        run: az bicep build --file infra/main.bicep
+      - name: What-if (dry-run)
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        run: az deployment sub what-if --location eastus2 --template-file infra/main.json --parameters @infra/parameters.staging.json

@@ -1,0 +1,9 @@
+*** Begin Patch
+*** Update File: infra/main.bicep
+@@
+ @description('Container Registry endpoint from AZD')
+-param containerRegistryEndpoint string = ''
++param containerRegistryEndpoint string = ''
++// Example (parameters.staging.json):
++// "containerRegistryEndpoint": "myacr.azurecr.io/fetscash:latest"
+*** End Patch
