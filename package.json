@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.84.0",
+    "framer-motion": "^11.0.8",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "recharts": "^3.5.0",
-    "@supabase/supabase-js": "^2.84.0",
-    "framer-motion": "^11.0.8"
+    "recharts": "^3.5.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
