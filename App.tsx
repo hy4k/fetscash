@@ -1,775 +1,888 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from './supabaseClient';
-import { User, Expense, LocationType, Category, FetsTransaction } from './types';
+import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoice } from './types';
 import { CATEGORY_REPLENISHMENT } from './constants';
 import HoloToggle from './components/HoloToggle';
 import { ExpenseForm } from './components/ExpenseForm';
 import { CashTransactionForm } from './components/CashTransactionForm';
 import { CategoryManager } from './components/CategoryManager';
+import { CustomerList } from './components/CustomerList';
+import { CustomerForm } from './components/CustomerForm';
+import { InvoiceList } from './components/InvoiceList';
+import { InvoiceForm } from './components/InvoiceForm';
+import { DataImport } from './components/DataImport';
 import { Modal } from './components/Modal';
 import { Sidebar } from './components/Sidebar';
 import { StatsCard } from './components/StatsCard';
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
-    AreaChart, Area
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  AreaChart, Area, PieChart, Pie, Cell
 } from 'recharts';
 
+// Main views for the application
+type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'reports' | 'import' | 'settings';
+
+// Company info for invoices
+const COMPANY_INFO = {
+  name: 'Forum Testing & Educational Services',
+  gstNumber: '32AAIFF5955B1ZO',
+  address: 'Cochin, Kerala, India',
+  phone: '',
+  email: '',
+};
+
 function App() {
-    // --- Core State ---
-    const [user, setUser] = useState<User | null>(null);
-    const [location, setLocation] = useState<LocationType>('cochin');
-    const [currentView, setCurrentView] = useState('dashboard');
-    const [loading, setLoading] = useState(true);
+  // --- Core State ---
+  const [user, setUser] = useState<User | null>(null);
+  const [location, setLocation] = useState<LocationType>('cochin');
+  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
+  const [loading, setLoading] = useState(true);
 
-    // --- Data State ---
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [expenses, setExpenses] = useState<Expense[]>([]);
-    const [fetsTransactions, setFetsTransactions] = useState<FetsTransaction[]>([]);
-    const [cashBalance, setCashBalance] = useState(0);
+  // --- Data State ---
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [fetsTransactions, setFetsTransactions] = useState<FetsTransaction[]>([]);
+  const [cashBalance, setCashBalance] = useState(0);
 
-    // --- UI State ---
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalType, setModalType] = useState<'expense' | 'cash' | null>(null);
-    const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-    const [editingTransaction, setEditingTransaction] = useState<FetsTransaction | null>(null);
-    const [activeActionId, setActiveActionId] = useState<string | null>(null);
+  // --- NEW: Customer & Invoice State ---
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
-    // --- Delete Confirmation State ---
-    const [deleteId, setDeleteId] = useState<string | null>(null);
-    const [deleteType, setDeleteType] = useState<'expense' | 'cash'>('expense');
+  // --- UI State ---
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'expense' | 'cash' | 'customer' | 'invoice' | null>(null);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<FetsTransaction | null>(null);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [activeActionId, setActiveActionId] = useState<string | null>(null);
 
-    // --- Filter State ---
-    const [categoryFilter, setCategoryFilter] = useState('all');
-    const [dateRange, setDateRange] = useState({ start: '', end: '' });
-    const [showFilters, setShowFilters] = useState(true);
+  // --- Delete Confirmation State ---
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteType, setDeleteType] = useState<'expense' | 'cash' | 'customer' | 'invoice'>('expense');
 
-    // --- Theme ---
-    const primaryColor = location === 'cochin' ? '#85bb65' : '#3e5c76';
+  // --- Filter State ---
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [showFilters, setShowFilters] = useState(true);
 
-    // --- ID Generation Helper ---
-    const generateNextId = (prefix: string, items: { custom_id?: string, paid_by?: string }[]) => {
-        const maxNum = items.reduce((max, item) => {
-            const idStr = item.custom_id || item.paid_by;
-            if (idStr && idStr.startsWith(prefix)) {
-                const numStr = idStr.replace(prefix, '');
-                const num = parseInt(numStr, 10);
-                return !isNaN(num) && num > max ? num : max;
-            }
-            return max;
-        }, 0);
-        const nextNum = maxNum + 1;
-        return `${prefix}${nextNum.toString().padStart(2, '0')}`;
-    };
+  // --- Theme ---
+  const primaryColor = location === 'cochin' ? '#85bb65' : '#3e5c76';
 
-    const nextExpenseId = useMemo(() =>
-        generateNextId(location === 'cochin' ? 'ECK' : 'ECL', expenses),
-        [expenses, location]);
+  // --- ID Generation Helper ---
+  const generateNextId = (prefix: string, items: { custom_id?: string, paid_by?: string }[]) => {
+    const maxNum = items.reduce((max, item) => {
+      const idStr = item.custom_id || item.paid_by;
+      if (idStr && idStr.startsWith(prefix)) {
+        const numStr = idStr.replace(prefix, '');
+        const num = parseInt(numStr, 10);
+        return !isNaN(num) && num > max ? num : max;
+      }
+      return max;
+    }, 0);
+    const nextNum = maxNum + 1;
+    return `${prefix}${nextNum.toString().padStart(2, '0')}`;
+  };
 
-    const nextCashId = useMemo(() =>
-        generateNextId(location === 'cochin' ? 'CCK' : 'CCL', fetsTransactions),
-        [fetsTransactions, location]);
+  const nextExpenseId = useMemo(() =>
+    generateNextId(location === 'cochin' ? 'ECK' : 'ECL', expenses),
+    [expenses, location]);
 
-    // --- Initialization ---
-    useEffect(() => {
-        const handleAuth = async () => {
-            const DEMO_EMAIL = 'user@fets-finance.com';
-            const DEMO_PASSWORD = 'fets-finance-password';
-            let { data: { session } } = await supabase.auth.getSession();
+  const nextCashId = useMemo(() =>
+    generateNextId(location === 'cochin' ? 'CCK' : 'CCL', fetsTransactions),
+    [fetsTransactions, location]);
 
-            if (!session) {
-                const { data, error } = await supabase.auth.signInWithPassword({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
-                if (error) {
-                    const { data: upData, error: upError } = await supabase.auth.signUp({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
-                    if (!upError && upData.session) session = upData.session;
-                } else {
-                    session = data.session;
-                }
-            }
+  // --- Invoice Number Generator ---
+  // Format: {BranchLetter}{CustomerCode}-{Sequence}
+  // e.g. CP-10 = Calicut + Prometric, sequence 10
+  // Branch: C = Calicut, K = Cochin (Kochi)
+  // CustomerCode: First letter of each significant word, max 2 chars, uppercase
+  const getInvoicePrefix = (customerId: string, loc: LocationType): string => {
+    const branchLetter = loc === 'calicut' ? 'C' : 'K';
+    const customer = customers.find(c => c.id === customerId);
+    if (!customer) return `${branchLetter}X`;
+    // Build 1-2 char customer code from initials of significant words
+    const words = customer.name
+      .replace(/\bpvt\b|\bltd\b|\bllc\b|\binc\b|\bservices\b|\btesting\b|\bvue\b/gi, '')
+      .trim()
+      .split(/\s+/)
+      .filter(w => w.length > 1);
+    const code = words.slice(0, 2).map(w => w[0].toUpperCase()).join('');
+    return `${branchLetter}${code || 'X'}`;
+  };
 
-            if (session) {
-                setUser({ id: session.user.id, email: session.user.email });
-                await initializeCategories(session.user.id);
-                fetchData(session.user.id, location);
-            } else {
-                setLoading(false);
-            }
-        };
+  const generateInvoiceNumber = async (customerId: string, loc: LocationType): Promise<string> => {
+    const prefix = getInvoicePrefix(customerId, loc);
+    // Count existing invoices with this prefix to determine next sequence
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('invoice_number')
+      .like('invoice_number', `${prefix}-%`);
+    if (error) console.error('Error generating invoice number:', error);
+    // Parse the highest existing sequence for this prefix
+    const maxSeq = (data || []).reduce((max: number, row: any) => {
+      const parts = row.invoice_number?.split('-');
+      const seq = parts ? parseInt(parts[parts.length - 1], 10) : 0;
+      return !isNaN(seq) && seq > max ? seq : max;
+    }, 0);
+    return `${prefix}-${maxSeq + 1}`;
+  };
 
-        handleAuth();
+  // --- Initialization ---
+  useEffect(() => {
+    const handleAuth = async () => {
+      const DEMO_EMAIL = 'user@forum-testing.com';
+      const DEMO_PASSWORD = 'forum-testing-password';
+      let { data: { session } } = await supabase.auth.getSession();
 
-        const channel = supabase.channel('public-db-changes')
-            .on('postgres_changes', { event: '*', schema: 'public' }, () => {
-                if (user) fetchData(user.id, location);
-            })
-            .subscribe();
-
-        const handleClickOutside = () => setActiveActionId(null);
-        document.addEventListener('click', handleClickOutside);
-
-        return () => {
-            supabase.removeChannel(channel);
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, [user?.id, location]);
-
-    useEffect(() => {
-        resetFilters();
-    }, [currentView, location]);
-
-    const initializeCategories = async (userId: string) => {
-        const { data } = await supabase.from('categories').select('id').eq('user_id', userId);
-        if (data && data.length === 0) {
-            const defaults = [CATEGORY_REPLENISHMENT, 'Office Supplies', 'Travel', 'Food & Beverage', 'Utilities', 'Maintenance', 'Salaries', 'Rent', 'Marketing'];
-            await supabase.from('categories').insert(defaults.map(name => ({ user_id: userId, name })));
+      if (!session) {
+        const { data, error } = await supabase.auth.signInWithPassword({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
+        if (error) {
+          const { data: upData, error: upError } = await supabase.auth.signUp({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
+          if (!upError && upData.session) session = upData.session;
+        } else {
+          session = data.session;
         }
-    };
+      }
 
-    const fetchData = async (userId: string, loc: LocationType) => {
-        setLoading(true);
-        const { data: cats } = await supabase.from('categories').select('*').eq('user_id', userId).order('name');
-        setCategories(cats || []);
-
-        const { data: exps } = await supabase.from('expenses').select('*').eq('user_id', userId).eq('location', loc).order('date', { ascending: false });
-        setExpenses(exps || []);
-
-        const { data: txs } = await supabase.from('fets_cash_transactions').select('*').eq('user_id', userId).eq('location', loc).order('date', { ascending: false });
-
-        // Parse description to extract packed ID and Category
-        const parsedTxs = (txs || []).map(tx => {
-            const parts = tx.description.split(' ||| ');
-            if (parts.length >= 3) {
-                return {
-                    ...tx,
-                    custom_id: parts[0],
-                    category: parts[1],
-                    clean_description: parts.slice(2).join(' ||| ') // Join back in case description had separator
-                };
-            }
-            return { ...tx, clean_description: tx.description, custom_id: 'N/A', category: 'Uncategorized' };
-        });
-
-        setFetsTransactions(parsedTxs);
-
-        // Calculate Balance Client-Side
-        const calculatedBalance = parsedTxs.reduce((sum, tx) => sum + tx.amount, 0);
-        setCashBalance(calculatedBalance);
+      if (session) {
+        setUser({ id: session.user.id, email: session.user.email });
+        await initializeData(session.user.id);
+        fetchAllData(session.user.id, location);
+      } else {
         setLoading(false);
+      }
     };
 
-    // --- Handlers ---
-    const handleSaveExpense = async (expData: Partial<Expense>) => {
-        if (!user) return;
-        const payload = { ...expData, user_id: user.id };
+    handleAuth();
 
-        // Check if category is Replenishment
-        const isReplenishment = payload.category === CATEGORY_REPLENISHMENT;
+    const channel = supabase.channel('public-db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+        if (user) fetchAllData(user.id, location);
+      })
+      .subscribe();
 
-        let result;
-        if (editingExpense?.id) {
-            result = await supabase.from('expenses').update(payload).eq('id', editingExpense.id).select().single();
+    const handleClickOutside = () => setActiveActionId(null);
+    document.addEventListener('click', handleClickOutside);
 
-            // Handle Replenishment Sync on Edit
-            if (!result.error && result.data) {
-                const savedExp = result.data;
-                // If it IS replenishment now
-                if (isReplenishment) {
-                    // Upsert cash transaction
-                    const { data: existingTx } = await supabase.from('fets_cash_transactions').select('id').eq('source_expense_id', savedExp.id).maybeSingle();
-
-                    const cashPayload = {
-                        user_id: user.id,
-                        location: savedExp.location,
-                        date: savedExp.date,
-                        amount: savedExp.amount, // Positive amount for replenishment
-                        description: `${savedExp.paid_by} ||| ${CATEGORY_REPLENISHMENT} ||| Replenished from Expense Register`,
-                        type: 'replenishment',
-                        source_expense_id: savedExp.id
-                    };
-
-                    if (existingTx) {
-                        await supabase.from('fets_cash_transactions').update(cashPayload).eq('id', existingTx.id);
-                    } else {
-                        await supabase.from('fets_cash_transactions').insert(cashPayload);
-                    }
-                } else {
-                    // If it was replenishment but changed to something else, remove from cash book
-                    await supabase.from('fets_cash_transactions').delete().eq('source_expense_id', savedExp.id);
-                }
-            }
-        } else {
-            result = await supabase.from('expenses').insert(payload).select().single();
-
-            // Handle Replenishment Sync on Create
-            if (!result.error && result.data && isReplenishment) {
-                const savedExp = result.data;
-                await supabase.from('fets_cash_transactions').insert({
-                    user_id: user.id,
-                    location: savedExp.location,
-                    date: savedExp.date,
-                    amount: savedExp.amount,
-                    description: `${savedExp.paid_by} ||| ${CATEGORY_REPLENISHMENT} ||| Replenished from Expense Register`,
-                    type: 'replenishment',
-                    source_expense_id: savedExp.id
-                });
-            }
-        }
-
-        if (result.error) return console.error(result.error);
-        setIsModalOpen(false);
-        fetchData(user.id, location);
+    return () => {
+      supabase.removeChannel(channel);
+      document.removeEventListener('click', handleClickOutside);
     };
+  }, [user?.id, location]);
 
-    const handleSaveCashTransaction = async (txData: Partial<FetsTransaction>) => {
-        if (!user) return;
-        const payload = { ...txData, user_id: user.id };
+  useEffect(() => {
+    resetFilters();
+  }, [currentView, location]);
 
-        let result;
-        if (editingTransaction?.id) {
-            result = await supabase.from('fets_cash_transactions').update(payload).eq('id', editingTransaction.id).select();
-        } else {
-            result = await supabase.from('fets_cash_transactions').insert(payload).select();
-        }
+  // --- Data Initialization ---
+  const initializeData = async (userId: string) => {
+    // Initialize default categories
+    const { data: cats } = await supabase.from('categories').select('id').eq('user_id', userId);
+    if (cats && cats.length === 0) {
+      const defaults = [CATEGORY_REPLENISHMENT, 'Office Supplies', 'Travel', 'Food & Beverage', 'Utilities', 'Maintenance', 'Salaries', 'Rent', 'Marketing', 'Bank Charges'];
+      await supabase.from('categories').insert(defaults.map(name => ({ user_id: userId, name })));
+    }
 
-        if (result.error) console.error(result.error);
-        setIsModalOpen(false);
-        fetchData(user.id, location);
-    };
+    // Initialize default customers (Prometric, Pearson Vue, etc.)
+    const { data: existingCustomers } = await supabase.from('customers').select('id').eq('user_id', userId);
+    if (existingCustomers && existingCustomers.length === 0) {
+      const defaultCustomers = [
+        { name: 'Prometric Testing Services', country: 'USA', currency: 'USD', email: 'accounts@prometric.com', payment_terms: 30, status: 'active' },
+        { name: 'Pearson VUE', country: 'USA', currency: 'USD', email: 'ap@pearsonvue.com', payment_terms: 45, status: 'active' },
+        { name: 'PSI Services LLC', country: 'USA', currency: 'USD', email: 'invoices@psiexams.com', payment_terms: 30, status: 'active' },
+        { name: 'CELPIP', country: 'Canada', currency: 'CAD', email: 'admin@celpip.ca', payment_terms: 30, status: 'active' },
+        { name: 'ITTS India Pvt Ltd', country: 'India', currency: 'INR', email: 'info@itts.in', payment_terms: 30, gst_number: '27AABCI1234C1Z5', status: 'active' },
+      ];
+      await supabase.from('customers').insert(defaultCustomers.map(c => ({ ...c, user_id: userId })));
+    }
+  };
 
-    const confirmDeleteRequest = (id: string, type: 'expense' | 'cash') => {
-        setDeleteId(id);
-        setDeleteType(type);
-        setActiveActionId(null);
-    };
+  // --- Fetch All Data ---
+  const fetchAllData = async (userId: string, loc: LocationType) => {
+    setLoading(true);
 
-    const executeDelete = async () => {
-        if (!deleteId || !user) return;
+    // Fetch categories
+    const { data: cats } = await supabase.from('categories').select('*').eq('user_id', userId).order('name');
+    setCategories(cats || []);
 
-        if (deleteType === 'expense') {
-            const { data: expense } = await supabase.from('expenses').select('*').eq('id', deleteId).single();
-            if (expense) {
-                // If deleting an expense that was a replenishment, clean up cash book
-                await supabase.from('fets_cash_transactions').delete().eq('source_expense_id', deleteId);
-            }
-            await supabase.from('expenses').delete().eq('id', deleteId);
-        } else {
-            await supabase.from('fets_cash_transactions').delete().eq('id', deleteId);
-        }
+    // Fetch expenses
+    const { data: exps } = await supabase.from('expenses').select('*').eq('user_id', userId).eq('location', loc).order('date', { ascending: false });
+    setExpenses(exps || []);
 
-        setDeleteId(null);
-        fetchData(user.id, location);
-    };
+    // Fetch cash transactions
+    const { data: txs } = await supabase.from('fets_cash_transactions').select('*').eq('user_id', userId).eq('location', loc).order('date', { ascending: false });
+    const parsedTxs = (txs || []).map(tx => {
+      const parts = tx.description.split(' ||| ');
+      if (parts.length >= 3) {
+        return { ...tx, custom_id: parts[0], category: parts[1], clean_description: parts.slice(2).join(' ||| ') };
+      }
+      return { ...tx, clean_description: tx.description, custom_id: 'N/A', category: 'Uncategorized' };
+    });
+    setFetsTransactions(parsedTxs);
+    setCashBalance(parsedTxs.reduce((sum, tx) => sum + tx.amount, 0));
 
-    const handleAddCategory = async (name: string) => {
-        if (!user) return;
-        await supabase.from('categories').insert({ user_id: user.id, name });
-        fetchData(user.id, location);
-    };
+    // Fetch customers
+    const { data: custs } = await supabase.from('customers').select('*').eq('user_id', userId).order('name');
+    setCustomers(custs || []);
 
-    const handleDeleteCategory = async (id: number) => {
-        await supabase.from('categories').delete().eq('id', id);
-        fetchData(user.id, location);
-    };
+    // Fetch invoices then join service_lines
+    const { data: invs } = await supabase.from('invoices').select('*').eq('user_id', userId).order('invoice_date', { ascending: false });
+    const invoiceIds = (invs || []).map((inv: any) => inv.id);
+    let serviceLinesByInvoice: Record<string, any[]> = {};
+    if (invoiceIds.length > 0) {
+      const { data: allLines } = await supabase.from('service_lines').select('*').in('invoice_id', invoiceIds);
+      (allLines || []).forEach((line: any) => {
+        if (!serviceLinesByInvoice[line.invoice_id]) serviceLinesByInvoice[line.invoice_id] = [];
+        serviceLinesByInvoice[line.invoice_id].push(line);
+      });
+    }
+    setInvoices((invs || []).map((inv: any) => ({ ...inv, service_lines: serviceLinesByInvoice[inv.id] || [] })));
 
-    const openCashModal = (tx: FetsTransaction | null = null) => {
-        setEditingTransaction(tx);
-        setModalType('cash');
-        setIsModalOpen(true);
-    };
+    setLoading(false);
+  };
 
-    const resetFilters = () => {
-        setSearchQuery('');
-        setCategoryFilter('all');
-        setDateRange({ start: '', end: '' });
-    };
+  // --- HANDLERS: Customers ---
+  const handleAddCustomer = async (customerData: Omit<Customer, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!user) return;
+    const { error } = await supabase.from('customers').insert({ ...customerData, user_id: user.id });
+    if (error) console.error('Error adding customer:', error);
+    fetchAllData(user.id, location);
+  };
 
-    // --- Computed Data ---
-    const totalSpend = useMemo(() => expenses.reduce((sum, e) => sum + e.amount, 0), [expenses]);
+  const handleUpdateCustomer = async (id: string, updates: Partial<Customer>) => {
+    if (!user) return;
+    const { error } = await supabase.from('customers').update(updates).eq('id', id);
+    if (error) console.error('Error updating customer:', error);
+    fetchAllData(user.id, location);
+  };
 
-    const filteredExpenses = useMemo(() => {
-        return expenses.filter(e => {
-            const matchesSearch = e.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                e.paid_by?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                e.amount.toString().includes(searchQuery);
-            const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
-            const matchesDateStart = !dateRange.start || e.date >= dateRange.start;
-            const matchesDateEnd = !dateRange.end || e.date <= dateRange.end;
-            return matchesSearch && matchesCategory && matchesDateStart && matchesDateEnd;
-        });
-    }, [expenses, categoryFilter, searchQuery, dateRange]);
+  const handleDeleteCustomer = async (id: string) => {
+    if (!user) return;
+    // Check if customer has invoices
+    const hasInvoices = invoices.some(inv => inv.customer_id === id);
+    if (hasInvoices) {
+      alert('Cannot delete customer with existing invoices. Please delete invoices first.');
+      return;
+    }
+    await supabase.from('customers').delete().eq('id', id);
+    fetchAllData(user.id, location);
+  };
 
-    const filteredTransactions = useMemo(() => {
-        return fetsTransactions.filter(tx => {
-            const desc = tx.clean_description || tx.description;
-            const id = tx.custom_id || '';
-            const matchesSearch = desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                tx.amount.toString().includes(searchQuery);
-            // Removed Type Filter Logic
-            const matchesDateStart = !dateRange.start || tx.date >= dateRange.start;
-            const matchesDateEnd = !dateRange.end || tx.date <= dateRange.end;
-            return matchesSearch && matchesDateStart && matchesDateEnd;
-        });
-    }, [fetsTransactions, searchQuery, dateRange]);
+  // --- HANDLERS: Invoices ---
+  const handleAddInvoice = async (invoiceData: Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!user) return;
 
-    // Chart Data
-    const chartData = useMemo(() => {
-        const data: Record<string, number> = {};
-        const today = new Date();
-        for (let i = 5; i >= 0; i--) {
-            const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-            const key = d.toLocaleString('default', { month: 'short' });
-            data[key] = 0;
-        }
-        expenses.forEach(e => {
-            const d = new Date(e.date);
-            const key = d.toLocaleString('default', { month: 'short' });
-            if (data[key] !== undefined) data[key] += e.amount;
-        });
-        return Object.entries(data).map(([name, value]) => ({ name, value }));
-    }, [expenses]);
+    // service_lines is NOT a column on the invoices table — strip it before insert
+    const { service_lines, ...invoicePayload } = invoiceData as any;
 
-    const pieData = useMemo(() => {
-        const agg: Record<string, number> = {};
-        expenses.forEach(e => { agg[e.category] = (agg[e.category] || 0) + e.amount; });
-        return Object.entries(agg)
-            .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 5);
-    }, [expenses]);
+    const { data, error } = await supabase
+      .from('invoices')
+      .insert({
+        ...invoicePayload,
+        user_id: user.id,
+        invoice_number: invoicePayload.invoice_number || await generateInvoiceNumber(invoicePayload.customer_id, location),
+      })
+      .select('id')
+      .single();
 
-    if (loading && !user) return <div className="h-screen w-full flex items-center justify-center bg-background text-money-green font-serif tracking-widest text-xl animate-pulse">AUTHENTICATING...</div>;
+    if (error) { console.error('Error adding invoice:', error); return; }
 
-    return (
-        <div className="flex h-screen w-full bg-background overflow-hidden text-money-paper">
-            <Sidebar
-                currentView={currentView}
-                onChangeView={setCurrentView}
-                locationColor={primaryColor}
-            />
+    // Insert service lines with invoice_id FK
+    if (data?.id && Array.isArray(service_lines) && service_lines.length > 0) {
+      const lines = service_lines.map((line: any) => ({
+        invoice_id: data.id,
+        description: line.description,
+        quantity: line.quantity ?? 1,
+        rate: line.rate,
+        amount: line.amount,
+        currency: line.currency ?? invoicePayload.currency,
+      }));
+      const { error: lineError } = await supabase.from('service_lines').insert(lines);
+      if (lineError) console.error('Error saving service lines:', lineError);
+    }
 
-            <div className="flex-1 flex flex-col h-full sm:ml-72 relative overflow-hidden">
-                <header className="px-8 py-6 flex justify-between items-center z-20 sticky top-0 bg-[#0c1410]/80 backdrop-blur-md border-b border-[#85bb65]/10">
-                    <div className="flex flex-col">
-                        <h2 className="text-2xl font-black text-money-gold capitalize tracking-widest font-serif drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                            {currentView === 'expenses' ? 'Expense Register' :
-                                currentView === 'cash' ? 'Cash Book' :
-                                    currentView === 'reports' ? 'Reports' :
-                                        currentView === 'settings' ? 'Settings' : 'Dashboard'}
-                        </h2>
-                        <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1">
-                            {location === 'cochin' ? 'Cochin' : 'Calicut'} Branch • <span className="text-money-green">Active</span>
-                        </p>
-                    </div>
+    fetchAllData(user.id, location);
+  };
 
-                    <div className="flex items-center gap-6">
-                        <div className="transform scale-[0.65] origin-right -mr-4 sm:mr-0">
-                            <HoloToggle checked={location === 'cochin'} onChange={(c) => setLocation(c ? 'cochin' : 'calicut')} />
-                        </div>
-                    </div>
-                </header>
+  const handleUpdateInvoice = async (id: string, updates: Partial<Invoice>) => {
+    if (!user) return;
 
-                <main className="flex-1 overflow-y-auto p-4 sm:p-8 pb-24 sm:pb-8 custom-scrollbar">
+    // Strip service_lines from the invoice update payload
+    const { service_lines, ...invoiceUpdates } = updates as any;
 
-                    {/* --- DASHBOARD --- */}
-                    {currentView === 'dashboard' && (
-                        <div className="space-y-8 animate-fade-in">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <StatsCard
-                                    title="Total Expenses"
-                                    value={`₹${totalSpend.toLocaleString('en-IN')}`}
-                                    icon="fa-coins"
-                                    color={primaryColor}
-                                    delay={0}
-                                />
-                                <StatsCard
-                                    title="Cash Balance"
-                                    value={`₹${cashBalance.toLocaleString('en-IN')}`}
-                                    icon="fa-university"
-                                    color={location === 'cochin' ? '#85bb65' : '#3e5c76'}
-                                    delay={0.1}
-                                />
-                            </div>
+    const { error } = await supabase.from('invoices').update(invoiceUpdates).eq('id', id);
+    if (error) { console.error('Error updating invoice:', error); return; }
 
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <div className="lg:col-span-2 glass-panel rounded-2xl p-6 relative">
-                                    <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Expense Trend</h3>
-                                    <div className="h-[300px]">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={chartData}>
-                                                <defs>
-                                                    <linearGradient id="colorSplit" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor={primaryColor} stopOpacity={0.3} />
-                                                        <stop offset="95%" stopColor={primaryColor} stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(133,187,101,0.1)" vertical={false} />
-                                                <XAxis dataKey="name" stroke="#546e61" tick={{ fontSize: 10, fontWeight: 'bold' }} tickLine={false} axisLine={false} />
-                                                <YAxis stroke="#546e61" tick={{ fontSize: 10, fontWeight: 'bold' }} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val / 1000}k`} />
-                                                <Tooltip contentStyle={{ backgroundColor: '#16231d', borderColor: '#85bb65', borderRadius: '4px' }} itemStyle={{ color: '#e8f5e9', fontFamily: 'serif' }} />
-                                                <Area type="monotone" dataKey="value" stroke={primaryColor} strokeWidth={2} fill="url(#colorSplit)" />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                </div>
-                                <div className="glass-panel rounded-2xl p-6 flex flex-col">
-                                    <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Top Categories</h3>
-                                    <div className="space-y-4">
-                                        {pieData.map((d, i) => (
-                                            <div key={d.name} className="flex justify-between items-center">
-                                                <span className="text-xs font-bold text-money-paper">{d.name}</span>
-                                                <span className="text-xs font-serif text-money-gold">₹{d.value.toLocaleString()}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+    // Replace service lines: delete existing rows, insert new ones
+    if (Array.isArray(service_lines)) {
+      await supabase.from('service_lines').delete().eq('invoice_id', id);
+      if (service_lines.length > 0) {
+        const lines = service_lines.map((line: any) => ({
+          invoice_id: id,
+          description: line.description,
+          quantity: line.quantity ?? 1,
+          rate: line.rate,
+          amount: line.amount,
+          currency: line.currency ?? invoiceUpdates.currency,
+        }));
+        const { error: lineError } = await supabase.from('service_lines').insert(lines);
+        if (lineError) console.error('Error updating service lines:', lineError);
+      }
+    }
 
-                    {/* --- EXPENSES --- */}
-                    {currentView === 'expenses' && (
-                        <div className="space-y-6 animate-fade-in">
-                            <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/10">
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex flex-col md:flex-row justify-between gap-4">
-                                        <div className="relative flex-1">
-                                            <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary"></i>
-                                            <input
-                                                type="text"
-                                                placeholder="Search description, ID, or amount..."
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="neo-input w-full rounded-xl py-3 pl-11 pr-4 text-sm focus:border-money-gold/50 transition-all placeholder-text-tertiary font-medium"
-                                            />
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <button
-                                                onClick={() => setShowFilters(!showFilters)}
-                                                className={`neo-btn w-12 h-full rounded-xl flex items-center justify-center transition-all ${showFilters ? 'text-money-gold shadow-inner' : 'text-text-secondary'}`}
-                                                title="Toggle Filters"
-                                            >
-                                                <i className="fas fa-filter"></i>
-                                            </button>
-                                            <button
-                                                onClick={() => { setEditingExpense(null); setModalType('expense'); setIsModalOpen(true); }}
-                                                className="neo-btn text-money-gold px-6 py-3 rounded-xl font-bold border border-money-gold/20 hover:border-money-gold/50 transition-all active:scale-95 flex items-center gap-2 text-xs uppercase tracking-wider whitespace-nowrap"
-                                            >
-                                                <i className="fas fa-plus"></i> <span className="hidden sm:inline">Add Expense</span>
-                                            </button>
-                                        </div>
-                                    </div>
+    fetchAllData(user.id, location);
+  };
 
-                                    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-300 ease-in-out overflow-hidden ${showFilters ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                                        <div className="relative">
-                                            <label className="block text-[9px] font-bold text-text-tertiary uppercase tracking-wider mb-1">Category</label>
-                                            <select
-                                                value={categoryFilter}
-                                                onChange={(e) => setCategoryFilter(e.target.value)}
-                                                className="neo-input w-full appearance-none rounded-xl px-4 py-2.5 text-xs font-bold text-text-secondary cursor-pointer focus:text-white"
-                                            >
-                                                <option value="all">All Categories</option>
-                                                {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                                            </select>
-                                            <i className="fas fa-chevron-down absolute right-3 bottom-3 text-text-tertiary pointer-events-none text-[10px]"></i>
-                                        </div>
+  const handleDeleteInvoice = async (id: string) => {
+    if (!user) return;
+    // service_lines cascade-delete via FK ON DELETE CASCADE
+    await supabase.from('invoices').delete().eq('id', id);
+    fetchAllData(user.id, location);
+  };
 
-                                        <div>
-                                            <label className="block text-[9px] font-bold text-text-tertiary uppercase tracking-wider mb-1">From Date</label>
-                                            <input
-                                                type="date"
-                                                value={dateRange.start}
-                                                onChange={(e) => setDateRange(p => ({ ...p, start: e.target.value }))}
-                                                className="neo-input w-full rounded-xl px-3 py-2.5 text-xs font-bold text-text-secondary"
-                                            />
-                                        </div>
+  // --- HANDLERS: Import ---
+  const handleImportCustomers = async (customersToImport: any[]) => {
+    if (!user) return;
+    const withUserId = customersToImport.map(c => ({ ...c, user_id: user.id }));
+    const { error } = await supabase.from('customers').insert(withUserId);
+    if (error) console.error('Import error:', error);
+    fetchAllData(user.id, location);
+  };
 
-                                        <div className="flex gap-2 items-end">
-                                            <div className="flex-1">
-                                                <label className="block text-[9px] font-bold text-text-tertiary uppercase tracking-wider mb-1">To Date</label>
-                                                <input
-                                                    type="date"
-                                                    value={dateRange.end}
-                                                    onChange={(e) => setDateRange(p => ({ ...p, end: e.target.value }))}
-                                                    className="neo-input w-full rounded-xl px-3 py-2.5 text-xs font-bold text-text-secondary"
-                                                />
-                                            </div>
-                                            <button onClick={resetFilters} className="neo-btn h-[38px] w-[38px] rounded-xl flex items-center justify-center text-text-tertiary hover:text-red-400">
-                                                <i className="fas fa-undo"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+  const handleImportInvoices = async (invoicesToImport: any[]) => {
+    if (!user) return;
+    // Map customer names to IDs
+    const withUserId = invoicesToImport.map(inv => {
+      const customer = customers.find(c => c.name.toLowerCase() === inv.customer_name?.toLowerCase());
+      return { ...inv, customer_id: customer?.id || '', user_id: user?.id };
+    }).filter(inv => inv.customer_id);
+    
+    const { error } = await supabase.from('invoices').insert(withUserId);
+    if (error) console.error('Import error:', error);
+    fetchAllData(user.id, location);
+  };
 
-                            <div className="glass-panel rounded-2xl overflow-hidden min-h-[400px]">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
-                                            <tr>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Date</th>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Ref No.</th>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Category</th>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] w-1/3">Description</th>
-                                                <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Amount</th>
-                                                <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-[#85bb65]/5">
-                                            {filteredExpenses.map((exp) => (
-                                                <tr key={exp.id} className="group hover:bg-[#85bb65]/5 transition-colors">
-                                                    <td className="px-6 py-4 text-xs font-mono text-text-secondary">{new Date(exp.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()}</td>
-                                                    <td className="px-6 py-4 text-xs font-bold text-money-green">{exp.paid_by}</td>
-                                                    <td className="px-6 py-4 text-xs font-bold text-money-paper">{exp.category}</td>
-                                                    <td className="px-6 py-4 text-xs text-text-tertiary truncate max-w-xs" title={exp.description}>{exp.description}</td>
-                                                    <td className="px-6 py-4 text-right font-serif font-bold text-money-gold tracking-wide text-sm">₹{exp.amount.toLocaleString('en-IN')}</td>
-                                                    <td className="px-6 py-4 text-center relative">
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); setActiveActionId(activeActionId === exp.id ? null : exp.id!); }}
-                                                            className="text-text-tertiary hover:text-white p-2 rounded-full hover:bg-white/10"
-                                                        >
-                                                            <i className="fas fa-ellipsis-v"></i>
-                                                        </button>
-                                                        {activeActionId === exp.id && (
-                                                            <div className="absolute right-8 top-8 w-32 bg-[#16231d] border border-[#85bb65]/20 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in flex flex-col">
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); setActiveActionId(null); setEditingExpense(exp); setModalType('expense'); setIsModalOpen(true); }}
-                                                                    className="px-4 py-3 text-left text-xs font-bold text-text-secondary hover:bg-white/5 hover:text-white"
-                                                                >
-                                                                    Edit
-                                                                </button>
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); confirmDeleteRequest(exp.id!, 'expense'); }}
-                                                                    className="px-4 py-3 text-left text-xs font-bold text-red-500 hover:bg-red-500/10"
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+  // --- Existing expense handlers (simplified) ---
+  const handleSaveExpense = async (expData: Partial<Expense>) => {
+    if (!user) return;
+    const payload = { ...expData, user_id: user.id };
+    const isReplenishment = payload.category === CATEGORY_REPLENISHMENT;
 
-                    {/* --- CASH --- */}
-                    {currentView === 'cash' && (
-                        <div className="space-y-6 animate-fade-in">
-                            <div className="relative w-full rounded-2xl p-6 sm:p-10 flex flex-col sm:flex-row justify-between items-center overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.6)] border border-white/10"
-                                style={{
-                                    background: location === 'cochin' ? '#1b3826' : '#1b2c38',
-                                    backgroundImage: `url("https://www.transparenttextures.com/patterns/black-scales.png")`
-                                }}>
-                                <div className="relative z-10 text-center sm:text-left">
-                                    <p className="text-money-green/60 text-[10px] font-black tracking-[0.4em] uppercase mb-2">Cash on Hand</p>
-                                    <h2 className="text-4xl sm:text-6xl font-black text-white font-serif tracking-tight">₹{cashBalance.toLocaleString('en-IN')}</h2>
-                                </div>
-                                <div className="relative z-10 mt-6 sm:mt-0">
-                                    <button onClick={() => openCashModal()} className="neo-btn px-6 py-4 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:text-money-green">
-                                        <i className="fas fa-plus"></i> New Transaction
-                                    </button>
-                                </div>
-                            </div>
+    if (editingExpense?.id) {
+      await supabase.from('expenses').update(payload).eq('id', editingExpense.id);
+    } else {
+      await supabase.from('expenses').insert(payload);
+    }
+    
+    setIsModalOpen(false);
+    fetchAllData(user.id, location);
+  };
 
-                            <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/10">
-                                <div className="flex gap-4">
-                                    <div className="relative flex-1">
-                                        <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary"></i>
-                                        <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="neo-input w-full rounded-xl py-3 pl-11 text-sm" />
-                                    </div>
-                                    <div className="flex-1 max-w-[200px] flex items-end">
-                                        <input
-                                            type="date"
-                                            value={dateRange.start}
-                                            onChange={(e) => setDateRange(p => ({ ...p, start: e.target.value }))}
-                                            className="neo-input w-full rounded-xl px-3 py-3 text-xs font-bold text-text-secondary"
-                                            placeholder="From Date"
-                                        />
-                                    </div>
-                                    <div className="flex-1 max-w-[200px] flex items-end">
-                                        <input
-                                            type="date"
-                                            value={dateRange.end}
-                                            onChange={(e) => setDateRange(p => ({ ...p, end: e.target.value }))}
-                                            className="neo-input w-full rounded-xl px-3 py-3 text-xs font-bold text-text-secondary"
-                                            placeholder="To Date"
-                                        />
-                                    </div>
-                                    <button onClick={resetFilters} className="neo-btn w-12 rounded-xl flex items-center justify-center text-text-tertiary hover:text-red-400">
-                                        <i className="fas fa-undo"></i>
-                                    </button>
-                                </div>
-                            </div>
+  const handleSaveCashTransaction = async (txData: Partial<FetsTransaction>) => {
+    if (!user) return;
+    const payload = { ...txData, user_id: user.id };
+    
+    if (editingTransaction?.id) {
+      await supabase.from('fets_cash_transactions').update(payload).eq('id', editingTransaction.id);
+    } else {
+      await supabase.from('fets_cash_transactions').insert(payload);
+    }
+    
+    setIsModalOpen(false);
+    fetchAllData(user.id, location);
+  };
 
-                            <div className="glass-panel rounded-2xl overflow-hidden min-h-[400px]">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
-                                            <tr>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Date</th>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Ref No.</th>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Type</th>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Category</th>
-                                                <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] w-1/3">Description</th>
-                                                <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Amount</th>
-                                                <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-[#85bb65]/5">
-                                            {filteredTransactions.map((tx) => (
-                                                <tr key={tx.id} className="hover:bg-[#85bb65]/5">
-                                                    <td className="px-6 py-4 text-xs font-mono text-text-secondary">{new Date(tx.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()}</td>
-                                                    <td className="px-6 py-4 text-xs font-bold text-money-green">{tx.custom_id}</td>
-                                                    <td className="px-6 py-4 text-xs font-bold">
-                                                        {tx.amount >= 0 ?
-                                                            <span className="text-money-green bg-money-green/10 px-2 py-1 rounded">Dr</span> :
-                                                            <span className="text-red-400 bg-red-400/10 px-2 py-1 rounded">Cr</span>
-                                                        }
-                                                    </td>
-                                                    <td className="px-6 py-4 text-xs font-bold text-money-paper">{tx.category}</td>
-                                                    <td className="px-6 py-4 text-xs text-text-tertiary truncate max-w-xs">{tx.clean_description}</td>
-                                                    <td className={`px-6 py-4 text-right font-serif font-bold text-sm ${tx.amount >= 0 ? 'text-money-green' : 'text-red-400'}`}>{tx.amount >= 0 ? '+' : ''}₹{Math.abs(tx.amount).toLocaleString('en-IN')}</td>
-                                                    <td className="px-6 py-4 text-center relative">
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); setActiveActionId(activeActionId === tx.id ? null : tx.id!); }}
-                                                            className="text-text-tertiary hover:text-white p-2 rounded-full hover:bg-white/10"
-                                                        >
-                                                            <i className="fas fa-ellipsis-v"></i>
-                                                        </button>
-                                                        {activeActionId === tx.id && (
-                                                            <div className="absolute right-8 top-8 w-32 bg-[#16231d] border border-[#85bb65]/20 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in flex flex-col">
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); setActiveActionId(null); openCashModal(tx); }}
-                                                                    className="px-4 py-3 text-left text-xs font-bold text-text-secondary hover:bg-white/5 hover:text-white"
-                                                                >
-                                                                    Edit
-                                                                </button>
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); confirmDeleteRequest(tx.id!, 'cash'); }}
-                                                                    className="px-4 py-3 text-left text-xs font-bold text-red-500 hover:bg-red-500/10"
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+  const confirmDeleteRequest = (id: string, type: 'expense' | 'cash' | 'customer' | 'invoice') => {
+    setDeleteId(id);
+    setDeleteType(type);
+    setActiveActionId(null);
+  };
 
-                    {/* --- REPORTS --- */}
-                    {currentView === 'reports' && (
-                        <div className="animate-fade-in grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 glass-panel rounded-2xl p-6">
-                                <h3 className="font-bold text-text-secondary mb-6 text-xs uppercase tracking-widest">Expense Distribution</h3>
-                                <div className="h-[350px]">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={pieData} layout="vertical" margin={{ left: 20 }}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(133,187,101,0.1)" horizontal={false} />
-                                            <XAxis type="number" hide />
-                                            <YAxis dataKey="name" type="category" stroke="#8ba696" width={100} tick={{ fontSize: 10, fontWeight: 'bold' }} />
-                                            <Tooltip cursor={{ fill: 'rgba(133,187,101,0.05)' }} contentStyle={{ backgroundColor: '#16231d', borderColor: '#85bb65' }} />
-                                            <Bar dataKey="value" fill={primaryColor} radius={[0, 4, 4, 0]} barSize={24} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </div>
-                            <div className="glass-panel rounded-2xl p-6 flex flex-col justify-center items-center text-center">
-                                <i className="fas fa-file-contract text-4xl text-money-gold mb-4"></i>
-                                <h3 className="text-lg font-black text-money-paper uppercase tracking-widest font-serif">Export Data</h3>
-                                <div className="mt-8 w-full space-y-4">
-                                    <button className="w-full neo-btn py-4 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:text-money-green">
-                                        <i className="fas fa-file-csv"></i> Export CSV
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+  const executeDelete = async () => {
+    if (!deleteId || !user) return;
 
-                    {/* --- SETTINGS --- */}
-                    {currentView === 'settings' && (
-                        <div className="animate-fade-in max-w-4xl mx-auto">
-                            <div className="glass-panel rounded-2xl p-8">
-                                <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-8 border-b border-[#85bb65]/20 pb-4">Category Management</h3>
-                                <CategoryManager
-                                    categories={categories}
-                                    onAdd={handleAddCategory}
-                                    onDelete={handleDeleteCategory}
-                                />
-                            </div>
-                        </div>
-                    )}
+    if (deleteType === 'expense') {
+      await supabase.from('fets_cash_transactions').delete().eq('source_expense_id', deleteId);
+      await supabase.from('expenses').delete().eq('id', deleteId);
+    } else if (deleteType === 'cash') {
+      await supabase.from('fets_cash_transactions').delete().eq('id', deleteId);
+    } else if (deleteType === 'customer') {
+      await handleDeleteCustomer(deleteId);
+    } else if (deleteType === 'invoice') {
+      await handleDeleteInvoice(deleteId);
+    }
 
-                </main>
+    setDeleteId(null);
+    fetchAllData(user.id, location);
+  };
+
+  const handleAddCategory = async (name: string) => {
+    if (!user) return;
+    await supabase.from('categories').insert({ user_id: user.id, name });
+    fetchAllData(user.id, location);
+  };
+
+  const handleDeleteCategory = async (id: number) => {
+    await supabase.from('categories').delete().eq('id', id);
+    fetchAllData(user.id, location);
+  };
+
+  const openCashModal = (tx: FetsTransaction | null = null) => {
+    setEditingTransaction(tx);
+    setModalType('cash');
+    setIsModalOpen(true);
+  };
+
+  const resetFilters = () => {
+    setSearchQuery('');
+    setCategoryFilter('all');
+    setDateRange({ start: '', end: '' });
+  };
+
+  // --- Computed Data ---
+  const totalSpend = useMemo(() => expenses.reduce((sum, e) => sum + e.amount, 0), [expenses]);
+  const totalIncome = useMemo(() => invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total_amount, 0), [invoices]);
+  const pendingInvoices = useMemo(() => invoices.filter(inv => inv.status === 'sent' || inv.status === 'overdue'), [invoices]);
+
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(e => {
+      const matchesSearch = e.description?.toLowerCase().includes(searchQuery.toLowerCase()) || e.paid_by?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
+      const matchesDateStart = !dateRange.start || e.date >= dateRange.start;
+      const matchesDateEnd = !dateRange.end || e.date <= dateRange.end;
+      return matchesSearch && matchesCategory && matchesDateStart && matchesDateEnd;
+    });
+  }, [expenses, categoryFilter, searchQuery, dateRange]);
+
+  const filteredTransactions = useMemo(() => {
+    return fetsTransactions.filter(tx => {
+      const desc = tx.clean_description || tx.description;
+      const matchesSearch = desc.toLowerCase().includes(searchQuery.toLowerCase()) || (tx.custom_id || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesDateStart = !dateRange.start || tx.date >= dateRange.start;
+      const matchesDateEnd = !dateRange.end || tx.date <= dateRange.end;
+      return matchesSearch && matchesDateStart && matchesDateEnd;
+    });
+  }, [fetsTransactions, searchQuery, dateRange]);
+
+  // Chart Data
+  const chartData = useMemo(() => {
+    const data: Record<string, number> = {};
+    const today = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const key = d.toLocaleString('default', { month: 'short' });
+      data[key] = 0;
+    }
+    expenses.forEach(e => {
+      const d = new Date(e.date);
+      const key = d.toLocaleString('default', { month: 'short' });
+      if (data[key] !== undefined) data[key] += e.amount;
+    });
+    return Object.entries(data).map(([name, value]) => ({ name, value }));
+  }, [expenses]);
+
+  const pieData = useMemo(() => {
+    const agg: Record<string, number> = {};
+    expenses.forEach(e => { agg[e.category] = (agg[e.category] || 0) + e.amount; });
+    return Object.entries(agg).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 5);
+  }, [expenses]);
+
+  // Revenue chart data
+  const revenueChartData = useMemo(() => {
+    const data: Record<string, { income: number, expense: number }> = {};
+    const today = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const key = d.toLocaleString('default', { month: 'short' });
+      data[key] = { income: 0, expense: 0 };
+    }
+    invoices.filter(inv => inv.status === 'paid').forEach(inv => {
+      const d = new Date(inv.invoice_date);
+      const key = d.toLocaleString('default', { month: 'short' });
+      if (data[key]) data[key].income += inv.total_amount;
+    });
+    expenses.forEach(e => {
+      const d = new Date(e.date);
+      const key = d.toLocaleString('default', { month: 'short' });
+      if (data[key]) data[key].expense += e.amount;
+    });
+    return Object.entries(data).map(([name, { income, expense }]) => ({ name, income, expense }));
+  }, [invoices, expenses]);
+
+  if (loading && !user) return <div className="h-screen w-full flex items-center justify-center bg-background text-money-green font-serif tracking-widest text-xl animate-pulse">AUTHENTICATING...</div>;
+
+  return (
+    <div className="flex h-screen w-full bg-background overflow-hidden text-money-paper">
+      <Sidebar
+        currentView={currentView}
+        onChangeView={(v) => setCurrentView(v as ViewType)}
+        locationColor={primaryColor}
+      />
+
+      <div className="flex-1 flex flex-col h-full sm:ml-72 relative overflow-hidden">
+        <header className="px-8 py-6 flex justify-between items-center z-20 sticky top-0 bg-[#0c1410]/80 backdrop-blur-md border-b border-[#85bb65]/10">
+          <div className="flex flex-col">
+            <h2 className="text-2xl font-black text-money-gold capitalize tracking-widest font-serif">
+              {currentView === 'dashboard' ? 'Dashboard' :
+               currentView === 'expenses' ? 'Expense Register' :
+               currentView === 'cash' ? 'Cash Book' :
+               currentView === 'customers' ? 'Clients' :
+               currentView === 'invoices' ? 'Invoices' :
+               currentView === 'reports' ? 'Reports' :
+               currentView === 'import' ? 'Data Import' : 'Settings'}
+            </h2>
+            <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1">
+              Forum Testing & Educational Services • {location === 'cochin' ? 'Cochin' : 'Calicut'} • GST: {COMPANY_INFO.gstNumber}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="text-right hidden sm:block">
+              <p className="text-xs text-text-secondary">Total Income (FY)</p>
+              <p className="text-sm font-bold text-money-green">${(totalIncome / 100000).toFixed(2)}L</p>
             </div>
+            <div className="transform scale-[0.65] origin-right -mr-4 sm:mr-0">
+              <HoloToggle checked={location === 'cochin'} onChange={(c) => setLocation(c ? 'cochin' : 'calicut')} />
+            </div>
+          </div>
+        </header>
 
-            {/* --- Modals --- */}
-            <Modal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title={modalType === 'expense' ? (editingExpense ? 'Modify Expense' : 'New Expense') : (editingTransaction ? 'Modify Cash Entry' : 'New Cash Entry')}
-            >
-                {modalType === 'expense' && (
-                    <ExpenseForm
-                        expense={editingExpense}
-                        nextId={nextExpenseId}
-                        categories={categories}
-                        location={location}
-                        primaryColor={primaryColor}
-                        onSave={handleSaveExpense}
-                        onCancel={() => setIsModalOpen(false)}
-                    />
-                )}
-                {modalType === 'cash' && (
-                    <CashTransactionForm
-                        transaction={editingTransaction}
-                        nextId={nextCashId}
-                        categories={categories}
-                        location={location}
-                        primaryColor={primaryColor}
-                        onSave={handleSaveCashTransaction}
-                        onCancel={() => setIsModalOpen(false)}
-                    />
-                )}
-            </Modal>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 pb-24 sm:pb-8 custom-scrollbar">
 
-            {/* --- Delete Confirmation Modal --- */}
-            <Modal
-                isOpen={!!deleteId}
-                onClose={() => setDeleteId(null)}
-                title="Authorize Deletion"
-            >
-                <div className="space-y-6">
-                    <p className="text-sm font-medium text-text-secondary leading-relaxed">
-                        You are about to permanently remove this record from the ledger. This action cannot be reversed.
-                    </p>
-                    <div className="flex gap-4 justify-end pt-4 border-t border-[#85bb65]/10">
-                        <button
-                            onClick={() => setDeleteId(null)}
-                            className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-text-secondary hover:text-white"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={executeDelete}
-                            className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-red-500 border border-red-500/20 hover:bg-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
-                        >
-                            Confirm Delete
-                        </button>
-                    </div>
+          {/* --- DASHBOARD --- */}
+          {currentView === 'dashboard' && (
+            <div className="space-y-8 animate-fade-in">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatsCard title="Total Income" value={`$${(totalIncome / 1000).toFixed(1)}k`} icon="fa-wallet" color="#85bb65" delay={0} />
+                <StatsCard title="Pending Invoices" value={pendingInvoices.length.toString()} icon="fa-file-invoice" color="#d4af37" delay={0.05} />
+                <StatsCard title="Total Expenses" value={`₹${totalSpend.toLocaleString('en-IN')}`} icon="fa-coins" color={primaryColor} delay={0.1} />
+                <StatsCard title="Cash Balance" value={`₹${cashBalance.toLocaleString('en-IN')}`} icon="fa-university" color="#3e5c76" delay={0.15} />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="glass-panel rounded-2xl p-6">
+                  <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Income vs Expenses</h3>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={revenueChartData}>
+                        <defs>
+                          <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#85bb65" stopOpacity={0.3} /><stop offset="95%" stopColor="#85bb65" stopOpacity={0} /></linearGradient>
+                          <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} /><stop offset="95%" stopColor="#ef4444" stopOpacity={0} /></linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(133,187,101,0.1)" />
+                        <XAxis dataKey="name" stroke="#546e61" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#546e61" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
+                        <Tooltip contentStyle={{ backgroundColor: '#16231d', borderColor: '#85bb65' }} />
+                        <Area type="monotone" dataKey="income" stroke="#85bb65" fill="url(#incomeGrad)" strokeWidth={2} />
+                        <Area type="monotone" dataKey="expense" stroke="#ef4444" fill="url(#expenseGrad)" strokeWidth={2} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-            </Modal>
+                <div className="glass-panel rounded-2xl p-6">
+                  <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Expense Breakdown</h3>
+                  <div className="h-[300px]">
+                    {pieData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={pieData}
+                            cx="50%"
+                            cy="45%"
+                            outerRadius={90}
+                            innerRadius={45}
+                            dataKey="value"
+                            nameKey="name"
+                            paddingAngle={3}
+                          >
+                            {pieData.map((_, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={['#85bb65', '#d4af37', '#3e5c76', '#ef4444', '#a78bfa'][index % 5]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#16231d', borderColor: '#85bb65', fontSize: 12 }}
+                            formatter={(value: number, name: string) => [`₹${value.toLocaleString('en-IN')}`, name]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-text-tertiary text-sm">
+                        No expense data yet
+                      </div>
+                    )}
+                  </div>
+                  {pieData.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      {pieData.map((entry, index) => (
+                        <div key={entry.name} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: ['#85bb65', '#d4af37', '#3e5c76', '#ef4444', '#a78bfa'][index % 5] }}></span>
+                            <span className="text-text-secondary truncate max-w-[120px]">{entry.name}</span>
+                          </div>
+                          <span className="text-money-gold font-bold">₹{entry.value.toLocaleString('en-IN')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="glass-panel rounded-2xl p-6 border border-money-gold/20">
+                <h3 className="text-sm font-bold text-money-gold uppercase tracking-widest mb-4">Quick Actions</h3>
+                <div className="flex flex-wrap gap-3">
+                  <button onClick={() => { setEditingInvoice(null); setModalType('invoice'); setIsModalOpen(true); }}
+                    className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center gap-2">
+                    <i className="fas fa-plus"></i> New Invoice
+                  </button>
+                  <button onClick={() => setCurrentView('customers')}
+                    className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-text-secondary flex items-center gap-2">
+                    <i className="fas fa-users"></i> View Clients
+                  </button>
+                  <button onClick={() => setCurrentView('import')}
+                    className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-text-secondary flex items-center gap-2">
+                    <i className="fas fa-file-import"></i> Import Data
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* --- EXPENSES (Existing) --- */}
+          {currentView === 'expenses' && (
+            <div className="space-y-6">
+              {/* Header with add button */}
+              <div className="flex justify-between items-center">
+                <div className="relative flex-1 max-w-md">
+                  <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary"></i>
+                  <input type="text" placeholder="Search expenses..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="neo-input w-full rounded-xl py-3 pl-11 text-sm" />
+                </div>
+                <button onClick={() => { setEditingExpense(null); setModalType('expense'); setIsModalOpen(true); }}
+                  className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center gap-2">
+                  <i className="fas fa-plus"></i> Add Expense
+                </button>
+              </div>
+
+              {/* Expenses Table */}
+              <div className="glass-panel rounded-2xl overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Date</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">ID</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Category</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Description</th>
+                      <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase">Amount</th>
+                      <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#85bb65]/5">
+                    {filteredExpenses.map((exp) => (
+                      <tr key={exp.id} className="hover:bg-[#85bb65]/5">
+                        <td className="px-6 py-4 text-xs">{new Date(exp.date).toLocaleDateString('en-GB')}</td>
+                        <td className="px-6 py-4 text-xs font-bold text-money-green">{exp.paid_by}</td>
+                        <td className="px-6 py-4 text-xs">{exp.category}</td>
+                        <td className="px-6 py-4 text-xs text-text-secondary truncate max-w-xs">{exp.description}</td>
+                        <td className="px-6 py-4 text-right font-bold text-money-gold">₹{exp.amount.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-center">
+                          <button onClick={() => { setEditingExpense(exp); setModalType('expense'); setIsModalOpen(true); }}
+                            className="text-text-tertiary hover:text-money-gold mr-2"><i className="fas fa-edit"></i></button>
+                          <button onClick={() => confirmDeleteRequest(exp.id!, 'expense')} className="text-text-tertiary hover:text-red-400"><i className="fas fa-trash"></i></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredExpenses.length === 0 && (
+                  <div className="text-center py-12 text-text-secondary">
+                    <i className="fas fa-receipt text-3xl mb-4"></i><p>No expenses found</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* --- CASH (Existing) --- */}
+          {currentView === 'cash' && (
+            <div className="space-y-6">
+              {/* Cash Balance Card */}
+              <div className="glass-panel rounded-2xl p-6 border border-[#85bb65]/20 flex justify-between items-center"
+                style={{ background: 'linear-gradient(135deg, #1b3826 0%, #0c1410 100%)' }}>
+                <div>
+                  <p className="text-xs text-money-green/60 uppercase tracking-wider">Current Cash Balance</p>
+                  <h3 className="text-4xl font-bold text-white font-serif">₹{cashBalance.toLocaleString('en-IN')}</h3>
+                </div>
+                <button onClick={() => openCashModal()} className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold">
+                  <i className="fas fa-plus mr-2"></i>New Transaction
+                </button>
+              </div>
+
+              {/* Cash Transactions Table */}
+              <div className="glass-panel rounded-2xl overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Date</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Ref ID</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Category</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Description</th>
+                      <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase">Amount</th>
+                      <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#85bb65]/5">
+                    {filteredTransactions.map((tx) => (
+                      <tr key={tx.id} className="hover:bg-[#85bb65]/5">
+                        <td className="px-6 py-4 text-xs">{new Date(tx.date).toLocaleDateString('en-GB')}</td>
+                        <td className="px-6 py-4 text-xs font-bold text-money-green">{tx.custom_id}</td>
+                        <td className="px-6 py-4 text-xs">{tx.category}</td>
+                        <td className="px-6 py-4 text-xs text-text-secondary">{tx.clean_description}</td>
+                        <td className={`px-6 py-4 text-right font-bold ${tx.amount >= 0 ? 'text-money-green' : 'text-red-400'}`}>
+                          {tx.amount >= 0 ? '+' : ''}₹{Math.abs(tx.amount).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <button onClick={() => openCashModal(tx)} className="text-text-tertiary hover:text-money-gold mr-2"><i className="fas fa-edit"></i></button>
+                          <button onClick={() => confirmDeleteRequest(tx.id!, 'cash')} className="text-text-tertiary hover:text-red-400"><i className="fas fa-trash"></i></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* --- CUSTOMERS (NEW) --- */}
+          {currentView === 'customers' && (
+            <CustomerList
+              customers={customers}
+              onAdd={handleAddCustomer}
+              onUpdate={handleUpdateCustomer}
+              onDelete={handleDeleteCustomer}
+              primaryColor={primaryColor}
+            />
+          )}
+
+          {/* --- INVOICES (NEW) --- */}
+          {currentView === 'invoices' && (
+            <InvoiceList
+              invoices={invoices}
+              customers={customers}
+              userId={user?.id || ''}
+              location={location}
+              onAdd={handleAddInvoice}
+              onUpdate={handleUpdateInvoice}
+              onDelete={handleDeleteInvoice}
+              primaryColor={primaryColor}
+            />
+          )}
+
+          {/* --- DATA IMPORT (NEW) --- */}
+          {currentView === 'import' && (
+            <DataImport
+              userId={user?.id || ''}
+              onCustomersImported={handleImportCustomers}
+              onInvoicesImported={handleImportInvoices}
+              primaryColor={primaryColor}
+            />
+          )}
+
+          {/* --- REPORTS (Placeholder) --- */}
+          {currentView === 'reports' && (
+            <div className="space-y-6">
+              <div className="glass-panel rounded-2xl p-8 text-center">
+                <i className="fas fa-chart-line text-5xl text-text-tertiary mb-4"></i>
+                <h3 className="text-xl font-bold text-money-paper mb-2">Financial Reports</h3>
+                <p className="text-text-secondary mb-6">Comprehensive P&L, Balance Sheet and GST reports coming in Phase 2</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                  <div className="glass-panel rounded-xl p-4">
+                    <i className="fas fa-file-invoice-dollar text-2xl text-money-gold mb-2"></i>
+                    <p className="text-sm font-bold">Income Report</p>
+                    <p className="text-xs text-text-secondary">By customer/month</p>
+                  </div>
+                  <div className="glass-panel rounded-xl p-4">
+                    <i className="fas fa-calculator text-2xl text-money-green mb-2"></i>
+                    <p className="text-sm font-bold">GST Summary</p>
+                    <p className="text-xs text-text-secondary">GSTR-1 / GSTR-3B</p>
+                  </div>
+                  <div className="glass-panel rounded-xl p-4">
+                    <i className="fas fa-balance-scale text-2xl text-text-tertiary mb-2"></i>
+                    <p className="text-sm font-bold">Balance Sheet</p>
+                    <p className="text-xs text-text-secondary">Assets vs Liabilities</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* --- SETTINGS (Existing + Enhanced) --- */}
+          {currentView === 'settings' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              {/* Company Settings */}
+              <div className="glass-panel rounded-2xl p-8">
+                <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-6 border-b border-[#85bb65]/20 pb-4">Company Information</h3>
+                <div className="grid grid-cols-2 gap-6 text-sm">
+                  <div>
+                    <label className="text-text-tertiary text-xs uppercase">Company Name</label>
+                    <p className="font-bold text-money-paper">{COMPANY_INFO.name}</p>
+                  </div>
+                  <div>
+                    <label className="text-text-tertiary text-xs uppercase">GST Number</label>
+                    <p className="font-bold text-money-green">{COMPANY_INFO.gstNumber}</p>
+                  </div>
+                  <div>
+                    <label className="text-text-tertiary text-xs uppercase">Bank</label>
+                    <p className="font-bold text-money-paper">Federal Bank</p>
+                  </div>
+                  <div>
+                    <label className="text-text-tertiary text-xs uppercase">Total Clients</label>
+                    <p className="font-bold text-money-paper">{customers.length}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Categories */}
+              <div className="glass-panel rounded-2xl p-8">
+                <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-6 border-b border-[#85bb65]/20 pb-4">Expense Categories</h3>
+                <CategoryManager categories={categories} onAdd={handleAddCategory} onDelete={handleDeleteCategory} />
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* --- Modals --- */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
+        title={modalType === 'expense' ? (editingExpense ? 'Edit Expense' : 'New Expense') :
+               modalType === 'cash' ? (editingTransaction ? 'Edit Cash Entry' : 'New Cash Entry') :
+               modalType === 'invoice' ? (editingInvoice ? 'Edit Invoice' : 'New Invoice') : 'Add Client'}>
+        {modalType === 'expense' && (
+          <ExpenseForm expense={editingExpense} nextId={nextExpenseId} categories={categories} location={location}
+            primaryColor={primaryColor} onSave={handleSaveExpense} onCancel={() => setIsModalOpen(false)} />
+        )}
+        {modalType === 'cash' && (
+          <CashTransactionForm transaction={editingTransaction} nextId={nextCashId} categories={categories} location={location}
+            primaryColor={primaryColor} onSave={handleSaveCashTransaction} onCancel={() => setIsModalOpen(false)} />
+        )}
+      </Modal>
+
+      {/* Delete Confirmation */}
+      <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} title="Confirm Delete">
+        <div className="space-y-6">
+          <p className="text-sm text-text-secondary">This action cannot be undone. Are you sure?</p>
+          <div className="flex gap-4 justify-end">
+            <button onClick={() => setDeleteId(null)} className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-text-secondary">Cancel</button>
+            <button onClick={executeDelete} className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-red-500 border border-red-500/20">Delete</button>
+          </div>
         </div>
-    );
+      </Modal>
+    </div>
+  );
 }
 
 export default App;
