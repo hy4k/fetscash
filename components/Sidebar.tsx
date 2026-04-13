@@ -9,8 +9,11 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, locationColor }) => {
   const menuItems = [
     { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
+    { id: 'customers', icon: 'fa-users', label: 'Clients' },
+    { id: 'invoices', icon: 'fa-file-invoice', label: 'Invoices' },
     { id: 'expenses', icon: 'fa-file-invoice-dollar', label: 'Expenses' },
     { id: 'cash', icon: 'fa-book', label: 'Cash Book' },
+    { id: 'import', icon: 'fa-file-import', label: 'Import' },
     { id: 'reports', icon: 'fa-table', label: 'Reports' },
     { id: 'settings', icon: 'fa-sliders-h', label: 'Settings' },
   ];
@@ -20,13 +23,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, loc
       {/* Desktop Sidebar */}
       <aside className="hidden sm:flex flex-col w-72 h-screen fixed left-0 top-0 bg-[#16231d] border-r border-[#85bb65]/10 z-40 shadow-[10px_0_30px_rgba(0,0,0,0.3)]">
         <div className="p-8 pb-8 flex flex-col items-center border-b border-[#85bb65]/10 bg-gradient-to-b from-[#1f3029] to-transparent">
-             {/* Logo Container with Coin Effect */}
              <div className="w-16 h-16 rounded-full neo-btn flex items-center justify-center mb-4 border border-money-gold/30">
                 <i className="fas fa-landmark text-2xl text-money-gold drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)]"></i>
              </div>
-             <h1 className="text-3xl font-black tracking-widest text-center engraved-text leading-tight">
-                FETS<br/>CASH
+             <h1 className="text-2xl font-black tracking-widest text-center engraved-text leading-tight">
+                FORUM<br/><span className="text-lg">TESTING</span>
              </h1>
+             <p className="text-[10px] text-text-tertiary uppercase tracking-wider mt-2">
+                Educational Services
+             </p>
              <div className="h-1 w-24 bg-gradient-to-r from-transparent via-money-gold to-transparent mt-3 opacity-50"></div>
         </div>
 
