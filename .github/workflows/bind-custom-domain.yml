@@ -45,8 +45,18 @@ jobs:
           ")
           az rest --method PATCH --url "$APP_URL" --body "$REMOVED" \
             --headers "Content-Type=application/json"
-          echo "Removed fets.cash. Waiting 10s..."
-          sleep 10
+          echo "Removed fets.cash. Waiting for provisioning to complete..."
+
+          # Wait until provisioningState is not InProgress
+          for i in $(seq 1 30); do
+            STATE=$(az rest --method GET --url "$APP_URL" | python3 -c "
+          import json,sys; d=json.load(sys.stdin)
+          print(d['properties'].get('provisioningState',''))
+            ")
+            echo "  provisioning: $STATE"
+            [ "$STATE" = "Succeeded" ] || [ "$STATE" = "Failed" ] && break
+            sleep 10
+          done
 
           # Step 2: Re-add fets.cash with Disabled binding (triggers fresh cert validation)
           CURRENT2=$(az rest --method GET --url "$APP_URL")
