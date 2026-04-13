@@ -25,96 +25,116 @@ jobs:
             --tenant "$AZURE_TENANT_ID"
           az account set --subscription "$AZURE_SUBSCRIPTION_ID"
 
-      - name: Re-register fets.cash (force fresh validation)
+      - name: Step 1 — Register fets.cash on Container App (bindingType=Disabled)
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         run: |
           APP_URL="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/rg-staging/providers/Microsoft.App/containerApps/ca-fetscash-axojf7v4ky4xo?api-version=2023-05-01"
 
           CURRENT=$(az rest --method GET --url "$APP_URL")
-          echo "Config retrieved."
-
-          # Step 1: Remove fets.cash to reset validation state
-          REMOVED=$(echo "$CURRENT" | python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          ingress = data['properties']['configuration']['ingress']
-          ingress['customDomains'] = [d for d in (ingress.get('customDomains') or []) if d['name'] != 'fets.cash']
-          data['properties']['configuration'].pop('secrets', None)
-          print(json.dumps(data))
+          EXISTING=$(echo "$CURRENT" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          doms = d['properties']['configuration']['ingress'].get('customDomains') or []
+          print('yes' if any(x['name']=='fets.cash' for x in doms) else 'no')
           ")
-          az rest --method PATCH --url "$APP_URL" --body "$REMOVED" \
-            --headers "Content-Type=application/json"
-          echo "Removed fets.cash. Waiting for provisioning to complete..."
-
-          # Wait until provisioningState is not InProgress
-          for i in $(seq 1 30); do
-            STATE=$(az rest --method GET --url "$APP_URL" | python3 -c "
-          import json,sys; d=json.load(sys.stdin)
-          print(d['properties'].get('provisioningState',''))
+          if [ "$EXISTING" = "yes" ]; then
+            echo "fets.cash already registered on Container App."
+          else
+            UPDATED=$(echo "$CURRENT" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          ingress=d['properties']['configuration']['ingress']
+          if not ingress.get('customDomains'): ingress['customDomains']=[]
+          ingress['customDomains'].append({'name':'fets.cash','bindingType':'Disabled'})
+          d['properties']['configuration'].pop('secrets',None)
+          print(json.dumps(d))
             ")
-            echo "  provisioning: $STATE"
-            [ "$STATE" = "Succeeded" ] || [ "$STATE" = "Failed" ] && break
-            sleep 10
-          done
+            az rest --method PATCH --url "$APP_URL" --body "$UPDATED" \
+              --headers "Content-Type=application/json"
+            echo "Registered fets.cash on Container App."
+            # Wait for provisioning
+            for i in $(seq 1 20); do
+              STATE=$(az rest --method GET --url "$APP_URL" | \
+                python3 -c "import json,sys; print(json.load(sys.stdin)['properties'].get('provisioningState',''))")
+              echo "  provisioning: $STATE"
+              [ "$STATE" = "Succeeded" ] && break
+              sleep 10
+            done
+          fi
 
-          # Step 2: Re-add fets.cash with Disabled binding (triggers fresh cert validation)
-          CURRENT2=$(az rest --method GET --url "$APP_URL")
-          ADDED=$(echo "$CURRENT2" | python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          ingress = data['properties']['configuration']['ingress']
-          if not ingress.get('customDomains'):
-              ingress['customDomains'] = []
-          ingress['customDomains'].append({'name': 'fets.cash', 'bindingType': 'Disabled'})
-          data['properties']['configuration'].pop('secrets', None)
-          print(json.dumps(data))
-          ")
-          az rest --method PATCH --url "$APP_URL" --body "$ADDED" \
-            --headers "Content-Type=application/json"
-          echo "Re-added fets.cash. Azure will now validate DNS and issue TLS cert."
-
-      - name: "NOTE: paybook.fets.cash DNS prerequisite"
-        run: |
-          echo "paybook.fets.cash is skipped until its verification TXT record is added:"
-          echo "  Type: TXT  |  Name: asuid.paybook  |  TTL: 300"
-          echo "  Value: 6E5EDF6D86B72205B9E60EF1ECD706BD643F3EF3EA7D9B78C5F3FFDE6BCE9D92"
-
-      - name: Wait for certificate issuance (up to 5 min)
+      - name: Step 2 — Create managed TLS certificate for fets.cash
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         run: |
-          APP_URL="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/rg-staging/providers/Microsoft.App/containerApps/ca-fetscash-axojf7v4ky4xo?api-version=2023-05-01"
-          for i in $(seq 1 30); do
-            STATUS=$(az rest --method GET --url "$APP_URL" | \
-              python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          domains = data['properties']['configuration']['ingress'].get('customDomains') or []
-          for d in domains:
-              print(d['name'], d.get('bindingType','?'))
-              ")
-            echo "poll $i: $STATUS"
-            if echo "$STATUS" | grep -q "SniEnabled"; then
-              echo "TLS certificate bound successfully!"
+          CERT_URL="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/rg-staging/providers/Microsoft.App/managedEnvironments/caeaxojf7v4ky4xo/managedCertificates/fets-cash-cert?api-version=2023-05-01"
+          CERT_BODY='{"location":"eastus2","properties":{"subjectName":"fets.cash","domainControlValidation":"HTTP"}}'
+
+          az rest --method PUT --url "$CERT_URL" \
+            --body "$CERT_BODY" \
+            --headers "Content-Type=application/json"
+          echo "Managed certificate creation triggered."
+
+      - name: Step 3 — Wait for certificate to be issued (up to 15 min)
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          CERT_URL="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/rg-staging/providers/Microsoft.App/managedEnvironments/caeaxojf7v4ky4xo/managedCertificates/fets-cash-cert?api-version=2023-05-01"
+          for i in $(seq 1 90); do
+            RESP=$(az rest --method GET --url "$CERT_URL" 2>/dev/null)
+            STATE=$(echo "$RESP" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('properties',{}).get('provisioningState',''))" 2>/dev/null)
+            CERT_ID=$(echo "$RESP" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))" 2>/dev/null)
+            echo "poll $i: provisioningState=$STATE"
+            if [ "$STATE" = "Succeeded" ]; then
+              echo "Certificate issued! ID: $CERT_ID"
+              echo "CERT_ID=$CERT_ID" >> $GITHUB_ENV
               break
             fi
             sleep 10
           done
+          if [ -z "${CERT_ID:-}" ]; then
+            echo "::warning::Certificate not yet issued after timeout. Re-run the workflow later."
+          fi
 
-      - name: Show final hostname status
+      - name: Step 4 — Bind certificate to fets.cash (SniEnabled)
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        if: env.CERT_ID != ''
+        run: |
+          APP_URL="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/rg-staging/providers/Microsoft.App/containerApps/ca-fetscash-axojf7v4ky4xo?api-version=2023-05-01"
+          CURRENT=$(az rest --method GET --url "$APP_URL")
+          UPDATED=$(echo "$CURRENT" | python3 -c "
+          import json,sys,os
+          d=json.load(sys.stdin)
+          ingress=d['properties']['configuration']['ingress']
+          doms = ingress.get('customDomains') or []
+          doms=[x for x in doms if x['name']!='fets.cash']
+          doms.append({'name':'fets.cash','certificateId':os.environ['CERT_ID'],'bindingType':'SniEnabled'})
+          ingress['customDomains']=doms
+          d['properties']['configuration'].pop('secrets',None)
+          print(json.dumps(d))
+          ")
+          az rest --method PATCH --url "$APP_URL" --body "$UPDATED" \
+            --headers "Content-Type=application/json"
+          echo "fets.cash is now bound with TLS (SniEnabled)."
+
+      - name: "NOTE: paybook.fets.cash DNS prerequisite"
+        run: |
+          echo "Add this DNS TXT record, then re-run this workflow to add paybook.fets.cash:"
+          echo "  Type: TXT  |  Name: asuid.paybook  |  TTL: 300"
+          echo "  Value: 6E5EDF6D86B72205B9E60EF1ECD706BD643F3EF3EA7D9B78C5F3FFDE6BCE9D92"
+
+      - name: Show final binding status
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         run: |
           az rest --method GET \
             --url "https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/rg-staging/providers/Microsoft.App/containerApps/ca-fetscash-axojf7v4ky4xo?api-version=2023-05-01" | \
             python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          domains = data['properties']['configuration']['ingress'].get('customDomains') or []
+          import json,sys
+          d=json.load(sys.stdin)
+          doms=d['properties']['configuration']['ingress'].get('customDomains') or []
           print('--- Custom Domains ---')
-          for d in domains:
-              print(f\"  {d['name']}  binding={d.get('bindingType','?')}\")
-          if not domains:
-              print('  (none)')
+          for x in doms: print(f\"  {x['name']}  binding={x.get('bindingType','?')}\")
+          if not doms: print('  (none)')
           "
