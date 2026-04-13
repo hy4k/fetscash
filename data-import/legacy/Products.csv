@@ -1,0 +1,12 @@
+Product Name,HSN Code,Buy Rate,Sale Rate,Measurement Units,Description,Current Stock,Minimum Stock,Opening Stock,Opening Stock Rate,Opening Date,Tax Rate,Tax List
+"ACCA CBT Exam","-","0","300","-","March 03, 2025","-","-","-","-","-","0 %","[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+"ACCA CBT Exam - March 03","-","0","300","-","-","-","-","-","-","-","0 %","[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+"Additional Expense","-","0","10000","-","Rent for Table & Chair, housekeeping, DG backup and Administrations for - 01 March 2025 to 07 March 2025","-","-","-","-","-","0 %","[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+"CMA US Mock exam","-","0","1500","-","-","-","-","-","-","-","0 %","[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+"GRE","HSN/SAC - 999295","0","1000","-","-","-","-","-","-","-","0 %","[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+"ICMA - Exam Registration Fees","-","0","10","-","-","-","-","-","-","-","0 %","[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+"IELTS Paper Based Exam","HSN/SAC - 999295","0","35000","-","-","-","-","-","-","-","0 %","[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+"MRCA Exam","-","0","0","-","-","-","-","-","-","-","0 %","[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+"PSI Exam","-","0","7","-","-","-","-","-","-","-","0 %","[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+"TOEFL","HSN/SAC - 999295","0","1000","-","-","-","-","-","-","-","0 %","[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+"TOEIC","HSN/SAC - 999295","0","1000","-","-","-","-","-","-","-","0 %","[ IGST : 18%, SGST : 0%, CGST : 0% ]"
