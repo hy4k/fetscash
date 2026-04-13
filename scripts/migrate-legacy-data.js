@@ -8,11 +8,15 @@
  * Example: node migrate-legacy-data.js "550e8400-e29b-41d4-a716-446655440000"
  */
 
-const fs = require('fs');
-const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
-const { parse } = require('csv-parse/sync');
-const { v4: uuidv4 } = require('uuid');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
+import { parse } from 'csv-parse/sync';
+import { v4 as uuidv4 } from 'uuid';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
