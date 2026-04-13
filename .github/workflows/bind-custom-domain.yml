@@ -25,45 +25,44 @@ jobs:
             --tenant "$AZURE_TENANT_ID"
           az account set --subscription "$AZURE_SUBSCRIPTION_ID"
 
-      - name: Add custom hostnames via REST API
+      - name: Re-register fets.cash (force fresh validation)
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         run: |
           APP_URL="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/rg-staging/providers/Microsoft.App/containerApps/ca-fetscash-axojf7v4ky4xo?api-version=2023-05-01"
 
-          # Get current container app config
           CURRENT=$(az rest --method GET --url "$APP_URL")
-          echo "Current config retrieved."
+          echo "Config retrieved."
 
-          # Inject custom domains with bindingType=Disabled (triggers managed cert issuance)
-          UPDATED=$(echo "$CURRENT" | python3 -c "
+          # Step 1: Remove fets.cash to reset validation state
+          REMOVED=$(echo "$CURRENT" | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          ingress = data['properties']['configuration']['ingress']
+          ingress['customDomains'] = [d for d in (ingress.get('customDomains') or []) if d['name'] != 'fets.cash']
+          data['properties']['configuration'].pop('secrets', None)
+          print(json.dumps(data))
+          ")
+          az rest --method PATCH --url "$APP_URL" --body "$REMOVED" \
+            --headers "Content-Type=application/json"
+          echo "Removed fets.cash. Waiting 10s..."
+          sleep 10
+
+          # Step 2: Re-add fets.cash with Disabled binding (triggers fresh cert validation)
+          CURRENT2=$(az rest --method GET --url "$APP_URL")
+          ADDED=$(echo "$CURRENT2" | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
           ingress = data['properties']['configuration']['ingress']
           if not ingress.get('customDomains'):
               ingress['customDomains'] = []
-          existing = {d['name'] for d in ingress['customDomains']}
-          # paybook.fets.cash requires asuid.paybook TXT record — added separately below
-          for hostname in ['fets.cash']:
-              if hostname not in existing:
-                  ingress['customDomains'].append({
-                      'name': hostname,
-                      'bindingType': 'Disabled'
-                  })
-                  print(f'Adding: {hostname}', file=__import__('sys').stderr)
-              else:
-                  print(f'Already present: {hostname}', file=__import__('sys').stderr)
-          # ARM GET redacts secret values; omit secrets key so Azure preserves existing ones
-          config = data['properties']['configuration']
-          config.pop('secrets', None)
+          ingress['customDomains'].append({'name': 'fets.cash', 'bindingType': 'Disabled'})
+          data['properties']['configuration'].pop('secrets', None)
           print(json.dumps(data))
           ")
-
-          # PATCH the container app
-          az rest --method PATCH --url "$APP_URL" --body "$UPDATED" \
+          az rest --method PATCH --url "$APP_URL" --body "$ADDED" \
             --headers "Content-Type=application/json"
-          echo "Custom domains added with bindingType=Disabled."
-          echo "Azure will issue managed TLS certificates via HTTP validation automatically."
+          echo "Re-added fets.cash. Azure will now validate DNS and issue TLS cert."
 
       - name: "NOTE: paybook.fets.cash DNS prerequisite"
         run: |
