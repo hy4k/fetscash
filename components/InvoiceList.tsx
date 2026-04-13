@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Invoice, Customer, InvoiceStatus, LocationType } from '../types';
+import { Invoice, Customer, InvoiceStatus, LocationType, Payment } from '../types';
 import { InvoiceForm } from './InvoiceForm';
+import { PaymentForm } from './PaymentForm';
 import { Modal } from './Modal';
 import { generateInvoicePDF } from '../utils/invoicePdf';
+import { downloadRemittancePDF } from '../utils/remittancePdf';
 
 interface InvoiceListProps {
   invoices: Invoice[];
@@ -12,6 +14,7 @@ interface InvoiceListProps {
   onAdd: (invoice: Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => void;
   onUpdate: (id: string, invoice: Partial<Invoice>) => void;
   onDelete: (id: string) => void;
+  onRecordPayment: (invoiceId: string, payment: Omit<Payment, 'id' | 'user_id' | 'created_at'>) => void;
   primaryColor: string;
 }
 
@@ -27,6 +30,8 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
@@ -101,10 +106,26 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
     setEditingInvoice(null);
   };
 
+  const handleOpenPaymentModal = (invoice: Invoice) => {
+    setPaymentInvoice(invoice);
+    setIsPaymentModalOpen(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+    setPaymentInvoice(null);
+  };
+
+  const handleSavePayment = (paymentData: Omit<Payment, 'id' | 'user_id' | 'created_at'>) => {
+    if (!paymentInvoice) return;
+    onRecordPayment(paymentInvoice.id, paymentData);
+    handleClosePaymentModal();
+  };
+
   const handleDownloadPDF = async (invoice: Invoice) => {
     const customer = customers.find((c) => c.id === invoice.customer_id);
     if (!customer) return;
-    
+
     try {
       const pdfBlob = await generateInvoicePDF(invoice, customer);
       const url = window.URL.createObjectURL(pdfBlob);
@@ -118,6 +139,35 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
     } catch (error) {
       console.error('Failed to generate PDF:', error);
       alert('Failed to generate PDF. Please try again.');
+    }
+  };
+
+  const handleDownloadRemittancePDF = (invoice: Invoice) => {
+    const customer = customers.find((c) => c.id === invoice.customer_id);
+    if (!customer) return;
+    if (!invoice.paid_amount || !invoice.paid_date) {
+      alert('Payment date and amount are required to generate remittance PDF.');
+      return;
+    }
+
+    try {
+      // Create a Payment object from the invoice's paid data
+      const payment: Payment = {
+        id: `payment-${invoice.id}`,
+        user_id: '',
+        invoice_id: invoice.id,
+        payment_date: invoice.paid_date,
+        amount: invoice.paid_amount,
+        amount_inr: invoice.inr_equivalent || invoice.paid_amount,
+        payment_method: 'Bank Transfer',
+        bank_name: 'Federal Bank',
+        reference_number: invoice.payment_reference || '—',
+      };
+
+      downloadRemittancePDF(payment, invoice, customer);
+    } catch (error) {
+      console.error('Failed to generate remittance PDF:', error);
+      alert('Failed to generate remittance PDF. Please try again.');
     }
   };
 
@@ -218,6 +268,8 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                 <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Service Month</th>
                 <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Currency</th>
                 <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Amount</th>
+                <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Paid</th>
+                <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Balance</th>
                 <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Status</th>
                 <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Due Date</th>
                 <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Actions</th>
@@ -226,7 +278,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
             <tbody className="divide-y divide-[#85bb65]/5">
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center">
+                  <td colSpan={10} className="px-6 py-12 text-center">
                     <i className="fas fa-file-invoice text-4xl text-text-tertiary mb-4"></i>
                     <p className="text-text-secondary">No invoices found</p>
                     <p className="text-xs text-text-tertiary mt-2">Create your first invoice to get started</p>
@@ -260,6 +312,18 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                         {formatCurrency(inv.total_amount, inv.currency)}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="font-serif font-bold text-money-green text-sm">
+                        {formatCurrency(inv.paid_amount || 0, inv.currency)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className={`font-serif font-bold text-sm ${
+                        ((inv.total_amount - (inv.paid_amount || 0)) > 0) ? 'text-money-gold' : 'text-money-green'
+                      }`}>
+                        {formatCurrency(Math.max(0, inv.total_amount - (inv.paid_amount || 0)), inv.currency)}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-center">
                       <span
                         className={`px-2 py-1 rounded text-[10px] font-bold uppercase text-white ${getStatusColor(
@@ -279,10 +343,28 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                         <button
                           onClick={() => handleDownloadPDF(inv)}
                           className="p-2 rounded-lg text-text-tertiary hover:text-money-green hover:bg-money-green/10 transition-all"
-                          title="Download PDF"
+                          title="Download Invoice PDF"
                         >
                           <i className="fas fa-file-pdf"></i>
                         </button>
+                        {(inv.status === 'paid' || inv.status === 'partially_paid') && (
+                          <button
+                            onClick={() => handleDownloadRemittancePDF(inv)}
+                            className="p-2 rounded-lg text-text-tertiary hover:text-money-gold hover:bg-money-gold/10 transition-all"
+                            title="Download Remittance PDF"
+                          >
+                            <i className="fas fa-file-invoice"></i>
+                          </button>
+                        )}
+                        {inv.status !== 'cancelled' && inv.status !== 'paid' && (
+                          <button
+                            onClick={() => handleOpenPaymentModal(inv)}
+                            className="p-2 rounded-lg text-text-tertiary hover:text-money-green hover:bg-money-green/10 transition-all"
+                            title="Record Payment"
+                          >
+                            <i className="fas fa-credit-card"></i>
+                          </button>
+                        )}
                         <button
                           onClick={() => handleEdit(inv)}
                           className="p-2 rounded-lg text-text-tertiary hover:text-money-gold hover:bg-money-gold/10 transition-all"
@@ -307,7 +389,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Invoice Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -329,6 +411,22 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
           onCancel={handleCloseModal}
           primaryColor={primaryColor}
         />
+      </Modal>
+
+      {/* Payment Modal */}
+      <Modal
+        isOpen={isPaymentModalOpen}
+        onClose={handleClosePaymentModal}
+        title="Record Payment"
+      >
+        {paymentInvoice && (
+          <PaymentForm
+            invoice={paymentInvoice}
+            customer={customers.find((c) => c.id === paymentInvoice.customer_id)!}
+            onSave={handleSavePayment}
+            onCancel={handleClosePaymentModal}
+          />
+        )}
       </Modal>
     </div>
   );

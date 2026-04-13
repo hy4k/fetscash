@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from './supabaseClient';
-import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoice } from './types';
+import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoice, Payment } from './types';
 import { CATEGORY_REPLENISHMENT } from './constants';
 import HoloToggle from './components/HoloToggle';
 import { ExpenseForm } from './components/ExpenseForm';
@@ -339,6 +339,60 @@ function App() {
     // service_lines cascade-delete via FK ON DELETE CASCADE
     await supabase.from('invoices').delete().eq('id', id);
     fetchAllData(user.id, location);
+  };
+
+  const handleRecordPayment = async (invoiceId: string, paymentData: Omit<any, 'id' | 'user_id' | 'created_at'>) => {
+    if (!user) return;
+
+    try {
+      // Insert payment record
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
+        .insert([{
+          ...paymentData,
+          invoice_id: invoiceId,
+          user_id: user.id,
+        }])
+        .select()
+        .single();
+
+      if (paymentError) {
+        console.error('Payment insertion error:', paymentError);
+        alert('Failed to record payment. Please try again.');
+        return;
+      }
+
+      // Find the invoice to get its total amount
+      const invoice = invoices.find(inv => inv.id === invoiceId);
+      if (!invoice) return;
+
+      // Calculate new paid amount and status
+      const newPaidAmount = (invoice.paid_amount || 0) + paymentData.amount;
+      const newStatus = newPaidAmount >= invoice.total_amount ? 'paid' : 'partially_paid';
+
+      // Update invoice with payment details
+      const { error: updateError } = await supabase
+        .from('invoices')
+        .update({
+          paid_amount: newPaidAmount,
+          paid_date: paymentData.payment_date,
+          payment_reference: paymentData.reference_number,
+          status: newStatus,
+        })
+        .eq('id', invoiceId);
+
+      if (updateError) {
+        console.error('Invoice update error:', updateError);
+        alert('Payment recorded but failed to update invoice. Please refresh.');
+        return;
+      }
+
+      // Refresh all data
+      fetchAllData(user.id, location);
+    } catch (error) {
+      console.error('Error recording payment:', error);
+      alert('An unexpected error occurred while recording the payment.');
+    }
   };
 
   // --- HANDLERS: Import ---
@@ -777,6 +831,7 @@ function App() {
               onAdd={handleAddInvoice}
               onUpdate={handleUpdateInvoice}
               onDelete={handleDeleteInvoice}
+              onRecordPayment={handleRecordPayment}
               primaryColor={primaryColor}
             />
           )}
