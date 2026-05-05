@@ -5,9 +5,11 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  /** Wider panel for complex forms (e.g. payroll ledger) */
+  maxWidthClass?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidthClass = 'max-w-lg' }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
       
       {/* Content */}
       <div 
-        className={`bg-[#16231d] w-full max-w-lg rounded-t-3xl sm:rounded-3xl border border-[#85bb65]/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative z-10 transform transition-all duration-300 ease-out flex flex-col max-h-[90vh] ${isOpen ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full sm:translate-y-8 opacity-0 scale-95'}`}
+        className={`bg-[#16231d] w-full ${maxWidthClass} rounded-t-3xl sm:rounded-3xl border border-[#85bb65]/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative z-10 transform transition-all duration-300 ease-out flex flex-col max-h-[90vh] ${isOpen ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-full sm:translate-y-8 opacity-0 scale-95'}`}
         style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/black-scales.png")`, backgroundBlendMode: 'overlay' }}
       >
         <div className="flex justify-between items-center p-6 border-b border-[#85bb65]/10">

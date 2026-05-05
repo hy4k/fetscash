@@ -248,3 +248,41 @@ export interface User {
   phone?: string;
   logo_url?: string;
 }
+
+// ============================================
+// PAYBOOK — Supabase public.fets_salary_data
+// ============================================
+export interface FetsSalaryData {
+  id?: number;
+  month: string;
+  name: string;
+  monthly_salary?: number | null;
+  daily_rate?: number | null;
+  start_date?: number | null;
+  end_date?: number | null;
+  leave_days?: number | null;
+  ot_hours?: number | null;
+  full_days?: number | null;
+  half_days?: number | null;
+  created_at?: string | null;
+  designation?: string | null;
+  id_num?: string | null;
+  working_days_in_month?: number | null;
+  extra_ot_hours?: number | null;
+  location?: string | null;
+}
+
+// ============================================
+// PAYBOOK — Supabase public.fets_expenses_data
+// ============================================
+export interface FetsExpensesData {
+  id?: number;
+  created_at?: string;
+  name: string;
+  amount: number;
+  location: string;
+  month: string;
+  color?: string | null;
+  date?: string | null;
+  category?: string | null;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase } from './supabaseClient';
+import { supabase, isSupabaseConfigured } from './supabaseClient';
 import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoice, Payment } from './types';
 import { CATEGORY_REPLENISHMENT } from './constants';
 import HoloToggle from './components/HoloToggle';
@@ -13,6 +13,7 @@ import { InvoiceForm } from './components/InvoiceForm';
 import { DataImport } from './components/DataImport';
 import { Modal } from './components/Modal';
 import { Sidebar } from './components/Sidebar';
+import { PaybookView } from './components/PaybookView';
 import { StatsCard } from './components/StatsCard';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -65,6 +66,7 @@ function App() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [showFilters, setShowFilters] = useState(true);
+  const [expenseSection, setExpenseSection] = useState<'register' | 'paybook'>('register');
 
   // --- Theme ---
   const primaryColor = location === 'cochin' ? '#85bb65' : '#3e5c76';
@@ -131,6 +133,10 @@ function App() {
   // --- Initialization ---
   useEffect(() => {
     const handleAuth = async () => {
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return;
+      }
       const DEMO_EMAIL = 'user@forum-testing.com';
       const DEMO_PASSWORD = 'forum-testing-password';
       let { data: { session } } = await supabase.auth.getSession();
@@ -174,6 +180,10 @@ function App() {
   useEffect(() => {
     resetFilters();
   }, [currentView, location]);
+
+  useEffect(() => {
+    if (currentView !== 'expenses') setExpenseSection('register');
+  }, [currentView]);
 
   // --- Data Initialization ---
   const initializeData = async (userId: string) => {
@@ -564,6 +574,26 @@ function App() {
     return Object.entries(data).map(([name, { income, expense }]) => ({ name, income, expense }));
   }, [invoices, expenses]);
 
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen w-full bg-background text-money-paper flex items-center justify-center p-6">
+        <div className="max-w-lg w-full glass-panel rounded-2xl p-8 border border-red-500/40 shadow-xl">
+          <h1 className="text-xl font-black text-red-400 uppercase tracking-widest font-serif mb-3">Configuration required</h1>
+          <p className="text-sm text-text-secondary mb-4 leading-relaxed">
+            Supabase environment variables are missing, so the app cannot start. Add a <code className="text-money-green px-1">.env</code> file in the project root (same folder as <code className="text-money-green px-1">package.json</code>), then restart the dev server.
+          </p>
+          <pre className="text-[11px] leading-relaxed bg-[#0c1410] p-4 rounded-xl border border-[#85bb65]/20 text-money-green overflow-x-auto whitespace-pre-wrap font-mono">
+            {`VITE_SUPABASE_URL=https://fcuxncgafmtfmagtzouh.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
+          </pre>
+          <p className="text-xs text-text-tertiary mt-4">
+            Project Settings → API: use the <strong className="text-money-paper">Project URL</strong> only (ends with <code className="text-money-green">.supabase.co</code>), not the <code className="text-money-green">/rest/v1</code> endpoint.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading && !user) return <div className="h-screen w-full flex items-center justify-center bg-background text-money-green font-serif tracking-widest text-xl animate-pulse">AUTHENTICATING...</div>;
 
   return (
@@ -579,7 +609,7 @@ function App() {
           <div className="flex flex-col">
             <h2 className="text-2xl font-black text-money-gold capitalize tracking-widest font-serif">
               {currentView === 'dashboard' ? 'Dashboard' :
-               currentView === 'expenses' ? 'Expense Register' :
+               currentView === 'expenses' ? (expenseSection === 'paybook' ? 'Paybook' : 'Expense Register') :
                currentView === 'cash' ? 'Cash Book' :
                currentView === 'customers' ? 'Clients' :
                currentView === 'invoices' ? 'Invoices' :
@@ -709,54 +739,87 @@ function App() {
           {/* --- EXPENSES (Existing) --- */}
           {currentView === 'expenses' && (
             <div className="space-y-6">
-              {/* Header with add button */}
-              <div className="flex justify-between items-center">
-                <div className="relative flex-1 max-w-md">
-                  <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary"></i>
-                  <input type="text" placeholder="Search expenses..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="neo-input w-full rounded-xl py-3 pl-11 text-sm" />
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex p-1 rounded-xl bg-[#0c1410]/80 border border-[#85bb65]/15 w-fit">
+                  <button
+                    type="button"
+                    onClick={() => setExpenseSection('register')}
+                    className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      expenseSection === 'register'
+                        ? 'neo-btn active text-money-gold border border-[#85bb65]/25'
+                        : 'text-text-tertiary hover:text-money-green'
+                    }`}
+                  >
+                    <i className="fas fa-list-ul mr-2 opacity-80" />
+                    Expense register
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExpenseSection('paybook')}
+                    className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      expenseSection === 'paybook'
+                        ? 'neo-btn active text-money-gold border border-[#85bb65]/25'
+                        : 'text-text-tertiary hover:text-money-green'
+                    }`}
+                  >
+                    <i className="fas fa-book mr-2 opacity-80" />
+                    Paybook
+                  </button>
                 </div>
-                <button onClick={() => { setEditingExpense(null); setModalType('expense'); setIsModalOpen(true); }}
-                  className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center gap-2">
-                  <i className="fas fa-plus"></i> Add Expense
-                </button>
               </div>
 
-              {/* Expenses Table */}
-              <div className="glass-panel rounded-2xl overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Date</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">ID</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Category</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Description</th>
-                      <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase">Amount</th>
-                      <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#85bb65]/5">
-                    {filteredExpenses.map((exp) => (
-                      <tr key={exp.id} className="hover:bg-[#85bb65]/5">
-                        <td className="px-6 py-4 text-xs">{new Date(exp.date).toLocaleDateString('en-GB')}</td>
-                        <td className="px-6 py-4 text-xs font-bold text-money-green">{exp.paid_by}</td>
-                        <td className="px-6 py-4 text-xs">{exp.category}</td>
-                        <td className="px-6 py-4 text-xs text-text-secondary truncate max-w-xs">{exp.description}</td>
-                        <td className="px-6 py-4 text-right font-bold text-money-gold">₹{exp.amount.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-center">
-                          <button onClick={() => { setEditingExpense(exp); setModalType('expense'); setIsModalOpen(true); }}
-                            className="text-text-tertiary hover:text-money-gold mr-2"><i className="fas fa-edit"></i></button>
-                          <button onClick={() => confirmDeleteRequest(exp.id!, 'expense')} className="text-text-tertiary hover:text-red-400"><i className="fas fa-trash"></i></button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {filteredExpenses.length === 0 && (
-                  <div className="text-center py-12 text-text-secondary">
-                    <i className="fas fa-receipt text-3xl mb-4"></i><p>No expenses found</p>
+              {expenseSection === 'paybook' ? (
+                <PaybookView location={location} primaryColor={primaryColor} />
+              ) : (
+                <>
+                  <div className="flex justify-between items-center">
+                    <div className="relative flex-1 max-w-md">
+                      <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary"></i>
+                      <input type="text" placeholder="Search expenses..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="neo-input w-full rounded-xl py-3 pl-11 text-sm" />
+                    </div>
+                    <button onClick={() => { setEditingExpense(null); setModalType('expense'); setIsModalOpen(true); }}
+                      className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center gap-2">
+                      <i className="fas fa-plus"></i> Add Expense
+                    </button>
                   </div>
-                )}
-              </div>
+
+                  <div className="glass-panel rounded-2xl overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Date</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">ID</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Category</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Description</th>
+                          <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase">Amount</th>
+                          <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#85bb65]/5">
+                        {filteredExpenses.map((exp) => (
+                          <tr key={exp.id} className="hover:bg-[#85bb65]/5">
+                            <td className="px-6 py-4 text-xs">{new Date(exp.date).toLocaleDateString('en-GB')}</td>
+                            <td className="px-6 py-4 text-xs font-bold text-money-green">{exp.paid_by}</td>
+                            <td className="px-6 py-4 text-xs">{exp.category}</td>
+                            <td className="px-6 py-4 text-xs text-text-secondary truncate max-w-xs">{exp.description}</td>
+                            <td className="px-6 py-4 text-right font-bold text-money-gold">₹{exp.amount.toLocaleString()}</td>
+                            <td className="px-6 py-4 text-center">
+                              <button onClick={() => { setEditingExpense(exp); setModalType('expense'); setIsModalOpen(true); }}
+                                className="text-text-tertiary hover:text-money-gold mr-2"><i className="fas fa-edit"></i></button>
+                              <button onClick={() => confirmDeleteRequest(exp.id!, 'expense')} className="text-text-tertiary hover:text-red-400"><i className="fas fa-trash"></i></button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {filteredExpenses.length === 0 && (
+                      <div className="text-center py-12 text-text-secondary">
+                        <i className="fas fa-receipt text-3xl mb-4"></i><p>No expenses found</p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
