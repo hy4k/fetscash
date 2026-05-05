@@ -14,7 +14,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, loc
     { id: 'expenses', icon: 'fa-file-invoice-dollar', label: 'Expenses' },
     { id: 'cash', icon: 'fa-book', label: 'Cash Book' },
     { id: 'import', icon: 'fa-file-import', label: 'Import' },
-    { id: 'reports', icon: 'fa-table', label: 'Reports' },
     { id: 'settings', icon: 'fa-sliders-h', label: 'Settings' },
   ];
 

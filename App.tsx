@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { resolveWorkspaceUserId } from './utils/workspaceUser';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
-import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoice, Payment } from './types';
+import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoice, Payment, ProductRow } from './types';
 import { CATEGORY_REPLENISHMENT } from './constants';
 import HoloToggle from './components/HoloToggle';
 import { ExpenseForm } from './components/ExpenseForm';
@@ -15,6 +15,7 @@ import { DataImport } from './components/DataImport';
 import { Modal } from './components/Modal';
 import { Sidebar } from './components/Sidebar';
 import { PaybookView } from './components/PaybookView';
+import { SettingsView } from './components/SettingsView';
 import { StatsCard } from './components/StatsCard';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -22,7 +23,7 @@ import {
 } from 'recharts';
 
 // Main views for the application
-type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'reports' | 'import' | 'settings';
+type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'import' | 'settings';
 
 // Company info for invoices
 const COMPANY_INFO = {
@@ -38,6 +39,8 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [location, setLocation] = useState<LocationType>('cochin');
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
+  /** Sub-screen when main view is Invoices: register vs monthly rollup. */
+  const [invoiceScreenTab, setInvoiceScreenTab] = useState<'invoices' | 'monthly_revenue'>('invoices');
   const [loading, setLoading] = useState(false);
 
   // --- Data State ---
@@ -49,6 +52,9 @@ function App() {
   // --- NEW: Customer & Invoice State ---
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [products, setProducts] = useState<ProductRow[]>([]);
+  const [globalExpenseCount, setGlobalExpenseCount] = useState(0);
+  const [globalCashCount, setGlobalCashCount] = useState(0);
 
   // --- UI State ---
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,6 +63,7 @@ function App() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editingTransaction, setEditingTransaction] = useState<FetsTransaction | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [activeActionId, setActiveActionId] = useState<string | null>(null);
 
   // --- Delete Confirmation State ---
@@ -231,12 +238,29 @@ function App() {
     setFetsTransactions(parsedTxs);
     setCashBalance(parsedTxs.reduce((sum, tx) => sum + tx.amount, 0));
 
-    // Fetch customers
-    const { data: custs } = await supabase.from('customers').select('*').eq('user_id', userId).order('name');
-    setCustomers(custs || []);
+    // Fetch customers, then ensure any invoice customer_id also appears (handles legacy or mixed user_id rows)
+    const { data: custsRaw } = await supabase.from('customers').select('*').eq('user_id', userId).order('name');
+    let mergedCusts: Customer[] = custsRaw || [];
 
     // Fetch invoices then join service_lines
     const { data: invs } = await supabase.from('invoices').select('*').eq('user_id', userId).order('invoice_date', { ascending: false });
+    const invoiceCustIds = [
+      ...new Set(
+        (invs || [])
+          .map((inv: Invoice) => inv.customer_id)
+          .filter((id): id is string => Boolean(id))
+      ),
+    ];
+    const haveCust = new Set(mergedCusts.map((c) => c.id));
+    const missingCustIds = invoiceCustIds.filter((id) => !haveCust.has(id));
+    if (missingCustIds.length > 0) {
+      const { data: extraCust } = await supabase.from('customers').select('*').in('id', missingCustIds);
+      mergedCusts = [...mergedCusts, ...(extraCust || [])].sort((a, b) =>
+        (a.name || '').localeCompare(b.name || '')
+      );
+    }
+    setCustomers(mergedCusts);
+
     const invoiceIds = (invs || []).map((inv: any) => inv.id);
     let serviceLinesByInvoice: Record<string, any[]> = {};
     if (invoiceIds.length > 0) {
@@ -247,6 +271,19 @@ function App() {
       });
     }
     setInvoices((invs || []).map((inv: any) => ({ ...inv, service_lines: serviceLinesByInvoice[inv.id] || [] })));
+
+    const { data: prodData, error: prodErr } = await supabase.from('products').select('*').order('name');
+    if (prodErr) console.error('products fetch:', prodErr);
+    setProducts((prodData as ProductRow[]) || []);
+
+    const [geC, gcC, gxC, gzC] = await Promise.all([
+      supabase.from('expenses').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('location', 'cochin'),
+      supabase.from('expenses').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('location', 'calicut'),
+      supabase.from('fets_cash_transactions').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('location', 'cochin'),
+      supabase.from('fets_cash_transactions').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('location', 'calicut'),
+    ]);
+    setGlobalExpenseCount((geC.count || 0) + (gcC.count || 0));
+    setGlobalCashCount((gxC.count || 0) + (gzC.count || 0));
 
     setLoading(false);
   };
@@ -350,6 +387,26 @@ function App() {
     fetchAllData(user.id, location);
   };
 
+  const handleAddProduct = async (row: Omit<ProductRow, 'id' | 'created_at'>) => {
+    if (!user) return;
+    const { error } = await supabase.from('products').insert(row as Record<string, unknown>);
+    if (error) console.error('Error adding product:', error);
+    fetchAllData(user.id, location);
+  };
+
+  const handleUpdateProduct = async (id: string, updates: Partial<ProductRow>) => {
+    if (!user) return;
+    const { error } = await supabase.from('products').update(updates).eq('id', id);
+    if (error) console.error('Error updating product:', error);
+    fetchAllData(user.id, location);
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!user) return;
+    await supabase.from('products').delete().eq('id', id);
+    fetchAllData(user.id, location);
+  };
+
   const handleRecordPayment = async (invoiceId: string, paymentData: Omit<any, 'id' | 'user_id' | 'created_at'>) => {
     if (!user) return;
 
@@ -438,7 +495,7 @@ function App() {
       await supabase.from('expenses').insert(payload);
     }
     
-    setIsModalOpen(false);
+    closeMainModal();
     fetchAllData(user.id, location);
   };
 
@@ -452,8 +509,17 @@ function App() {
       await supabase.from('fets_cash_transactions').insert(payload);
     }
     
-    setIsModalOpen(false);
+    closeMainModal();
     fetchAllData(user.id, location);
+  };
+
+  const closeMainModal = () => {
+    setIsModalOpen(false);
+    setModalType(null);
+    setEditingExpense(null);
+    setEditingTransaction(null);
+    setEditingInvoice(null);
+    setEditingCustomer(null);
   };
 
   const confirmDeleteRequest = (id: string, type: 'expense' | 'cash' | 'customer' | 'invoice') => {
@@ -507,7 +573,6 @@ function App() {
   const totalSpend = useMemo(() => expenses.reduce((sum, e) => sum + e.amount, 0), [expenses]);
   const totalIncome = useMemo(() => invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total_amount, 0), [invoices]);
   const pendingInvoices = useMemo(() => invoices.filter(inv => inv.status === 'sent' || inv.status === 'overdue'), [invoices]);
-
   const filteredExpenses = useMemo(() => {
     return expenses.filter(e => {
       const matchesSearch = e.description?.toLowerCase().includes(searchQuery.toLowerCase()) || e.paid_by?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -577,16 +642,17 @@ function App() {
     return (
       <div className="min-h-screen w-full bg-background text-money-paper flex items-center justify-center p-6">
         <div className="max-w-lg w-full glass-panel rounded-2xl p-8 border border-red-500/40 shadow-xl">
-          <h1 className="text-xl font-black text-red-400 uppercase tracking-widest font-serif mb-3">Configuration required</h1>
+          <h1 className="text-xl font-black text-red-400 uppercase tracking-widest font-serif mb-3">Connection required</h1>
           <p className="text-sm text-text-secondary mb-4 leading-relaxed">
-            Supabase environment variables are missing, so the app cannot start. Add a <code className="text-money-green px-1">.env</code> file in the project root (same folder as <code className="text-money-green px-1">package.json</code>), then restart the dev server.
+            The app cannot reach your backend until the environment is configured. Add your project URL and API key where this app reads
+            its settings (usually a local <code className="text-money-green px-1">.env</code> file), then restart the dev or preview server.
           </p>
           <pre className="text-[11px] leading-relaxed bg-[#0c1410] p-4 rounded-xl border border-[#85bb65]/20 text-money-green overflow-x-auto whitespace-pre-wrap font-mono">
-            {`VITE_SUPABASE_URL=https://fcuxncgafmtfmagtzouh.supabase.co
-VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
+            {`VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_key_here`}
           </pre>
           <p className="text-xs text-text-tertiary mt-4">
-            Project Settings → API: use the <strong className="text-money-paper">Project URL</strong> only (ends with <code className="text-money-green">.supabase.co</code>), not the <code className="text-money-green">/rest/v1</code> endpoint.
+            Use the project base URL only (host ending in <code className="text-money-green">.supabase.co</code>), not the REST API path.
           </p>
         </div>
       </div>
@@ -597,7 +663,11 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
     <div className="flex h-screen w-full bg-background overflow-hidden text-money-paper">
       <Sidebar
         currentView={currentView}
-        onChangeView={(v) => setCurrentView(v as ViewType)}
+        onChangeView={(v) => {
+          const id = v as ViewType;
+          if (id === 'invoices') setInvoiceScreenTab('invoices');
+          setCurrentView(id);
+        }}
         locationColor={primaryColor}
       />
 
@@ -609,9 +679,11 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
                currentView === 'expenses' ? (expenseSection === 'paybook' ? 'Paybook' : 'Expense Register') :
                currentView === 'cash' ? 'Cash Book' :
                currentView === 'customers' ? 'Clients' :
-               currentView === 'invoices' ? 'Invoices' :
-               currentView === 'reports' ? 'Reports' :
-               currentView === 'import' ? 'Data Import' : 'Settings'}
+               currentView === 'invoices'
+                 ? invoiceScreenTab === 'monthly_revenue'
+                   ? 'Invoices · Monthly revenue'
+                   : 'Invoices'
+               : currentView === 'import' ? 'Data Import' : 'Settings'}
             </h2>
             <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1">
               Forum Testing & Educational Services • {location === 'cochin' ? 'Cochin' : 'Calicut'} • GST: {COMPANY_INFO.gstNumber}
@@ -636,11 +708,8 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
               role="status"
               className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90"
             >
-              No workspace <code className="text-amber-200">user_id</code> could be resolved without signing in.
-              Set <code className="text-amber-200">VITE_WORKSPACE_USER_ID</code> in <code className="text-amber-200">.env</code>{' '}
-              to your Supabase profile UUID, or allow anonymous reads on{' '}
-              <code className="text-amber-200">categories</code>/<code className="text-amber-200">expenses</code> so the app can
-              auto-detect one. Paybook still loads from public tables.
+              We couldn’t attach this session to your main operating account, so the dashboard, clients, and day-book may stay empty.
+              Paybook can still be used. If this persists, your administrator should check account linking settings.
             </div>
           )}
 
@@ -729,7 +798,7 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
               <div className="glass-panel rounded-2xl p-6 border border-money-gold/20">
                 <h3 className="text-sm font-bold text-money-gold uppercase tracking-widest mb-4">Quick Actions</h3>
                 <div className="flex flex-wrap gap-3">
-                  <button onClick={() => { setEditingInvoice(null); setModalType('invoice'); setIsModalOpen(true); }}
+                  <button onClick={() => { setEditingCustomer(null); setEditingInvoice(null); setModalType('invoice'); setIsModalOpen(true); }}
                     className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center gap-2">
                     <i className="fas fa-plus"></i> New Invoice
                   </button>
@@ -751,9 +820,8 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <p className="text-[11px] text-text-tertiary max-w-xl sm:order-last">
-                  <strong className="text-money-green/90">Paybook</strong> is the sheet-style ledger (payroll, payslip PDFs, sundry vouchers).{' '}
-                  <strong className="text-text-secondary">Expense register</strong> is day-book rows in{' '}
-                  <code className="text-money-green/80 text-[10px]">expenses</code> (filtered by workspace user).
+                  <strong className="text-money-green/90">Paybook</strong> is payroll, payslips, and sundry vouchers.{' '}
+                  <strong className="text-text-secondary">Expense register</strong> is the branch day-book of posted expenses.
                 </p>
                 <div className="flex p-1 rounded-xl bg-[#0c1410]/80 border border-[#85bb65]/15 w-fit">
                   <button
@@ -911,6 +979,8 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
               onDelete={handleDeleteInvoice}
               onRecordPayment={handleRecordPayment}
               primaryColor={primaryColor}
+              screenTab={invoiceScreenTab}
+              onScreenTabChange={setInvoiceScreenTab}
             />
           )}
 
@@ -924,83 +994,95 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
             />
           )}
 
-          {/* --- REPORTS (Placeholder) --- */}
-          {currentView === 'reports' && (
-            <div className="space-y-6">
-              <div className="glass-panel rounded-2xl p-8 text-center">
-                <i className="fas fa-chart-line text-5xl text-text-tertiary mb-4"></i>
-                <h3 className="text-xl font-bold text-money-paper mb-2">Financial Reports</h3>
-                <p className="text-text-secondary mb-6">Comprehensive P&L, Balance Sheet and GST reports coming in Phase 2</p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                  <div className="glass-panel rounded-xl p-4">
-                    <i className="fas fa-file-invoice-dollar text-2xl text-money-gold mb-2"></i>
-                    <p className="text-sm font-bold">Income Report</p>
-                    <p className="text-xs text-text-secondary">By customer/month</p>
-                  </div>
-                  <div className="glass-panel rounded-xl p-4">
-                    <i className="fas fa-calculator text-2xl text-money-green mb-2"></i>
-                    <p className="text-sm font-bold">GST Summary</p>
-                    <p className="text-xs text-text-secondary">GSTR-1 / GSTR-3B</p>
-                  </div>
-                  <div className="glass-panel rounded-xl p-4">
-                    <i className="fas fa-balance-scale text-2xl text-text-tertiary mb-2"></i>
-                    <p className="text-sm font-bold">Balance Sheet</p>
-                    <p className="text-xs text-text-secondary">Assets vs Liabilities</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* --- SETTINGS (Existing + Enhanced) --- */}
-          {currentView === 'settings' && (
-            <div className="space-y-6 max-w-4xl mx-auto">
-              {/* Company Settings */}
-              <div className="glass-panel rounded-2xl p-8">
-                <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-6 border-b border-[#85bb65]/20 pb-4">Company Information</h3>
-                <div className="grid grid-cols-2 gap-6 text-sm">
-                  <div>
-                    <label className="text-text-tertiary text-xs uppercase">Company Name</label>
-                    <p className="font-bold text-money-paper">{COMPANY_INFO.name}</p>
-                  </div>
-                  <div>
-                    <label className="text-text-tertiary text-xs uppercase">GST Number</label>
-                    <p className="font-bold text-money-green">{COMPANY_INFO.gstNumber}</p>
-                  </div>
-                  <div>
-                    <label className="text-text-tertiary text-xs uppercase">Bank</label>
-                    <p className="font-bold text-money-paper">Federal Bank</p>
-                  </div>
-                  <div>
-                    <label className="text-text-tertiary text-xs uppercase">Total Clients</label>
-                    <p className="font-bold text-money-paper">{customers.length}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Categories */}
-              <div className="glass-panel rounded-2xl p-8">
-                <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-6 border-b border-[#85bb65]/20 pb-4">Expense Categories</h3>
-                <CategoryManager categories={categories} onAdd={handleAddCategory} onDelete={handleDeleteCategory} />
-              </div>
-            </div>
+          {/* --- SETTINGS --- */}
+          {currentView === 'settings' && user && (
+            <SettingsView
+              companyInfo={COMPANY_INFO}
+              location={location}
+              onLocationChange={setLocation}
+              totalIncomePaid={totalIncome}
+              invoicesCount={invoices.length}
+              clientsCount={customers.length}
+              expensesCountThisBranch={expenses.length}
+              cashTxnsCountThisBranch={fetsTransactions.length}
+              expensesCountAllBranches={globalExpenseCount}
+              cashTxnsCountAllBranches={globalCashCount}
+              products={products}
+              categories={categories}
+              onAddCategory={handleAddCategory}
+              onDeleteCategory={handleDeleteCategory}
+              onAddProduct={handleAddProduct}
+              onUpdateProduct={handleUpdateProduct}
+              onDeleteProduct={handleDeleteProduct}
+              primaryColor={primaryColor}
+              onQuickNewInvoice={() => {
+                setEditingInvoice(null);
+                setModalType('invoice');
+                setIsModalOpen(true);
+              }}
+              onQuickNewExpense={() => {
+                setCurrentView('expenses');
+                setExpenseSection('register');
+                setEditingExpense(null);
+                setModalType('expense');
+                setIsModalOpen(true);
+              }}
+              onQuickAddClient={() => {
+                setEditingCustomer(null);
+                setModalType('customer');
+                setIsModalOpen(true);
+              }}
+              onQuickCashBook={() => setCurrentView('cash')}
+              onOpenMonthlyRevenue={() => {
+                setInvoiceScreenTab('monthly_revenue');
+                setCurrentView('invoices');
+              }}
+              onOpenClients={() => setCurrentView('customers')}
+              onOpenImport={() => setCurrentView('import')}
+            />
           )}
         </main>
       </div>
 
       {/* --- Modals --- */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
+      <Modal isOpen={isModalOpen} onClose={closeMainModal}
         title={modalType === 'expense' ? (editingExpense ? 'Edit Expense' : 'New Expense') :
                modalType === 'cash' ? (editingTransaction ? 'Edit Cash Entry' : 'New Cash Entry') :
                modalType === 'invoice' ? (editingInvoice ? 'Edit Invoice' : 'New Invoice') : 'Add Client'}>
         {modalType === 'expense' && (
           <ExpenseForm expense={editingExpense} nextId={nextExpenseId} categories={categories} location={location}
-            primaryColor={primaryColor} onSave={handleSaveExpense} onCancel={() => setIsModalOpen(false)} />
+            primaryColor={primaryColor} onSave={handleSaveExpense} onCancel={closeMainModal} />
         )}
         {modalType === 'cash' && (
           <CashTransactionForm transaction={editingTransaction} nextId={nextCashId} categories={categories} location={location}
-            primaryColor={primaryColor} onSave={handleSaveCashTransaction} onCancel={() => setIsModalOpen(false)} />
+            primaryColor={primaryColor} onSave={handleSaveCashTransaction} onCancel={closeMainModal} />
+        )}
+        {modalType === 'invoice' && user && (
+          <InvoiceForm
+            invoice={editingInvoice}
+            customers={customers}
+            userId={user.id}
+            location={location}
+            primaryColor={primaryColor}
+            onSave={async (data) => {
+              if (editingInvoice) await handleUpdateInvoice(editingInvoice.id!, data);
+              else await handleAddInvoice(data);
+              closeMainModal();
+            }}
+            onCancel={closeMainModal}
+          />
+        )}
+        {modalType === 'customer' && (
+          <CustomerForm
+            customer={editingCustomer}
+            primaryColor={primaryColor}
+            onSave={async (data) => {
+              if (editingCustomer) await handleUpdateCustomer(editingCustomer.id!, data);
+              else await handleAddCustomer(data);
+              closeMainModal();
+            }}
+            onCancel={closeMainModal}
+          />
         )}
       </Modal>
 

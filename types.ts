@@ -286,3 +286,47 @@ export interface FetsExpensesData {
   date?: string | null;
   category?: string | null;
 }
+
+// ============================================
+// SUPABASE — catalog & revenue aggregates
+// ============================================
+export interface ProductRow {
+  id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  stock_quantity?: number | null;
+  category?: string | null;
+  sku?: string | null;
+  created_at?: string;
+}
+
+export interface MonthlyRevenueRow {
+  user_id: string;
+  month: string;
+  currency: string;
+  invoice_count: number;
+  total_revenue: number;
+  paid_amount: number;
+  pending_amount: number;
+}
+
+export interface SettleUpCycle {
+  id: number;
+  created_at?: string;
+  settled_date?: string | null;
+  settlement_method?: string | null;
+  mithun_total?: number | null;
+  niyas_total?: number | null;
+}
+
+export interface SettleUpContribution {
+  id: number;
+  created_at?: string;
+  date?: string | null;
+  amount: number;
+  description?: string | null;
+  contributor?: string | null;
+  is_settled?: boolean | null;
+  cycle_id?: number | null;
+}

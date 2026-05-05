@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { FetsExpensesData, FetsSalaryData, LocationType } from '../types';
+import { FetsExpensesData, FetsSalaryData, LocationType, SettleUpCycle, SettleUpContribution } from '../types';
 import { Modal } from './Modal';
 import { computeSalaryBreakdown } from '../utils/paybookSalary';
 import { downloadPayslipPdf, downloadPayrollRegisterPdf, downloadAllPayslipsPdf } from '../utils/paybookPayslip';
@@ -9,7 +9,6 @@ import {
   canonicalMonthFromDate,
   normalizeMonthToCanonical,
   prettyPeriodLabel,
-  periodTechnicalHint,
   rollingCanonicalMonths,
   sortPeriodsDesc,
   monthEqVariants,
@@ -82,15 +81,6 @@ interface PaybookViewProps {
   primaryColor: string;
 }
 
-interface SettleCycleRow {
-  id: string;
-  start_date?: string | null;
-  end_date?: string | null;
-  is_settled?: boolean | null;
-  mithun_total?: number | null;
-  niyas_total?: number | null;
-}
-
 export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor }) => {
   const [ledgerMonth, setLedgerMonth] = useState<string>(() => canonicalMonthFromDate());
   const [salaryRows, setSalaryRows] = useState<FetsSalaryData[]>([]);
@@ -108,7 +98,8 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
 
   const [deleteTarget, setDeleteTarget] = useState<{ kind: 'salary' | 'expense'; id: number } | null>(null);
   const [dbMonths, setDbMonths] = useState<string[]>([]);
-  const [settleCycles, setSettleCycles] = useState<SettleCycleRow[]>([]);
+  const [settleCycles, setSettleCycles] = useState<SettleUpCycle[]>([]);
+  const [settleContributions, setSettleContributions] = useState<SettleUpContribution[]>([]);
 
   const periodChoices = useMemo(() => {
     const acc = new Set<string>();
@@ -125,12 +116,21 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from('settleup_cycles')
-        .select('id,start_date,end_date,is_settled,mithun_total,niyas_total')
-        .order('created_at', { ascending: false })
-        .limit(25);
-      if (!cancelled && !error && data) setSettleCycles(data as SettleCycleRow[]);
+      const [cyclesRes, contribRes] = await Promise.all([
+        supabase
+          .from('settleup_cycles')
+          .select('id,created_at,settled_date,settlement_method,mithun_total,niyas_total')
+          .order('created_at', { ascending: false })
+          .limit(40),
+        supabase
+          .from('settleup_contributions')
+          .select('*')
+          .order('date', { ascending: false })
+          .limit(500),
+      ]);
+      if (cancelled) return;
+      if (!cyclesRes.error && cyclesRes.data) setSettleCycles(cyclesRes.data as SettleUpCycle[]);
+      if (!contribRes.error && contribRes.data) setSettleContributions(contribRes.data as SettleUpContribution[]);
     })();
     return () => {
       cancelled = true;
@@ -161,12 +161,12 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
 
       const parts: string[] = [];
       if (e1) {
-        console.error('fets_salary_data', e1);
-        parts.push(`Salary table: ${e1.message}`);
+        console.error('payroll fetch', e1);
+        parts.push(`Payroll: ${e1.message}`);
       }
       if (e2) {
-        console.error('fets_expenses_data', e2);
-        parts.push(`Expenses table: ${e2.message}`);
+        console.error('voucher fetch', e2);
+        parts.push(`Sundry vouchers: ${e2.message}`);
       }
       setFetchError(parts.length ? parts.join(' ') : null);
 
@@ -223,7 +223,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
     ledgerMonth === PAYBOOK_ALL_PERIODS ? 'All periods' : prettyPeriodLabel(ledgerMonth);
 
   const payrollPdfTitle =
-    ledgerMonth === PAYBOOK_ALL_PERIODS ? 'All periods' : `${prettyPeriodLabel(ledgerMonth)} (${periodTechnicalHint(ledgerMonth)})`;
+    ledgerMonth === PAYBOOK_ALL_PERIODS ? 'All periods' : prettyPeriodLabel(ledgerMonth);
 
   const totalPayroll = useMemo(
     () => filteredSalary.reduce((s, r) => s + parseAmountDisplay(r.monthly_salary), 0),
@@ -418,9 +418,8 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
             <p className="text-[10px] font-black text-money-gold uppercase tracking-[0.22em] mb-1">Paybook</p>
             <h3 className="text-xl font-serif font-bold text-money-paper leading-tight">Payroll &amp; sundry vouchers</h3>
             <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-              Opens on <strong className="text-money-paper">this calendar month</strong> only. Use the period list for history, or “All
-              periods” when auditing imports. Data: <code className="text-money-green/85 text-[10px]">fets_salary_data</code>,{' '}
-              <code className="text-money-green/85 text-[10px]">fets_expenses_data</code>.
+              Opens on <strong className="text-money-paper">this calendar month</strong>. Use the period list for other months, or choose
+              “All periods” when you need the full ledger.
             </p>
           </div>
           <div className="lg:col-span-7 grid gap-4 sm:grid-cols-2">
@@ -433,12 +432,12 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               >
                 {periodChoices.map((value) => (
                   <option key={value} value={value}>
-                    {prettyPeriodLabel(value)} — {periodTechnicalHint(value)}
+                    {prettyPeriodLabel(value)}
                   </option>
                 ))}
                 <option value={PAYBOOK_ALL_PERIODS}>{prettyPeriodLabel(PAYBOOK_ALL_PERIODS)}</option>
               </select>
-              <p className="text-[10px] text-text-tertiary mt-1.5">Readable month name + storage key (e.g. Sep-2025).</p>
+              <p className="text-[10px] text-text-tertiary mt-1.5">Pick the month your sheet uses for payroll and vouchers.</p>
             </div>
             <div>
               <label className={labelCls}>Branch filter</label>
@@ -470,27 +469,23 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
 
       {fetchError && (
         <div className="rounded-xl border border-red-400/50 bg-red-950/50 px-4 py-3 text-sm text-red-200/95">
-          <p className="font-bold text-red-300 mb-1 uppercase text-[10px] tracking-wider">Paybook data error</p>
+          <p className="font-bold text-red-300 mb-1 uppercase text-[10px] tracking-wider">Couldn’t load paybook</p>
           <p>{fetchError}</p>
         </div>
       )}
 
-      {settleCycles.length > 0 && (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/15">
-          <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary mb-3">SettleUp cycles</h4>
-          <p className="text-[10px] text-text-tertiary mb-3">
-            From <code className="text-money-green/90">settleup_cycles</code> (reference:{' '}
-            <a href="https://github.com/hy4k/paybook" className="text-money-gold underline" target="_blank" rel="noreferrer">
-              hy4k/paybook
-            </a>
-            ).
+          <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary mb-3">Settlement rounds</h4>
+          <p className="text-[10px] text-text-tertiary mb-3 leading-relaxed">
+            Internal settlement rounds between partners (same source as before, now grouped with Paybook).
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-[#85bb65]/20 text-text-tertiary uppercase text-[9px]">
-                  <th className="text-left py-2">Period</th>
-                  <th className="text-left py-2">Status</th>
+                  <th className="text-left py-2">Settled date</th>
+                  <th className="text-left py-2">Settlement</th>
                   <th className="text-right py-2">Mithun</th>
                   <th className="text-right py-2">Niyas</th>
                 </tr>
@@ -498,20 +493,64 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               <tbody className="divide-y divide-[#85bb65]/10">
                 {settleCycles.map((c) => (
                   <tr key={c.id}>
-                    <td className="py-2 text-text-secondary">
-                      {c.start_date ? new Date(c.start_date).toLocaleDateString('en-GB') : '—'} —{' '}
-                      {c.end_date ? new Date(c.end_date).toLocaleDateString('en-GB') : '…'}
+                    <td className="py-2 text-text-secondary font-mono whitespace-nowrap">
+                      {c.settled_date ? new Date(c.settled_date).toLocaleDateString('en-GB') : '—'}
                     </td>
-                    <td className="py-2">{c.is_settled ? 'Settled' : 'Active'}</td>
+                    <td className="py-2 text-text-secondary max-w-xs truncate" title={c.settlement_method || ''}>
+                      {c.settlement_method || '—'}
+                    </td>
                     <td className="py-2 text-right tabular-nums">{INR(Number(c.mithun_total) || 0)}</td>
                     <td className="py-2 text-right tabular-nums">{INR(Number(c.niyas_total) || 0)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {settleCycles.length === 0 && (
+              <p className="text-center py-8 text-text-secondary text-sm">No settlement rounds recorded.</p>
+            )}
           </div>
         </div>
-      )}
+
+        <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/15">
+          <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary mb-3">Contributions</h4>
+          <p className="text-[10px] text-text-tertiary mb-3 leading-relaxed">
+            Ledger contributions linked to settlement rounds.
+          </p>
+          <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-[#85bb65]/20 text-text-tertiary uppercase text-[9px] sticky top-0 bg-[#0c1410]">
+                  <th className="text-left py-2">Date</th>
+                  <th className="text-left py-2">Contributor</th>
+                  <th className="text-left py-2">Details</th>
+                  <th className="text-right py-2">Amount</th>
+                  <th className="text-center py-2">Round</th>
+                  <th className="text-center py-2">Closed</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#85bb65]/10">
+                {settleContributions.map((c) => (
+                  <tr key={c.id}>
+                    <td className="py-2 font-mono whitespace-nowrap">
+                      {c.date ? new Date(c.date).toLocaleDateString('en-GB') : '—'}
+                    </td>
+                    <td className="py-2 text-text-secondary">{c.contributor || '—'}</td>
+                    <td className="py-2 text-money-paper max-w-[140px] truncate" title={c.description || ''}>
+                      {c.description || '—'}
+                    </td>
+                    <td className="py-2 text-right tabular-nums font-semibold">{INR(Number(c.amount) || 0)}</td>
+                    <td className="py-2 text-center text-text-tertiary">{c.cycle_id ?? '—'}</td>
+                    <td className="py-2 text-center">{c.is_settled ? 'Yes' : 'No'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {settleContributions.length === 0 && (
+              <p className="text-center py-8 text-text-secondary text-sm">No contributions yet.</p>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Summary — trial balance style */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -559,9 +598,6 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
             <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary">Payroll</h4>
             <p className="text-xs text-text-tertiary mt-1">
               <span className="text-money-paper font-semibold">{periodSummaryLabel}</span>
-              {ledgerMonth !== PAYBOOK_ALL_PERIODS && (
-                <span className="text-text-tertiary/75"> · stored as {periodTechnicalHint(ledgerMonth)}</span>
-              )}
             </p>
             <p className="text-[10px] text-text-tertiary/85 mt-2 max-w-xl leading-relaxed">
               Estimates from attendance + contract rates. Use <strong>Expand</strong> for every field; actions stay on the right without
@@ -826,9 +862,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               />
             </div>
             <div className="sm:col-span-2">
-              <label className={labelCls}>
-                Ledger month (matches sheet, e.g. <span className="font-mono text-money-green/90">Sep-2025</span>)
-              </label>
+              <label className={labelCls}>Ledger month (as on your spreadsheet)</label>
               <input
                 className={fieldCls}
                 placeholder={postingMonth(ledgerMonth)}
@@ -985,9 +1019,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               />
             </div>
             <div>
-              <label className={labelCls}>
-                Ledger month (e.g. <span className="font-mono text-money-green/90">Sep-2025</span>)
-              </label>
+              <label className={labelCls}>Ledger month (as on your spreadsheet)</label>
               <input
                 className={fieldCls}
                 placeholder={postingMonth(ledgerMonth)}

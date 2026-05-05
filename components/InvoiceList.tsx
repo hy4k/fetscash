@@ -6,6 +6,26 @@ import { Modal } from './Modal';
 import { generateInvoicePDF } from '../utils/invoicePdf';
 import { downloadRemittancePDF } from '../utils/remittancePdf';
 
+function invoiceMonthKey(inv: Invoice): string | null {
+  const raw = inv.invoice_date;
+  if (!raw) return null;
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function formatMoneyCell(amount: number, currency: string) {
+  const symbols: { [key: string]: string } = {
+    USD: '$',
+    INR: '₹',
+    EUR: '€',
+    GBP: '£',
+    CAD: 'C$',
+  };
+  const sym = symbols[currency] || `${currency} `;
+  return `${sym}${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 interface InvoiceListProps {
   invoices: Invoice[];
   customers: Customer[];
@@ -16,6 +36,8 @@ interface InvoiceListProps {
   onDelete: (id: string) => void;
   onRecordPayment: (invoiceId: string, payment: Omit<Payment, 'id' | 'user_id' | 'created_at'>) => void;
   primaryColor: string;
+  screenTab: 'invoices' | 'monthly_revenue';
+  onScreenTabChange: (tab: 'invoices' | 'monthly_revenue') => void;
 }
 
 export const InvoiceList: React.FC<InvoiceListProps> = ({
@@ -27,6 +49,8 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
   onUpdate,
   onDelete,
   primaryColor,
+  screenTab,
+  onScreenTabChange,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
@@ -81,6 +105,53 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
       return matchesSearch && matchesStatus && matchesCustomer;
     });
   }, [invoices, searchQuery, statusFilter, customerFilter, customers]);
+
+  const monthlyByClientRows = useMemo(() => {
+    type Row = {
+      month: string;
+      customer_id: string;
+      currency: string;
+      invoice_count: number;
+      total_revenue: number;
+      paid_amount: number;
+      pending_amount: number;
+    };
+    const map = new Map<string, Row>();
+    for (const inv of invoices) {
+      if (inv.status === 'cancelled') continue;
+      const month = invoiceMonthKey(inv);
+      if (!month) continue;
+      const currency = inv.currency || 'INR';
+      const key = `${month}|${inv.customer_id}|${currency}`;
+      const paid = Number(inv.paid_amount) || 0;
+      const total = Number(inv.total_amount) || 0;
+      const pending = Math.max(0, total - paid);
+      const cur = map.get(key);
+      if (!cur) {
+        map.set(key, {
+          month,
+          customer_id: inv.customer_id,
+          currency,
+          invoice_count: 1,
+          total_revenue: total,
+          paid_amount: paid,
+          pending_amount: pending,
+        });
+      } else {
+        cur.invoice_count += 1;
+        cur.total_revenue += total;
+        cur.paid_amount += paid;
+        cur.pending_amount += pending;
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => {
+      if (a.month !== b.month) return b.month.localeCompare(a.month);
+      const na = customers.find((c) => c.id === a.customer_id)?.name || '';
+      const nb = customers.find((c) => c.id === b.customer_id)?.name || '';
+      if (na !== nb) return na.localeCompare(nb);
+      return a.currency.localeCompare(b.currency);
+    });
+  }, [invoices, customers]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -185,6 +256,44 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex p-1 rounded-xl bg-[#0c1410]/80 border border-[#85bb65]/15 w-fit">
+          <button
+            type="button"
+            onClick={() => onScreenTabChange('invoices')}
+            className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+              screenTab === 'invoices'
+                ? 'neo-btn active text-money-gold border border-[#85bb65]/25'
+                : 'text-text-tertiary hover:text-money-green'
+            }`}
+          >
+            <i className="fas fa-list-ul mr-2 opacity-80" />
+            Invoice register
+          </button>
+          <button
+            type="button"
+            onClick={() => onScreenTabChange('monthly_revenue')}
+            className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+              screenTab === 'monthly_revenue'
+                ? 'neo-btn active text-money-gold border border-[#85bb65]/25'
+                : 'text-text-tertiary hover:text-money-green'
+            }`}
+          >
+            <i className="fas fa-chart-line mr-2 opacity-80" />
+            Monthly revenue
+          </button>
+        </div>
+        {screenTab === 'monthly_revenue' && (
+          <p className="text-[11px] text-text-tertiary max-w-xl">
+            Totals are grouped by <strong className="text-money-paper">invoice month</strong> (invoice date),{' '}
+            <strong className="text-money-paper">client</strong> (from each invoice&rsquo;s customer), and currency.
+            Cancelled invoices are excluded.
+          </p>
+        )}
+      </div>
+
+      {screenTab === 'invoices' && (
+        <>
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-4">
         <div className="glass-panel rounded-xl p-4 border border-[#85bb65]/10">
@@ -388,6 +497,58 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
           </table>
         </div>
       </div>
+        </>
+      )}
+
+      {screenTab === 'monthly_revenue' && (
+        <div className="glass-panel rounded-2xl border border-[#85bb65]/10 overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#85bb65]/15">
+            <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary">Monthly revenue by client</h4>
+            <p className="text-[10px] text-text-tertiary mt-1">
+              Derived from your invoice register. Each row is one month, one client, and one currency.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-[#0c1410]/90 text-[9px] uppercase text-text-tertiary border-b border-[#85bb65]/20">
+                  <th className="text-left px-4 py-3 font-black tracking-wider">Month</th>
+                  <th className="text-left px-4 py-3 font-black tracking-wider">Client</th>
+                  <th className="text-left px-4 py-3 font-black tracking-wider">Currency</th>
+                  <th className="text-right px-4 py-3 font-black tracking-wider">Invoices</th>
+                  <th className="text-right px-4 py-3 font-black tracking-wider">Total</th>
+                  <th className="text-right px-4 py-3 font-black tracking-wider">Paid</th>
+                  <th className="text-right px-4 py-3 font-black tracking-wider">Pending</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#85bb65]/10">
+                {monthlyByClientRows.map((r, i) => (
+                  <tr key={`${r.month}-${r.customer_id}-${r.currency}-${i}`} className="hover:bg-[#85bb65]/5">
+                    <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
+                      {new Date(`${r.month}-01`).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-money-paper">{getCustomerName(r.customer_id)}</td>
+                    <td className="px-4 py-3">{r.currency}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{r.invoice_count}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-money-green">
+                      {formatMoneyCell(r.total_revenue, r.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">{formatMoneyCell(r.paid_amount, r.currency)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-amber-200/90">
+                      {formatMoneyCell(r.pending_amount, r.currency)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {monthlyByClientRows.length === 0 && (
+              <div className="text-center py-12 text-text-secondary text-sm">
+                No invoice data to summarize yet.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Invoice Modal */}
       <Modal
