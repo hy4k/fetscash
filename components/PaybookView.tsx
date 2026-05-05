@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { FetsExpensesData, FetsSalaryData, LocationType } from '../types';
 import { Modal } from './Modal';
+import { computeSalaryBreakdown } from '../utils/paybookSalary';
+import { downloadPayslipPdf, downloadPayrollRegisterPdf } from '../utils/paybookPayslip';
 
 const labelCls = 'block text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1.5';
 const fieldCls = 'neo-input w-full rounded-lg px-3 py-2 text-sm';
@@ -86,6 +88,15 @@ interface PaybookViewProps {
   primaryColor: string;
 }
 
+interface SettleCycleRow {
+  id: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  is_settled?: boolean | null;
+  mithun_total?: number | null;
+  niyas_total?: number | null;
+}
+
 export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor }) => {
   const [ledgerMonth, setLedgerMonth] = useState<string>(PAYBOOK_ALL_PERIODS);
   const [salaryRows, setSalaryRows] = useState<FetsSalaryData[]>([]);
@@ -102,8 +113,33 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
   const [editingExp, setEditingExp] = useState<FetsExpensesData | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<{ kind: 'salary' | 'expense'; id: number } | null>(null);
+  const [dbMonths, setDbMonths] = useState<string[]>([]);
+  const [settleCycles, setSettleCycles] = useState<SettleCycleRow[]>([]);
 
   const months = useMemo(() => monthChoices(), []);
+  const mergedMonthOptions = useMemo(() => {
+    const s = new Set<string>();
+    dbMonths.forEach((m) => {
+      if (m?.trim()) s.add(m.trim());
+    });
+    months.forEach((m) => s.add(m));
+    return Array.from(s).sort((a, b) => a.localeCompare(b, 'en-IN', { numeric: true }));
+  }, [dbMonths, months]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('settleup_cycles')
+        .select('id,start_date,end_date,is_settled,mithun_total,niyas_total')
+        .order('created_at', { ascending: false })
+        .limit(25);
+      if (!cancelled && !error && data) setSettleCycles(data as SettleCycleRow[]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const locLabel = locationToPaybookLabel(location);
   const showPeriodCol = ledgerMonth === PAYBOOK_ALL_PERIODS;
@@ -142,6 +178,19 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
       setPaybookExps(
         (ex || []).filter((r) => locationScope === 'all' || rowMatchesLocation(r.location, location))
       );
+
+      const [rm, em] = await Promise.all([
+        supabase.from('fets_salary_data').select('month').limit(8000),
+        supabase.from('fets_expenses_data').select('month').limit(8000),
+      ]);
+      const mu = new Set<string>();
+      (rm.data || []).forEach((r: { month?: string | null }) => {
+        if (r.month?.trim()) mu.add(r.month.trim());
+      });
+      (em.data || []).forEach((r: { month?: string | null }) => {
+        if (r.month?.trim()) mu.add(r.month.trim());
+      });
+      setDbMonths(Array.from(mu));
     } finally {
       setLoading(false);
     }
@@ -182,6 +231,19 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
   );
   const grandTotal = totalPayroll + totalSundry;
 
+  const { totalGrossPay, totalDeductions, totalNetPay } = useMemo(() => {
+    let g = 0;
+    let d = 0;
+    let n = 0;
+    filteredSalary.forEach((r) => {
+      const b = computeSalaryBreakdown(r);
+      g += b.grossSalary;
+      d += b.deductions;
+      n += b.netSalary;
+    });
+    return { totalGrossPay: g, totalDeductions: d, totalNetPay: n };
+  }, [filteredSalary]);
+
   const openNewSalary = () => {
     setEditingSalary({
       month: postingMonth(ledgerMonth),
@@ -217,6 +279,19 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
       date: new Date().toISOString().split('T')[0],
       category: '',
       color: '#85bb65',
+    });
+    setExpModal(true);
+  };
+
+  const openRentExpense = () => {
+    setEditingExp({
+      name: 'Rent — ',
+      amount: 0,
+      location: locLabel,
+      month: postingMonth(ledgerMonth),
+      date: new Date().toISOString().split('T')[0],
+      category: 'Rent',
+      color: '#d4af37',
     });
     setExpModal(true);
   };
@@ -354,7 +429,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                 onChange={(e) => setLedgerMonth(e.target.value)}
               >
                 <option value={PAYBOOK_ALL_PERIODS}>All periods (show everything)</option>
-                {months.map((m) => (
+                {mergedMonthOptions.map((m) => (
                   <option key={m} value={m}>
                     {m}
                   </option>
@@ -396,8 +471,46 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
         </div>
       )}
 
+      {settleCycles.length > 0 && (
+        <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/15">
+          <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary mb-3">SettleUp cycles</h4>
+          <p className="text-[10px] text-text-tertiary mb-3">
+            From <code className="text-money-green/90">settleup_cycles</code> (reference:{' '}
+            <a href="https://github.com/hy4k/paybook" className="text-money-gold underline" target="_blank" rel="noreferrer">
+              hy4k/paybook
+            </a>
+            ).
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-[#85bb65]/20 text-text-tertiary uppercase text-[9px]">
+                  <th className="text-left py-2">Period</th>
+                  <th className="text-left py-2">Status</th>
+                  <th className="text-right py-2">Mithun</th>
+                  <th className="text-right py-2">Niyas</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#85bb65]/10">
+                {settleCycles.map((c) => (
+                  <tr key={c.id}>
+                    <td className="py-2 text-text-secondary">
+                      {c.start_date ? new Date(c.start_date).toLocaleDateString('en-GB') : '—'} —{' '}
+                      {c.end_date ? new Date(c.end_date).toLocaleDateString('en-GB') : '…'}
+                    </td>
+                    <td className="py-2">{c.is_settled ? 'Settled' : 'Active'}</td>
+                    <td className="py-2 text-right tabular-nums">{INR(Number(c.mithun_total) || 0)}</td>
+                    <td className="py-2 text-right tabular-nums">{INR(Number(c.niyas_total) || 0)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Summary — trial balance style */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div
           className="glass-panel rounded-xl p-5 border border-[#85bb65]/20"
           style={{ borderLeftColor: primaryColor, borderLeftWidth: 3 }}
@@ -418,6 +531,13 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
             {locationScope === 'all' ? 'All branches' : `${locLabel} only`}
           </p>
         </div>
+        <div className="glass-panel rounded-xl p-5 border border-emerald-500/30 border-l-[3px] border-l-emerald-400/50">
+          <p className="text-[10px] uppercase tracking-widest text-text-tertiary font-bold">Net pay (estimated)</p>
+          <p className="text-2xl font-bold tabular-nums text-emerald-200 mt-1">{INR(totalNetPay)}</p>
+          <p className="text-[10px] text-text-tertiary mt-2">
+            Gross {INR(totalGrossPay)} · Ded. {INR(totalDeductions)}
+          </p>
+        </div>
       </div>
 
       {loading && (
@@ -436,22 +556,47 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               Employee cost sheet
               {ledgerMonth === PAYBOOK_ALL_PERIODS ? ' — all periods' : ` — ${ledgerMonth}`}
             </p>
+            <p className="text-[9px] text-text-tertiary/80 mt-1 max-w-2xl">
+              Gross / net are <strong>estimates</strong> from attendance + daily rate or pro-rata monthly (see payslip footnote). Hover formula via individual PDF.
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={openNewSalary}
-            className="neo-btn px-5 py-2.5 rounded-xl text-[11px] font-bold text-money-gold border border-money-gold/25 flex items-center gap-2"
-          >
-            <i className="fas fa-user-plus" /> Add employee line
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={openRentExpense}
+              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-amber-200 border border-amber-500/30 flex items-center gap-2"
+            >
+              <i className="fas fa-building" /> Add rent
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                downloadPayrollRegisterPdf(
+                  filteredSalary,
+                  ledgerMonth === PAYBOOK_ALL_PERIODS ? 'All periods' : ledgerMonth
+                )
+              }
+              disabled={filteredSalary.length === 0}
+              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-text-secondary border border-[#85bb65]/25 flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+            >
+              <i className="fas fa-file-pdf" /> Payroll PDF
+            </button>
+            <button
+              type="button"
+              onClick={openNewSalary}
+              className="neo-btn px-5 py-2.5 rounded-xl text-[11px] font-bold text-money-gold border border-money-gold/25 flex items-center gap-2"
+            >
+              <i className="fas fa-user-plus" /> Add employee line
+            </button>
+          </div>
         </div>
         <div className="glass-panel rounded-2xl overflow-hidden border border-[#85bb65]/10">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1100px] text-xs">
+            <table className="w-full min-w-[1450px] text-xs">
               <thead>
                 <tr className="bg-[#0c1410]/80 border-b-2 border-[#85bb65]/25">
                   <th className="text-left px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider w-10">#</th>
-              {showPeriodCol && (
+                  {showPeriodCol && (
                     <th className="text-left px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider min-w-[100px]">Period</th>
                   )}
                   {showBranchCol && (
@@ -466,52 +611,69 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                   <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Full / half</th>
                   <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Leave</th>
                   <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">OT hrs</th>
-                  <th className="text-center px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider w-24">Actions</th>
+                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Gross est.</th>
+                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Ded.</th>
+                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Net est.</th>
+                  <th className="text-center px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider w-36">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#85bb65]/10">
-                {filteredSalary.map((row, idx) => (
-                  <tr key={row.id} className="hover:bg-[#85bb65]/5 font-mono text-[11px]">
-                    <td className="px-1 py-2 text-center text-text-tertiary tabular-nums">{idx + 1}</td>
-                    {showPeriodCol && (
-                      <td className="px-3 py-2 text-text-secondary font-sans text-[10px] whitespace-nowrap">{row.month || '—'}</td>
-                    )}
-                    {showBranchCol && (
-                      <td className="px-3 py-2 text-text-tertiary font-sans text-[10px] whitespace-nowrap">{row.location?.trim() || '—'}</td>
-                    )}
-                    <td className="px-3 py-2 text-money-paper font-sans font-semibold">{row.name}</td>
-                    <td className="px-3 py-2 text-text-secondary font-sans">{row.designation || '—'}</td>
-                    <td className="px-3 py-2 text-text-tertiary font-sans">{row.id_num || '—'}</td>
-                    <td className="px-3 py-2 text-right text-money-green tabular-nums">{INR(parseAmountDisplay(row.monthly_salary))}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.daily_rate ?? '—'}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.working_days_in_month ?? '—'}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-text-secondary">
-                      {row.full_days ?? '—'} / {row.half_days ?? '—'}
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.leave_days ?? 0}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-text-secondary">
-                      {(Number(row.ot_hours) || 0) + (Number(row.extra_ot_hours) || 0)}
-                    </td>
-                    <td className="px-2 py-2 text-center font-sans">
-                      <button
-                        type="button"
-                        className="text-text-tertiary hover:text-money-gold px-2"
-                        onClick={() => row.id != null && openEditSalary(row)}
-                        title="Edit"
-                      >
-                        <i className="fas fa-pen-to-square" />
-                      </button>
-                      <button
-                        type="button"
-                        className="text-text-tertiary hover:text-red-400 px-2"
-                        onClick={() => row.id != null && setDeleteTarget({ kind: 'salary', id: row.id })}
-                        title="Delete"
-                      >
-                        <i className="fas fa-trash" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {filteredSalary.map((row, idx) => {
+                  const b = computeSalaryBreakdown(row);
+                  return (
+                    <tr key={row.id} className="hover:bg-[#85bb65]/5 font-mono text-[11px]">
+                      <td className="px-1 py-2 text-center text-text-tertiary tabular-nums">{idx + 1}</td>
+                      {showPeriodCol && (
+                        <td className="px-3 py-2 text-text-secondary font-sans text-[10px] whitespace-nowrap">{row.month || '—'}</td>
+                      )}
+                      {showBranchCol && (
+                        <td className="px-3 py-2 text-text-tertiary font-sans text-[10px] whitespace-nowrap">{row.location?.trim() || '—'}</td>
+                      )}
+                      <td className="px-3 py-2 text-money-paper font-sans font-semibold">{row.name}</td>
+                      <td className="px-3 py-2 text-text-secondary font-sans">{row.designation || '—'}</td>
+                      <td className="px-3 py-2 text-text-tertiary font-sans">{row.id_num || '—'}</td>
+                      <td className="px-3 py-2 text-right text-money-green tabular-nums">{INR(parseAmountDisplay(row.monthly_salary))}</td>
+                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.daily_rate ?? '—'}</td>
+                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.working_days_in_month ?? '—'}</td>
+                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">
+                        {row.full_days ?? '—'} / {row.half_days ?? '—'}
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.leave_days ?? 0}</td>
+                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">
+                        {(Number(row.ot_hours) || 0) + (Number(row.extra_ot_hours) || 0)}
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums text-money-green/90">{INR(b.grossSalary)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums text-amber-200/90">{INR(b.deductions)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums font-semibold text-emerald-200/95">{INR(b.netSalary)}</td>
+                      <td className="px-1 py-2 text-center font-sans whitespace-nowrap">
+                        <button
+                          type="button"
+                          className="text-text-tertiary hover:text-money-gold px-1.5"
+                          onClick={() => row.id != null && openEditSalary(row)}
+                          title="Edit"
+                        >
+                          <i className="fas fa-pen-to-square" />
+                        </button>
+                        <button
+                          type="button"
+                          className="text-text-tertiary hover:text-sky-300 px-1.5"
+                          onClick={() => downloadPayslipPdf(row, b)}
+                          title={b.basis}
+                        >
+                          <i className="fas fa-file-invoice" />
+                        </button>
+                        <button
+                          type="button"
+                          className="text-text-tertiary hover:text-red-400 px-1.5"
+                          onClick={() => row.id != null && setDeleteTarget({ kind: 'salary', id: row.id })}
+                          title="Delete"
+                        >
+                          <i className="fas fa-trash" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
               <tfoot>
                 <tr className="bg-[#0c1410]/90 border-t-2 border-money-gold/30">
@@ -522,7 +684,13 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                     carried to summary →
                   </td>
                   <td className="px-3 py-3 text-right font-bold text-money-green tabular-nums text-sm">{INR(totalPayroll)}</td>
-                  <td colSpan={6} />
+                  <td colSpan={5} className="px-3 py-3 text-text-tertiary text-[9px] italic">
+                    daily / attendance columns
+                  </td>
+                  <td className="px-3 py-3 text-right font-bold text-money-green/90 tabular-nums text-sm">{INR(totalGrossPay)}</td>
+                  <td className="px-3 py-3 text-right font-bold text-amber-200/90 tabular-nums text-sm">{INR(totalDeductions)}</td>
+                  <td className="px-3 py-3 text-right font-bold text-emerald-200 tabular-nums text-sm">{INR(totalNetPay)}</td>
+                  <td className="px-3 py-3" />
                 </tr>
               </tfoot>
             </table>

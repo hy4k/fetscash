@@ -37,7 +37,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [location, setLocation] = useState<LocationType>('cochin');
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // --- Data State ---
   const [categories, setCategories] = useState<Category[]>([]);
@@ -593,8 +593,6 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
       </div>
     );
   }
-
-  if (loading && !user) return <div className="h-screen w-full flex items-center justify-center bg-background text-money-green font-serif tracking-widest text-xl animate-pulse">AUTHENTICATING...</div>;
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden text-money-paper">
