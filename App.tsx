@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { resolveWorkspaceUserId } from './utils/workspaceUser';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoice, Payment } from './types';
 import { CATEGORY_REPLENISHMENT } from './constants';
@@ -66,7 +67,7 @@ function App() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [showFilters, setShowFilters] = useState(true);
-  const [expenseSection, setExpenseSection] = useState<'register' | 'paybook'>('register');
+  const [expenseSection, setExpenseSection] = useState<'register' | 'paybook'>('paybook');
 
   // --- Theme ---
   const primaryColor = location === 'cochin' ? '#85bb65' : '#3e5c76';
@@ -130,60 +131,58 @@ function App() {
     return `${prefix}-${maxSeq + 1}`;
   };
 
-  // --- Initialization ---
+  const workspaceBootstrapDone = useRef(false);
+
+  // No Supabase Auth: clear any persisted session, resolve workspace `user_id`, seed defaults once.
   useEffect(() => {
-    const handleAuth = async () => {
+    const run = async () => {
       if (!isSupabaseConfigured) {
         setLoading(false);
         return;
       }
-      const DEMO_EMAIL = 'user@forum-testing.com';
-      const DEMO_PASSWORD = 'forum-testing-password';
-      let { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        const { data, error } = await supabase.auth.signInWithPassword({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
-        if (error) {
-          const { data: upData, error: upError } = await supabase.auth.signUp({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
-          if (!upError && upData.session) session = upData.session;
-        } else {
-          session = data.session;
-        }
-      }
-
-      if (session) {
-        setUser({ id: session.user.id, email: session.user.email });
-        await initializeData(session.user.id);
-        fetchAllData(session.user.id, location);
-      } else {
+      if (workspaceBootstrapDone.current) return;
+      workspaceBootstrapDone.current = true;
+      setLoading(true);
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      const userId = await resolveWorkspaceUserId();
+      if (!userId) {
+        setUser(null);
         setLoading(false);
+        return;
       }
+      setUser({ id: userId });
+      await initializeData(userId);
     };
+    void run();
+  }, []);
 
-    handleAuth();
+  useEffect(() => {
+    if (!user?.id || !isSupabaseConfigured) return;
+    fetchAllData(user.id, location);
+  }, [user?.id, location]);
 
-    const channel = supabase.channel('public-db-changes')
+  useEffect(() => {
+    if (!user?.id || !isSupabaseConfigured) return;
+    const channel = supabase
+      .channel('public-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public' }, () => {
-        if (user) fetchAllData(user.id, location);
+        fetchAllData(user.id, location);
       })
       .subscribe();
-
-    const handleClickOutside = () => setActiveActionId(null);
-    document.addEventListener('click', handleClickOutside);
-
     return () => {
       supabase.removeChannel(channel);
-      document.removeEventListener('click', handleClickOutside);
     };
   }, [user?.id, location]);
 
   useEffect(() => {
-    resetFilters();
-  }, [currentView, location]);
+    const handleClickOutside = () => setActiveActionId(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   useEffect(() => {
-    if (currentView !== 'expenses') setExpenseSection('register');
-  }, [currentView]);
+    resetFilters();
+  }, [currentView, location]);
 
   // --- Data Initialization ---
   const initializeData = async (userId: string) => {
@@ -632,6 +631,19 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 pb-24 sm:pb-8 custom-scrollbar">
 
+          {isSupabaseConfigured && !user && !loading && (
+            <div
+              role="status"
+              className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90"
+            >
+              No workspace <code className="text-amber-200">user_id</code> could be resolved without signing in.
+              Set <code className="text-amber-200">VITE_WORKSPACE_USER_ID</code> in <code className="text-amber-200">.env</code>{' '}
+              to your Supabase profile UUID, or allow anonymous reads on{' '}
+              <code className="text-amber-200">categories</code>/<code className="text-amber-200">expenses</code> so the app can
+              auto-detect one. Paybook still loads from public tables.
+            </div>
+          )}
+
           {/* --- DASHBOARD --- */}
           {currentView === 'dashboard' && (
             <div className="space-y-8 animate-fade-in">
@@ -738,6 +750,11 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here`}
           {currentView === 'expenses' && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <p className="text-[11px] text-text-tertiary max-w-xl sm:order-last">
+                  <strong className="text-money-green/90">Paybook</strong> is the sheet-style ledger (payroll, payslip PDFs, sundry vouchers).{' '}
+                  <strong className="text-text-secondary">Expense register</strong> is day-book rows in{' '}
+                  <code className="text-money-green/80 text-[10px]">expenses</code> (filtered by workspace user).
+                </p>
                 <div className="flex p-1 rounded-xl bg-[#0c1410]/80 border border-[#85bb65]/15 w-fit">
                   <button
                     type="button"

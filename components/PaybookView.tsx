@@ -3,7 +3,17 @@ import { supabase } from '../supabaseClient';
 import { FetsExpensesData, FetsSalaryData, LocationType } from '../types';
 import { Modal } from './Modal';
 import { computeSalaryBreakdown } from '../utils/paybookSalary';
-import { downloadPayslipPdf, downloadPayrollRegisterPdf } from '../utils/paybookPayslip';
+import { downloadPayslipPdf, downloadPayrollRegisterPdf, downloadAllPayslipsPdf } from '../utils/paybookPayslip';
+import {
+  PAYBOOK_ALL_PERIODS,
+  canonicalMonthFromDate,
+  normalizeMonthToCanonical,
+  prettyPeriodLabel,
+  periodTechnicalHint,
+  rollingCanonicalMonths,
+  sortPeriodsDesc,
+  monthEqVariants,
+} from '../utils/paybookMonth';
 
 const labelCls = 'block text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1.5';
 const fieldCls = 'neo-input w-full rounded-lg px-3 py-2 text-sm';
@@ -12,25 +22,9 @@ export function locationToPaybookLabel(loc: LocationType): string {
   return loc === 'cochin' ? 'Cochin' : 'Calicut';
 }
 
-function monthChoices(count = 30): string[] {
-  const out: string[] = [];
-  const d = new Date();
-  for (let i = 0; i < count; i++) {
-    const x = new Date(d.getFullYear(), d.getMonth() - i, 1);
-    out.push(x.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }));
-  }
-  return out;
-}
-
-function defaultMonth(): string {
-  return new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
-}
-
-/** Selector value: load every row regardless of `month` text (handles mismatched formats). */
-const PAYBOOK_ALL_PERIODS = '__all__';
-
 function postingMonth(ledgerMonth: string): string {
-  return ledgerMonth === PAYBOOK_ALL_PERIODS ? defaultMonth() : ledgerMonth;
+  if (ledgerMonth === PAYBOOK_ALL_PERIODS) return canonicalMonthFromDate();
+  return normalizeMonthToCanonical(ledgerMonth) ?? ledgerMonth;
 }
 
 function rowMatchesLocation(rowLoc: string | null | undefined, appLoc: LocationType): boolean {
@@ -98,7 +92,7 @@ interface SettleCycleRow {
 }
 
 export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor }) => {
-  const [ledgerMonth, setLedgerMonth] = useState<string>(PAYBOOK_ALL_PERIODS);
+  const [ledgerMonth, setLedgerMonth] = useState<string>(() => canonicalMonthFromDate());
   const [salaryRows, setSalaryRows] = useState<FetsSalaryData[]>([]);
   const [paybookExps, setPaybookExps] = useState<FetsExpensesData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,15 +110,17 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
   const [dbMonths, setDbMonths] = useState<string[]>([]);
   const [settleCycles, setSettleCycles] = useState<SettleCycleRow[]>([]);
 
-  const months = useMemo(() => monthChoices(), []);
-  const mergedMonthOptions = useMemo(() => {
-    const s = new Set<string>();
-    dbMonths.forEach((m) => {
-      if (m?.trim()) s.add(m.trim());
+  const periodChoices = useMemo(() => {
+    const acc = new Set<string>();
+    rollingCanonicalMonths(42).forEach((c) => acc.add(c));
+    dbMonths.forEach((raw) => {
+      const t = raw?.trim();
+      if (!t) return;
+      const c = normalizeMonthToCanonical(t);
+      acc.add(c ?? t);
     });
-    months.forEach((m) => s.add(m));
-    return Array.from(s).sort((a, b) => a.localeCompare(b, 'en-IN', { numeric: true }));
-  }, [dbMonths, months]);
+    return sortPeriodsDesc(Array.from(acc));
+  }, [dbMonths]);
 
   useEffect(() => {
     let cancelled = false;
@@ -142,19 +138,21 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
   }, []);
 
   const locLabel = locationToPaybookLabel(location);
-  const showPeriodCol = ledgerMonth === PAYBOOK_ALL_PERIODS;
-  const showBranchCol = locationScope === 'all';
-  const payrollCarryColSpan = 4 + (showPeriodCol ? 1 : 0) + (showBranchCol ? 1 : 0);
-  const sundryCarryColSpan = 3 + (showPeriodCol ? 1 : 0) + (showBranchCol ? 1 : 0);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
     try {
       let salQ = supabase.from('fets_salary_data').select('*');
-      if (ledgerMonth !== PAYBOOK_ALL_PERIODS) salQ = salQ.eq('month', ledgerMonth);
+      if (ledgerMonth !== PAYBOOK_ALL_PERIODS) {
+        const vs = monthEqVariants(ledgerMonth);
+        salQ = vs.length <= 1 ? salQ.eq('month', vs[0]) : salQ.in('month', vs);
+      }
       let exQ = supabase.from('fets_expenses_data').select('*');
-      if (ledgerMonth !== PAYBOOK_ALL_PERIODS) exQ = exQ.eq('month', ledgerMonth);
+      if (ledgerMonth !== PAYBOOK_ALL_PERIODS) {
+        const vs = monthEqVariants(ledgerMonth);
+        exQ = vs.length <= 1 ? exQ.eq('month', vs[0]) : exQ.in('month', vs);
+      }
 
       const [{ data: sal, error: e1 }, { data: ex, error: e2 }] = await Promise.all([
         salQ.order('name'),
@@ -220,6 +218,12 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
         (r.category || '').toLowerCase().includes(q)
     );
   }, [paybookExps, search]);
+
+  const periodSummaryLabel =
+    ledgerMonth === PAYBOOK_ALL_PERIODS ? 'All periods' : prettyPeriodLabel(ledgerMonth);
+
+  const payrollPdfTitle =
+    ledgerMonth === PAYBOOK_ALL_PERIODS ? 'All periods' : `${prettyPeriodLabel(ledgerMonth)} (${periodTechnicalHint(ledgerMonth)})`;
 
   const totalPayroll = useMemo(
     () => filteredSalary.reduce((s, r) => s + parseAmountDisplay(r.monthly_salary), 0),
@@ -408,53 +412,53 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Ledger control bar — accounts period */}
-      <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/15">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-black text-money-gold uppercase tracking-[0.25em] mb-1">Paybook</p>
-            <h3 className="text-lg font-serif font-bold text-money-paper">Staff payroll &amp; sundry disbursements</h3>
-            <p className="text-xs text-text-secondary mt-1 max-w-xl">
-              Period-based ledger for <span className="text-money-green/90 font-mono text-[11px]">fets_salary_data</span> and{' '}
-              <span className="text-money-green/90 font-mono text-[11px]">fets_expenses_data</span>. Amounts in INR. Use{' '}
-              <strong className="text-money-paper">All periods</strong> if your rows use a different <code className="text-money-green/80">month</code> text than the list. Use{' '}
-              <strong className="text-money-paper">All branches</strong> under Locations if payroll/vouchers were saved with another site label.
+      <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-[#85bb65]/15">
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-5">
+            <p className="text-[10px] font-black text-money-gold uppercase tracking-[0.22em] mb-1">Paybook</p>
+            <h3 className="text-xl font-serif font-bold text-money-paper leading-tight">Payroll &amp; sundry vouchers</h3>
+            <p className="text-xs text-text-secondary mt-2 leading-relaxed">
+              Opens on <strong className="text-money-paper">this calendar month</strong> only. Use the period list for history, or “All
+              periods” when auditing imports. Data: <code className="text-money-green/85 text-[10px]">fets_salary_data</code>,{' '}
+              <code className="text-money-green/85 text-[10px]">fets_expenses_data</code>.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="lg:col-span-7 grid gap-4 sm:grid-cols-2">
             <div>
-              <label className={labelCls}>Accounting period (month)</label>
+              <label className={labelCls}>Period</label>
               <select
-                className={`${fieldCls} min-w-[220px]`}
+                className={`${fieldCls} w-full min-w-0`}
                 value={ledgerMonth}
                 onChange={(e) => setLedgerMonth(e.target.value)}
               >
-                <option value={PAYBOOK_ALL_PERIODS}>All periods (show everything)</option>
-                {mergedMonthOptions.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
+                {periodChoices.map((value) => (
+                  <option key={value} value={value}>
+                    {prettyPeriodLabel(value)} — {periodTechnicalHint(value)}
                   </option>
                 ))}
+                <option value={PAYBOOK_ALL_PERIODS}>{prettyPeriodLabel(PAYBOOK_ALL_PERIODS)}</option>
               </select>
+              <p className="text-[10px] text-text-tertiary mt-1.5">Readable month name + storage key (e.g. Sep-2025).</p>
             </div>
             <div>
-              <label className={labelCls}>Locations</label>
+              <label className={labelCls}>Branch filter</label>
               <select
-                className={`${fieldCls} min-w-[220px]`}
+                className={`${fieldCls} w-full min-w-0`}
                 value={locationScope}
                 onChange={(e) => setLocationScope(e.target.value as 'all' | 'branch')}
               >
-                <option value="all">All branches (legacy / imports)</option>
+                <option value="all">All branches</option>
                 <option value="branch">This branch only ({locLabel})</option>
               </select>
             </div>
-            <div className="flex-1 min-w-[200px] max-w-md">
-              <label className={labelCls}>Search ledgers</label>
+            <div className="sm:col-span-2">
+              <label className={labelCls}>Search</label>
               <div className="relative">
                 <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary text-xs" />
                 <input
                   type="text"
-                  className={`${fieldCls} pl-9`}
-                  placeholder="Name, designation, category…"
+                  className={`${fieldCls} pl-9 w-full`}
+                  placeholder="Name, designation, voucher category…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -528,7 +532,8 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
           <p className="text-[10px] uppercase tracking-widest text-money-gold font-bold">Period total (paybook)</p>
           <p className="text-2xl font-serif font-bold tabular-nums text-money-gold mt-1">{INR(grandTotal)}</p>
           <p className="text-[10px] text-text-secondary mt-2">
-            {locationScope === 'all' ? 'All branches' : `${locLabel} only`}
+            {periodSummaryLabel}
+            {locationScope === 'all' ? '' : ` · ${locLabel}`}
           </p>
         </div>
         <div className="glass-panel rounded-xl p-5 border border-emerald-500/30 border-l-[3px] border-l-emerald-400/50">
@@ -547,257 +552,257 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
         </div>
       )}
 
-      {/* Payroll register */}
-      <section className="space-y-3">
-        <div className="flex flex-wrap justify-between items-center gap-3">
-          <div>
-            <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary">Payroll register</h4>
-            <p className="text-[10px] text-text-tertiary">
-              Employee cost sheet
-              {ledgerMonth === PAYBOOK_ALL_PERIODS ? ' — all periods' : ` — ${ledgerMonth}`}
+      {/* Payroll — card layout (no horizontal scroll for actions) */}
+      <section className="space-y-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary">Payroll</h4>
+            <p className="text-xs text-text-tertiary mt-1">
+              <span className="text-money-paper font-semibold">{periodSummaryLabel}</span>
+              {ledgerMonth !== PAYBOOK_ALL_PERIODS && (
+                <span className="text-text-tertiary/75"> · stored as {periodTechnicalHint(ledgerMonth)}</span>
+              )}
             </p>
-            <p className="text-[9px] text-text-tertiary/80 mt-1 max-w-2xl">
-              Gross / net are <strong>estimates</strong> from attendance + daily rate or pro-rata monthly (see payslip footnote). Hover formula via individual PDF.
+            <p className="text-[10px] text-text-tertiary/85 mt-2 max-w-xl leading-relaxed">
+              Estimates from attendance + contract rates. Use <strong>Expand</strong> for every field; actions stay on the right without
+              scrolling the sheet.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={openRentExpense}
-              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-amber-200 border border-amber-500/30 flex items-center gap-2"
+              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-amber-200 border border-amber-500/30 inline-flex items-center gap-2"
             >
               <i className="fas fa-building" /> Add rent
             </button>
             <button
               type="button"
-              onClick={() =>
-                downloadPayrollRegisterPdf(
-                  filteredSalary,
-                  ledgerMonth === PAYBOOK_ALL_PERIODS ? 'All periods' : ledgerMonth
-                )
-              }
+              onClick={() => downloadPayrollRegisterPdf(filteredSalary, payrollPdfTitle)}
               disabled={filteredSalary.length === 0}
-              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-text-secondary border border-[#85bb65]/25 flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-text-secondary border border-[#85bb65]/25 inline-flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
             >
-              <i className="fas fa-file-pdf" /> Payroll PDF
+              <i className="fas fa-table" /> Summary table PDF
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadAllPayslipsPdf(filteredSalary, payrollPdfTitle)}
+              disabled={filteredSalary.length === 0}
+              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-sky-200/95 border border-sky-500/35 inline-flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+            >
+              <i className="fas fa-file-pdf" /> All payslips (one PDF)
             </button>
             <button
               type="button"
               onClick={openNewSalary}
-              className="neo-btn px-5 py-2.5 rounded-xl text-[11px] font-bold text-money-gold border border-money-gold/25 flex items-center gap-2"
+              className="neo-btn px-5 py-2.5 rounded-xl text-[11px] font-bold text-money-gold border border-money-gold/25 inline-flex items-center gap-2"
             >
-              <i className="fas fa-user-plus" /> Add employee line
+              <i className="fas fa-user-plus" /> Add employee
             </button>
           </div>
         </div>
-        <div className="glass-panel rounded-2xl overflow-hidden border border-[#85bb65]/10">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1450px] text-xs">
-              <thead>
-                <tr className="bg-[#0c1410]/80 border-b-2 border-[#85bb65]/25">
-                  <th className="text-left px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider w-10">#</th>
-                  {showPeriodCol && (
-                    <th className="text-left px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider min-w-[100px]">Period</th>
-                  )}
-                  {showBranchCol && (
-                    <th className="text-left px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider min-w-[88px]">Branch</th>
-                  )}
-                  <th className="text-left px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider min-w-[140px]">Particulars</th>
-                  <th className="text-left px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Designation</th>
-                  <th className="text-left px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">ID ref.</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Monthly</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Daily rate</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Work days</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Full / half</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Leave</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">OT hrs</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Gross est.</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Ded.</th>
-                  <th className="text-right px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Net est.</th>
-                  <th className="text-center px-3 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider w-36">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#85bb65]/10">
-                {filteredSalary.map((row, idx) => {
-                  const b = computeSalaryBreakdown(row);
-                  return (
-                    <tr key={row.id} className="hover:bg-[#85bb65]/5 font-mono text-[11px]">
-                      <td className="px-1 py-2 text-center text-text-tertiary tabular-nums">{idx + 1}</td>
-                      {showPeriodCol && (
-                        <td className="px-3 py-2 text-text-secondary font-sans text-[10px] whitespace-nowrap">{row.month || '—'}</td>
+
+        <div className="space-y-3">
+          {filteredSalary.map((row, idx) => {
+            const b = computeSalaryBreakdown(row);
+            return (
+              <div
+                key={row.id ?? idx}
+                className="rounded-2xl border border-[#85bb65]/15 bg-[#0c1410]/55 overflow-hidden shadow-sm shadow-black/20"
+              >
+                <div className="flex flex-wrap items-stretch gap-3 p-4 sm:gap-4">
+                  <div className="flex items-center justify-center w-9 shrink-0 rounded-lg bg-black/25 text-text-tertiary text-xs font-mono tabular-nums">
+                    {idx + 1}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-money-paper text-sm leading-snug">{row.name || '—'}</div>
+                    <div className="text-[11px] text-text-tertiary mt-0.5 space-x-1.5 space-y-0.5">
+                      <span>{row.designation || 'No designation'}</span>
+                      <span className="text-text-tertiary/50">·</span>
+                      <span>{row.location?.trim() || 'Any branch'}</span>
+                      {ledgerMonth === PAYBOOK_ALL_PERIODS && (
+                        <>
+                          <span className="text-text-tertiary/50">·</span>
+                          <span className="font-mono text-[10px]">{row.month || '—'}</span>
+                        </>
                       )}
-                      {showBranchCol && (
-                        <td className="px-3 py-2 text-text-tertiary font-sans text-[10px] whitespace-nowrap">{row.location?.trim() || '—'}</td>
-                      )}
-                      <td className="px-3 py-2 text-money-paper font-sans font-semibold">{row.name}</td>
-                      <td className="px-3 py-2 text-text-secondary font-sans">{row.designation || '—'}</td>
-                      <td className="px-3 py-2 text-text-tertiary font-sans">{row.id_num || '—'}</td>
-                      <td className="px-3 py-2 text-right text-money-green tabular-nums">{INR(parseAmountDisplay(row.monthly_salary))}</td>
-                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.daily_rate ?? '—'}</td>
-                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.working_days_in_month ?? '—'}</td>
-                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">
-                        {row.full_days ?? '—'} / {row.half_days ?? '—'}
-                      </td>
-                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{row.leave_days ?? 0}</td>
-                      <td className="px-3 py-2 text-right tabular-nums text-text-secondary">
-                        {(Number(row.ot_hours) || 0) + (Number(row.extra_ot_hours) || 0)}
-                      </td>
-                      <td className="px-3 py-2 text-right tabular-nums text-money-green/90">{INR(b.grossSalary)}</td>
-                      <td className="px-3 py-2 text-right tabular-nums text-amber-200/90">{INR(b.deductions)}</td>
-                      <td className="px-3 py-2 text-right tabular-nums font-semibold text-emerald-200/95">{INR(b.netSalary)}</td>
-                      <td className="px-1 py-2 text-center font-sans whitespace-nowrap">
-                        <button
-                          type="button"
-                          className="text-text-tertiary hover:text-money-gold px-1.5"
-                          onClick={() => row.id != null && openEditSalary(row)}
-                          title="Edit"
-                        >
-                          <i className="fas fa-pen-to-square" />
-                        </button>
-                        <button
-                          type="button"
-                          className="text-text-tertiary hover:text-sky-300 px-1.5"
-                          onClick={() => downloadPayslipPdf(row, b)}
-                          title={b.basis}
-                        >
-                          <i className="fas fa-file-invoice" />
-                        </button>
-                        <button
-                          type="button"
-                          className="text-text-tertiary hover:text-red-400 px-1.5"
-                          onClick={() => row.id != null && setDeleteTarget({ kind: 'salary', id: row.id })}
-                          title="Delete"
-                        >
-                          <i className="fas fa-trash" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              <tfoot>
-                <tr className="bg-[#0c1410]/90 border-t-2 border-money-gold/30">
-                  <td
-                    colSpan={payrollCarryColSpan}
-                    className="px-3 py-3 text-right font-black text-[10px] uppercase text-money-gold tracking-widest"
-                  >
-                    carried to summary →
-                  </td>
-                  <td className="px-3 py-3 text-right font-bold text-money-green tabular-nums text-sm">{INR(totalPayroll)}</td>
-                  <td colSpan={5} className="px-3 py-3 text-text-tertiary text-[9px] italic">
-                    daily / attendance columns
-                  </td>
-                  <td className="px-3 py-3 text-right font-bold text-money-green/90 tabular-nums text-sm">{INR(totalGrossPay)}</td>
-                  <td className="px-3 py-3 text-right font-bold text-amber-200/90 tabular-nums text-sm">{INR(totalDeductions)}</td>
-                  <td className="px-3 py-3 text-right font-bold text-emerald-200 tabular-nums text-sm">{INR(totalNetPay)}</td>
-                  <td className="px-3 py-3" />
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          {!loading && filteredSalary.length === 0 && (
-            <div className="text-center py-10 text-text-secondary text-sm">
-              <i className="fas fa-users-slash text-2xl mb-2 block opacity-40" />
-              No payroll lines. Try <strong>All periods</strong> and <strong>All branches</strong> if data was imported.
-            </div>
-          )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-end gap-4 sm:gap-6">
+                    <div className="text-right min-w-[7rem]">
+                      <div className="text-[9px] uppercase tracking-wider text-text-tertiary font-bold">Gross est.</div>
+                      <div className="text-sm font-bold tabular-nums text-money-green/90">{INR(b.grossSalary)}</div>
+                    </div>
+                    <div className="text-right min-w-[7rem]">
+                      <div className="text-[9px] uppercase tracking-wider text-text-tertiary font-bold">Net est.</div>
+                      <div className="text-lg font-bold tabular-nums text-emerald-200 leading-none">{INR(b.netSalary)}</div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0 border-l border-[#85bb65]/15 pl-3 ml-auto">
+                      <button
+                        type="button"
+                        className="p-2.5 rounded-xl text-text-tertiary hover:text-money-gold hover:bg-[#85bb65]/10 transition-colors"
+                        onClick={() => row.id != null && openEditSalary(row)}
+                        title="Edit"
+                        aria-label="Edit payroll line"
+                      >
+                        <i className="fas fa-pen-to-square" />
+                      </button>
+                      <button
+                        type="button"
+                        className="p-2.5 rounded-xl text-text-tertiary hover:text-sky-300 hover:bg-sky-500/10 transition-colors"
+                        onClick={() => downloadPayslipPdf(row, b)}
+                        title="Download payslip PDF"
+                        aria-label="Download payslip PDF"
+                      >
+                        <i className="fas fa-file-pdf" />
+                      </button>
+                      <button
+                        type="button"
+                        className="p-2.5 rounded-xl text-text-tertiary hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        onClick={() => row.id != null && setDeleteTarget({ kind: 'salary', id: row.id })}
+                        title="Delete"
+                        aria-label="Delete payroll line"
+                      >
+                        <i className="fas fa-trash" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <details className="group border-t border-[#85bb65]/10 bg-black/15 [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="cursor-pointer select-none px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-text-tertiary hover:text-money-green flex items-center gap-2">
+                    <i className="fas fa-chevron-right text-[9px] transition-transform group-open:rotate-90" />
+                    Expand — attendance, rates, deductions
+                  </summary>
+                  <div className="px-4 pb-4 pt-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2 text-[11px] font-mono text-text-secondary">
+                    <div>
+                      <span className="text-text-tertiary text-[9px] uppercase block">Monthly</span>
+                      {INR(parseAmountDisplay(row.monthly_salary))}
+                    </div>
+                    <div>
+                      <span className="text-text-tertiary text-[9px] uppercase block">Daily rate</span>
+                      {row.daily_rate ?? '—'}
+                    </div>
+                    <div>
+                      <span className="text-text-tertiary text-[9px] uppercase block">Work days (month)</span>
+                      {row.working_days_in_month ?? '—'}
+                    </div>
+                    <div>
+                      <span className="text-text-tertiary text-[9px] uppercase block">Full / half</span>
+                      {row.full_days ?? '—'} / {row.half_days ?? '—'}
+                    </div>
+                    <div>
+                      <span className="text-text-tertiary text-[9px] uppercase block">Leave</span>
+                      {row.leave_days ?? 0}
+                    </div>
+                    <div>
+                      <span className="text-text-tertiary text-[9px] uppercase block">OT hours</span>
+                      {(Number(row.ot_hours) || 0) + (Number(row.extra_ot_hours) || 0)}
+                    </div>
+                    <div>
+                      <span className="text-text-tertiary text-[9px] uppercase block">Deductions est.</span>
+                      {INR(b.deductions)}
+                    </div>
+                    <div className="sm:col-span-2 lg:col-span-4">
+                      <span className="text-text-tertiary text-[9px] uppercase block">Basis</span>
+                      <span className="font-sans text-[11px] text-text-secondary/95 leading-snug">{b.basis}</span>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            );
+          })}
         </div>
+
+        {!loading && filteredSalary.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-[#85bb65]/25 bg-[#0c1410]/30 text-center py-12 text-text-secondary text-sm px-4">
+            <i className="fas fa-users-slash text-2xl mb-2 block opacity-40" />
+            No payroll for <strong className="text-money-paper">{periodSummaryLabel}</strong>. Try another period or{' '}
+            <strong>All periods</strong> / <strong>All branches</strong>.
+          </div>
+        )}
       </section>
 
-      {/* Cash / sundry disbursements */}
-      <section className="space-y-3 pb-4">
-        <div className="flex flex-wrap justify-between items-center gap-3">
+      {/* Sundry vouchers — cards */}
+      <section className="space-y-4 pb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary">Sundry disbursements</h4>
-            <p className="text-[10px] text-text-tertiary">
-              Miscellaneous payments
-              {ledgerMonth === PAYBOOK_ALL_PERIODS ? ' — all periods' : ` — ${ledgerMonth}`}
+            <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary">Sundry vouchers</h4>
+            <p className="text-xs text-text-tertiary mt-1">
+              <span className="text-money-paper font-semibold">{periodSummaryLabel}</span>
             </p>
           </div>
           <button
             type="button"
             onClick={openNewExp}
-            className="neo-btn px-5 py-2.5 rounded-xl text-[11px] font-bold text-money-gold border border-money-gold/25 flex items-center gap-2"
+            className="neo-btn px-5 py-2.5 rounded-xl text-[11px] font-bold text-money-gold border border-money-gold/25 inline-flex items-center gap-2 self-start sm:self-auto"
           >
             <i className="fas fa-file-circle-plus" /> Add voucher
           </button>
         </div>
-        <div className="glass-panel rounded-2xl overflow-hidden border border-[#85bb65]/10">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-[#0c1410]/80 border-b-2 border-[#85bb65]/25">
-                <th className="text-left px-4 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider w-28">Date</th>
-                {showPeriodCol && (
-                  <th className="text-left px-4 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider min-w-[96px]">Period</th>
-                )}
-                {showBranchCol && (
-                  <th className="text-left px-4 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider min-w-[88px]">Branch</th>
-                )}
-                <th className="text-left px-4 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Narration</th>
-                <th className="text-left px-4 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider">Category</th>
-                <th className="text-right px-4 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider min-w-[120px]">Debit (₹)</th>
-                <th className="text-center px-4 py-3 font-black text-[9px] text-text-tertiary uppercase tracking-wider w-28">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#85bb65]/10">
-              {filteredExps.map((row) => (
-                <tr key={row.id} className="hover:bg-[#85bb65]/5">
-                  <td className="px-4 py-3 font-mono tabular-nums text-text-secondary align-top">{formatLedgerDate(row.date)}</td>
-                  {showPeriodCol && (
-                    <td className="px-4 py-3 text-[10px] text-text-secondary whitespace-nowrap align-top">{row.month || '—'}</td>
-                  )}
-                  {showBranchCol && (
-                    <td className="px-4 py-3 text-[10px] text-text-tertiary whitespace-nowrap align-top">{row.location?.trim() || '—'}</td>
-                  )}
-                  <td className="px-4 py-3 align-top min-w-[160px]">
-                    <span className="inline-flex items-start gap-2 max-w-md">
-                      {row.color && (
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0 border border-white/10 mt-1" style={{ backgroundColor: row.color }} />
-                      )}
-                      <span className="font-medium text-money-paper break-words whitespace-normal leading-snug">{row.name}</span>
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-text-secondary align-top">{row.category || '—'}</td>
-                  <td className="px-4 py-3 text-right font-mono font-semibold text-amber-100/90 tabular-nums align-top">{INR(parseAmountDisplay(row.amount))}</td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      type="button"
-                      className="text-text-tertiary hover:text-money-gold px-2"
-                      onClick={() => row.id != null && openEditExp(row)}
-                    >
-                      <i className="fas fa-pen-to-square" />
-                    </button>
-                    <button
-                      type="button"
-                      className="text-text-tertiary hover:text-red-400 px-2"
-                      onClick={() => row.id != null && setDeleteTarget({ kind: 'expense', id: row.id })}
-                    >
-                      <i className="fas fa-trash" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="bg-[#0c1410]/90 border-t-2 border-amber-500/25">
-                <td
-                  colSpan={sundryCarryColSpan}
-                  className="px-4 py-3 text-right font-black text-[10px] uppercase text-amber-200/80 tracking-widest"
-                >
-                  sundry subtotal →
-                </td>
-                <td className="px-4 py-3 text-right font-bold text-amber-100 tabular-nums text-sm">{INR(totalSundry)}</td>
-                <td />
-              </tr>
-            </tfoot>
-          </table>
-          {!loading && filteredExps.length === 0 && (
-            <div className="text-center py-10 text-text-secondary text-sm">
-              <i className="fas fa-receipt text-2xl mb-2 block opacity-40" />
-              No sundry vouchers. Try <strong>All periods</strong> and <strong>All branches</strong>.
+
+        <div className="space-y-2.5">
+          {filteredExps.map((row) => (
+            <div
+              key={row.id}
+              className="rounded-xl border border-[#85bb65]/12 bg-[#0c1410]/50 p-4 flex flex-wrap gap-3 items-start justify-between"
+            >
+              <div className="flex min-w-0 flex-1 gap-3">
+                <div className="shrink-0 text-[11px] font-mono text-text-tertiary tabular-nums w-[5.5rem]">
+                  {formatLedgerDate(row.date)}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-start gap-2">
+                    {row.color && (
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0 mt-1 border border-white/10"
+                        style={{ backgroundColor: row.color }}
+                      />
+                    )}
+                    <span className="font-medium text-money-paper text-sm leading-snug break-words">{row.name}</span>
+                  </div>
+                  <div className="text-[10px] text-text-tertiary mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+                    <span className="rounded-md bg-black/20 px-1.5 py-0.5">{row.category || 'Uncategorised'}</span>
+                    {ledgerMonth === PAYBOOK_ALL_PERIODS && (
+                      <span className="font-mono">{row.month || '—'}</span>
+                    )}
+                    {row.location?.trim() && <span>{row.location.trim()}</span>}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="text-right">
+                  <div className="text-[9px] uppercase text-text-tertiary font-bold">Amount</div>
+                  <div className="text-base font-bold tabular-nums text-amber-100/90">{INR(parseAmountDisplay(row.amount))}</div>
+                </div>
+                <div className="flex gap-1 border-l border-[#85bb65]/15 pl-3">
+                  <button
+                    type="button"
+                    className="p-2.5 rounded-xl text-text-tertiary hover:text-money-gold hover:bg-[#85bb65]/10"
+                    onClick={() => row.id != null && openEditExp(row)}
+                    aria-label="Edit voucher"
+                  >
+                    <i className="fas fa-pen-to-square" />
+                  </button>
+                  <button
+                    type="button"
+                    className="p-2.5 rounded-xl text-text-tertiary hover:text-red-400 hover:bg-red-500/10"
+                    onClick={() => row.id != null && setDeleteTarget({ kind: 'expense', id: row.id })}
+                    aria-label="Delete voucher"
+                  >
+                    <i className="fas fa-trash" />
+                  </button>
+                </div>
+              </div>
             </div>
-          )}
+          ))}
         </div>
+
+        {!loading && filteredExps.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-[#85bb65]/25 bg-[#0c1410]/30 text-center py-12 text-text-secondary text-sm px-4">
+            <i className="fas fa-receipt text-2xl mb-2 block opacity-40" />
+            No sundry vouchers for <strong className="text-money-paper">{periodSummaryLabel}</strong>. Change period or branch filter.
+          </div>
+        )}
       </section>
 
       {/* Salary modal */}
@@ -821,10 +826,12 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               />
             </div>
             <div className="sm:col-span-2">
-              <label className={labelCls}>Ledger month (exact text stored in DB, e.g. January 2026)</label>
+              <label className={labelCls}>
+                Ledger month (matches sheet, e.g. <span className="font-mono text-money-green/90">Sep-2025</span>)
+              </label>
               <input
                 className={fieldCls}
-                placeholder={defaultMonth()}
+                placeholder={postingMonth(ledgerMonth)}
                 value={editingSalary.month || ''}
                 onChange={(e) => setEditingSalary({ ...editingSalary, month: e.target.value })}
               />
@@ -978,10 +985,12 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               />
             </div>
             <div>
-              <label className={labelCls}>Ledger month (DB text)</label>
+              <label className={labelCls}>
+                Ledger month (e.g. <span className="font-mono text-money-green/90">Sep-2025</span>)
+              </label>
               <input
                 className={fieldCls}
-                placeholder={defaultMonth()}
+                placeholder={postingMonth(ledgerMonth)}
                 value={editingExp.month || ''}
                 onChange={(e) => setEditingExp({ ...editingExp, month: e.target.value })}
               />
