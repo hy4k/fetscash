@@ -20,67 +20,94 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, loc
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden sm:flex flex-col w-72 h-screen fixed left-0 top-0 bg-[#16231d] border-r border-[#85bb65]/10 z-40 shadow-[10px_0_30px_rgba(0,0,0,0.3)]">
-        <div className="p-8 pb-8 flex flex-col items-center border-b border-[#85bb65]/10 bg-gradient-to-b from-[#1f3029] to-transparent">
-             <div className="w-16 h-16 rounded-full neo-btn flex items-center justify-center mb-4 border border-money-gold/30">
-                <i className="fas fa-landmark text-2xl text-money-gold drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)]"></i>
-             </div>
-             <h1 className="text-2xl font-black tracking-widest text-center engraved-text leading-tight">
-                FORUM<br/><span className="text-lg">TESTING</span>
-             </h1>
-             <p className="text-[10px] text-text-tertiary uppercase tracking-wider mt-2">
-                Educational Services
-             </p>
-             <div className="h-1 w-24 bg-gradient-to-r from-transparent via-money-gold to-transparent mt-3 opacity-50"></div>
+      <aside className="hidden sm:flex flex-col w-72 h-screen fixed left-0 top-0 bg-surface border-r border-divider z-40">
+        {/* Logo area */}
+        <div className="p-8 pb-6 flex flex-col items-center border-b border-divider bg-gradient-to-b from-surface-highlight to-transparent">
+          <div className="relative mb-5">
+            <div className="w-16 h-16 rounded-2xl neo-btn flex items-center justify-center border border-money-gold/20">
+              <i className="fas fa-landmark text-2xl text-money-gold drop-shadow-md"></i>
+            </div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-money-green/20 border border-money-green/30 animate-pulse-slow"></div>
+          </div>
+          <h1 className="text-2xl font-black tracking-[0.15em] text-center engraved-text leading-tight">
+            FORUM<br/><span className="text-lg tracking-[0.2em]">TESTING</span>
+          </h1>
+          <p className="text-[10px] text-text-tertiary uppercase tracking-[0.25em] mt-2 font-medium">
+            Educational Services
+          </p>
+          <div className="h-px w-20 bg-gradient-to-r from-transparent via-money-gold/40 to-transparent mt-4"></div>
         </div>
 
-        <nav className="flex-1 px-6 py-8 space-y-4">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => onChangeView(item.id)}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 neo-btn group ${
-                currentView === item.id 
-                  ? 'active' 
-                  : 'text-text-secondary hover:text-money-green'
-              }`}
-            >
-              <i className={`fas ${item.icon} text-lg w-6 text-center transition-all duration-300 ${currentView === item.id ? 'scale-110 drop-shadow-[0_0_5px_rgba(133,187,101,0.5)]' : 'group-hover:scale-110'}`} style={currentView === item.id ? { color: locationColor } : {}}></i>
-              <span>{item.label}</span>
-              {currentView === item.id && (
-                  <div className="ml-auto w-2 h-2 rounded-full bg-money-gold shadow-[0_0_10px_#d4af37]"></div>
-              )}
-            </button>
-          ))}
+        {/* Nav */}
+        <nav className="flex-1 px-5 py-6 space-y-1.5 overflow-y-auto">
+          {menuItems.map((item) => {
+            const isActive = currentView === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onChangeView(item.id)}
+                className={`w-full flex items-center gap-3.5 px-5 py-3.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 group relative ${
+                  isActive
+                    ? 'active text-money-gold'
+                    : 'text-text-secondary hover:text-money-green'
+                }`}
+                style={isActive ? { background: 'rgba(133,187,101,0.06)' } : {}}
+              >
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                  isActive
+                    ? 'bg-money-green/10 shadow-[0_0_12px_rgba(133,187,101,0.15)]'
+                    : 'bg-transparent group-hover:bg-money-green/5'
+                }`}>
+                  <i className={`fas ${item.icon} text-[15px] transition-all duration-300 ${
+                    isActive ? 'text-money-green scale-110' : 'group-hover:scale-105'
+                  }`}></i>
+                </div>
+                <span className="flex-1 text-left">{item.label}</span>
+                {isActive && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-money-gold shadow-[0_0_8px_rgba(212,175,55,0.5)]"></div>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
-        <div className="p-6">
-            <div className="flex items-center gap-3 p-4 rounded-xl neo-input">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-money-green to-money-dark border border-money-gold/30 flex items-center justify-center text-xs font-serif font-bold text-white shadow-inner">
-                    AD
-                </div>
-                <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-money-paper uppercase tracking-wider truncate">Admin</p>
-                    <p className="text-[10px] text-text-secondary truncate">Manager</p>
-                </div>
-                <button className="text-money-gold hover:text-white transition-colors"><i className="fas fa-cog"></i></button>
+        {/* User pill */}
+        <div className="p-5 border-t border-divider">
+          <div className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-highlight/60 border border-divider">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-money-green/20 to-money-dark/40 border border-money-green/20 flex items-center justify-center text-xs font-bold text-money-paper shadow-inner">
+              AD
             </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-money-paper uppercase tracking-wider truncate">Admin</p>
+              <p className="text-[10px] text-text-tertiary truncate">Manager</p>
+            </div>
+            <button className="w-8 h-8 rounded-lg flex items-center justify-center text-text-tertiary hover:text-money-gold transition-colors">
+              <i className="fas fa-cog text-xs"></i>
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-[#16231d]/95 backdrop-blur-xl border-t border-[#85bb65]/20 pb-safe z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
-        <div className="flex justify-around items-center p-3">
-           {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => onChangeView(item.id)}
-              className={`flex flex-col items-center justify-center p-2 rounded-2xl transition-all ${currentView === item.id ? 'text-money-gold' : 'text-text-tertiary'}`}
-            >
-              <i className={`fas ${item.icon} text-xl mb-1 transition-colors ${currentView === item.id ? 'drop-shadow-[0_0_5px_rgba(212,175,55,0.5)]' : ''}`}></i>
-              <span className="text-[9px] font-bold uppercase tracking-wider">{item.label}</span>
-            </button>
-          ))}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-divider pb-safe z-50">
+        <div className="flex justify-around items-center p-2">
+          {menuItems.map((item) => {
+            const isActive = currentView === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onChangeView(item.id)}
+                className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all min-w-[52px] ${
+                  isActive
+                    ? 'text-money-gold bg-money-gold/5'
+                    : 'text-text-tertiary'
+                }`}
+              >
+                <i className={`fas ${item.icon} text-lg mb-1 transition-all ${isActive ? 'drop-shadow-[0_0_5px_rgba(212,175,55,0.4)] scale-110' : ''}`}></i>
+                <span className="text-[9px] font-bold uppercase tracking-wider">{item.label}</span>
+              </button>
+            );
+          })}
         </div>
       </nav>
     </>

@@ -641,18 +641,23 @@ function App() {
   if (!isSupabaseConfigured) {
     return (
       <div className="min-h-screen w-full bg-background text-money-paper flex items-center justify-center p-6">
-        <div className="max-w-lg w-full glass-panel rounded-2xl p-8 border border-red-500/40 shadow-xl">
-          <h1 className="text-xl font-black text-red-400 uppercase tracking-widest font-serif mb-3">Connection required</h1>
-          <p className="text-sm text-text-secondary mb-4 leading-relaxed">
+        <div className="max-w-lg w-full glass-panel rounded-2xl p-8 border border-red-500/30 shadow-2xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+              <i className="fas fa-plug"></i>
+            </div>
+            <h1 className="text-xl font-black text-red-400 uppercase tracking-widest font-serif">Connection required</h1>
+          </div>
+          <p className="text-sm text-text-secondary mb-5 leading-relaxed">
             The app cannot reach your backend until the environment is configured. Add your project URL and API key where this app reads
-            its settings (usually a local <code className="text-money-green px-1">.env</code> file), then restart the dev or preview server.
+            its settings (usually a local <code className="text-money-green px-1.5 py-0.5 rounded bg-money-green/10">.env</code> file), then restart the dev or preview server.
           </p>
-          <pre className="text-[11px] leading-relaxed bg-[#0c1410] p-4 rounded-xl border border-[#85bb65]/20 text-money-green overflow-x-auto whitespace-pre-wrap font-mono">
+          <pre className="text-[11px] leading-relaxed bg-surface p-4 rounded-xl border border-divider text-money-green overflow-x-auto whitespace-pre-wrap font-mono shadow-inner">
             {`VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_key_here`}
           </pre>
           <p className="text-xs text-text-tertiary mt-4">
-            Use the project base URL only (host ending in <code className="text-money-green">.supabase.co</code>), not the REST API path.
+            Use the project base URL only (host ending in <code className="text-money-green bg-money-green/10 px-1 rounded">.supabase.co</code>), not the REST API path.
           </p>
         </div>
       </div>
@@ -672,7 +677,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
       />
 
       <div className="flex-1 flex flex-col h-full sm:ml-72 relative overflow-hidden">
-        <header className="px-8 py-6 flex justify-between items-center z-20 sticky top-0 bg-[#0c1410]/80 backdrop-blur-md border-b border-[#85bb65]/10">
+        <header className="px-6 sm:px-8 py-5 flex justify-between items-center z-20 sticky top-0 bg-background/70 backdrop-blur-xl border-b border-divider">
           <div className="flex flex-col">
             <h2 className="text-2xl font-black text-money-gold capitalize tracking-widest font-serif">
               {currentView === 'dashboard' ? 'Dashboard' :
@@ -686,16 +691,16 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                : currentView === 'import' ? 'Data Import' : 'Settings'}
             </h2>
             <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1">
-              Forum Testing & Educational Services • {location === 'cochin' ? 'Cochin' : 'Calicut'} • GST: {COMPANY_INFO.gstNumber}
+              Forum Testing & Educational Services <span className="mx-1.5 opacity-40">•</span> {location === 'cochin' ? 'Cochin' : 'Calicut'} <span className="mx-1.5 opacity-40">•</span> GST {COMPANY_INFO.gstNumber}
             </p>
           </div>
 
           <div className="flex items-center gap-6">
             <div className="text-right hidden sm:block">
-              <p className="text-xs text-text-secondary">Total Income (FY)</p>
-              <p className="text-sm font-bold text-money-green">${(totalIncome / 100000).toFixed(2)}L</p>
+              <p className="text-[10px] text-text-tertiary uppercase tracking-wider font-semibold">Total Income (FY)</p>
+              <p className="text-sm font-extrabold text-money-green">${(totalIncome / 100000).toFixed(2)}L</p>
             </div>
-            <div className="transform scale-[0.65] origin-right -mr-4 sm:mr-0">
+            <div className="transform scale-[0.7] origin-right">
               <HoloToggle checked={location === 'cochin'} onChange={(c) => setLocation(c ? 'cochin' : 'calicut')} />
             </div>
           </div>
@@ -715,7 +720,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
 
           {/* --- DASHBOARD --- */}
           {currentView === 'dashboard' && (
-            <div className="space-y-8 animate-fade-in">
+            <div className="space-y-8 page-enter">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatsCard title="Total Income" value={`$${(totalIncome / 1000).toFixed(1)}k`} icon="fa-wallet" color="#85bb65" delay={0} />
                 <StatsCard title="Pending Invoices" value={pendingInvoices.length.toString()} icon="fa-file-invoice" color="#d4af37" delay={0.05} />
@@ -725,18 +730,24 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="glass-panel rounded-2xl p-6">
-                  <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Income vs Expenses</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xs font-bold text-text-secondary uppercase tracking-[0.2em]">Income vs Expenses</h3>
+                    <div className="flex items-center gap-2 text-[10px] text-text-tertiary">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-money-green"></span> Income</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400"></span> Expense</span>
+                    </div>
+                  </div>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={revenueChartData}>
                         <defs>
-                          <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#85bb65" stopOpacity={0.3} /><stop offset="95%" stopColor="#85bb65" stopOpacity={0} /></linearGradient>
-                          <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} /><stop offset="95%" stopColor="#ef4444" stopOpacity={0} /></linearGradient>
+                          <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#85bb65" stopOpacity={0.25} /><stop offset="95%" stopColor="#85bb65" stopOpacity={0} /></linearGradient>
+                          <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} /><stop offset="95%" stopColor="#ef4444" stopOpacity={0} /></linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(133,187,101,0.1)" />
-                        <XAxis dataKey="name" stroke="#546e61" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
-                        <YAxis stroke="#546e61" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
-                        <Tooltip contentStyle={{ backgroundColor: '#16231d', borderColor: '#85bb65' }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(133,187,101,0.06)" />
+                        <XAxis dataKey="name" stroke="#4a6354" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#4a6354" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
+                        <Tooltip contentStyle={{ backgroundColor: '#0f1a14', borderColor: 'rgba(133,187,101,0.2)', borderRadius: '12px', fontSize: 12 }} />
                         <Area type="monotone" dataKey="income" stroke="#85bb65" fill="url(#incomeGrad)" strokeWidth={2} />
                         <Area type="monotone" dataKey="expense" stroke="#ef4444" fill="url(#expenseGrad)" strokeWidth={2} />
                       </AreaChart>
@@ -744,7 +755,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                   </div>
                 </div>
                 <div className="glass-panel rounded-2xl p-6">
-                  <h3 className="text-sm font-bold text-text-secondary uppercase tracking-widest mb-6">Expense Breakdown</h3>
+                  <h3 className="text-xs font-bold text-text-secondary uppercase tracking-[0.2em] mb-6">Expense Breakdown</h3>
                   <div className="h-[300px]">
                     {pieData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
@@ -753,11 +764,12 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                             data={pieData}
                             cx="50%"
                             cy="45%"
-                            outerRadius={90}
-                            innerRadius={45}
+                            outerRadius={85}
+                            innerRadius={50}
                             dataKey="value"
                             nameKey="name"
-                            paddingAngle={3}
+                            paddingAngle={4}
+                            stroke="none"
                           >
                             {pieData.map((_, index) => (
                               <Cell
@@ -767,24 +779,27 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                             ))}
                           </Pie>
                           <Tooltip
-                            contentStyle={{ backgroundColor: '#16231d', borderColor: '#85bb65', fontSize: 12 }}
+                            contentStyle={{ backgroundColor: '#0f1a14', borderColor: 'rgba(133,187,101,0.2)', borderRadius: '12px', fontSize: 12 }}
                             formatter={(value: number, name: string) => [`₹${value.toLocaleString('en-IN')}`, name]}
                           />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
-                      <div className="h-full flex items-center justify-center text-text-tertiary text-sm">
-                        No expense data yet
+                      <div className="h-full flex flex-col items-center justify-center text-text-tertiary gap-3">
+                        <div className="w-16 h-16 rounded-2xl bg-surface-elevated border border-divider flex items-center justify-center">
+                          <i className="fas fa-chart-pie text-2xl text-text-muted"></i>
+                        </div>
+                        <p className="text-sm">No expense data yet</p>
                       </div>
                     )}
                   </div>
                   {pieData.length > 0 && (
-                    <div className="mt-3 space-y-1">
+                    <div className="mt-3 space-y-1.5">
                       {pieData.map((entry, index) => (
-                        <div key={entry.name} className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: ['#85bb65', '#d4af37', '#3e5c76', '#ef4444', '#a78bfa'][index % 5] }}></span>
-                            <span className="text-text-secondary truncate max-w-[120px]">{entry.name}</span>
+                        <div key={entry.name} className="flex items-center justify-between text-xs py-1 px-2 rounded-lg hover:bg-white/[0.02] transition-colors">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: ['#85bb65', '#d4af37', '#3e5c76', '#ef4444', '#a78bfa'][index % 5] }}></span>
+                            <span className="text-text-secondary truncate max-w-[140px]">{entry.name}</span>
                           </div>
                           <span className="text-money-gold font-bold">₹{entry.value.toLocaleString('en-IN')}</span>
                         </div>
@@ -795,19 +810,22 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
               </div>
 
               {/* Quick Actions */}
-              <div className="glass-panel rounded-2xl p-6 border border-money-gold/20">
-                <h3 className="text-sm font-bold text-money-gold uppercase tracking-widest mb-4">Quick Actions</h3>
+              <div className="glass-panel rounded-2xl p-6 border border-money-gold/15">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-1 h-4 rounded-full bg-money-gold/60"></div>
+                  <h3 className="text-xs font-bold text-money-gold uppercase tracking-[0.2em]">Quick Actions</h3>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   <button onClick={() => { setEditingCustomer(null); setEditingInvoice(null); setModalType('invoice'); setIsModalOpen(true); }}
-                    className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center gap-2">
+                    className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center gap-2 hover:border-money-gold/40">
                     <i className="fas fa-plus"></i> New Invoice
                   </button>
                   <button onClick={() => setCurrentView('customers')}
-                    className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-text-secondary flex items-center gap-2">
+                    className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-text-secondary flex items-center gap-2 hover:text-money-green">
                     <i className="fas fa-users"></i> View Clients
                   </button>
                   <button onClick={() => setCurrentView('import')}
-                    className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-text-secondary flex items-center gap-2">
+                    className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-text-secondary flex items-center gap-2 hover:text-money-green">
                     <i className="fas fa-file-import"></i> Import Data
                   </button>
                 </div>
@@ -815,21 +833,21 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
             </div>
           )}
 
-          {/* --- EXPENSES (Existing) --- */}
+          {/* --- EXPENSES --- */}
           {currentView === 'expenses' && (
-            <div className="space-y-6">
+            <div className="space-y-6 page-enter">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <p className="text-[11px] text-text-tertiary max-w-xl sm:order-last">
+                <p className="text-[11px] text-text-tertiary max-w-xl sm:order-last leading-relaxed">
                   <strong className="text-money-green/90">Paybook</strong> is payroll, payslips, and sundry vouchers.{' '}
                   <strong className="text-text-secondary">Expense register</strong> is the branch day-book of posted expenses.
                 </p>
-                <div className="flex p-1 rounded-xl bg-[#0c1410]/80 border border-[#85bb65]/15 w-fit">
+                <div className="flex p-1 rounded-xl bg-surface border border-divider w-fit">
                   <button
                     type="button"
                     onClick={() => setExpenseSection('register')}
                     className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                       expenseSection === 'register'
-                        ? 'neo-btn active text-money-gold border border-[#85bb65]/25'
+                        ? 'active text-money-gold bg-money-green/5 border border-money-green/15'
                         : 'text-text-tertiary hover:text-money-green'
                     }`}
                   >
@@ -841,7 +859,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                     onClick={() => setExpenseSection('paybook')}
                     className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                       expenseSection === 'paybook'
-                        ? 'neo-btn active text-money-gold border border-[#85bb65]/25'
+                        ? 'active text-money-gold bg-money-green/5 border border-money-green/15'
                         : 'text-text-tertiary hover:text-money-green'
                     }`}
                   >
@@ -855,49 +873,52 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                 <PaybookView location={location} primaryColor={primaryColor} />
               ) : (
                 <>
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
                     <div className="relative flex-1 max-w-md">
-                      <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary"></i>
+                      <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-muted"></i>
                       <input type="text" placeholder="Search expenses..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="neo-input w-full rounded-xl py-3 pl-11 text-sm" />
                     </div>
                     <button onClick={() => { setEditingExpense(null); setModalType('expense'); setIsModalOpen(true); }}
-                      className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center gap-2">
+                      className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center justify-center gap-2 hover:border-money-gold/40">
                       <i className="fas fa-plus"></i> Add Expense
                     </button>
                   </div>
 
                   <div className="glass-panel rounded-2xl overflow-hidden">
                     <table className="w-full">
-                      <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
+                      <thead className="bg-surface-highlight/50 border-b border-divider">
                         <tr>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Date</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">ID</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Category</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Description</th>
-                          <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase">Amount</th>
-                          <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase">Actions</th>
+                          <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Date</th>
+                          <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">ID</th>
+                          <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Category</th>
+                          <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Description</th>
+                          <th className="px-5 py-3.5 text-right text-[10px] font-black text-text-tertiary uppercase tracking-wider">Amount</th>
+                          <th className="px-5 py-3.5 text-center text-[10px] font-black text-text-tertiary uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#85bb65]/5">
+                      <tbody className="divide-y divide-divider">
                         {filteredExpenses.map((exp) => (
-                          <tr key={exp.id} className="hover:bg-[#85bb65]/5">
-                            <td className="px-6 py-4 text-xs">{new Date(exp.date).toLocaleDateString('en-GB')}</td>
-                            <td className="px-6 py-4 text-xs font-bold text-money-green">{exp.paid_by}</td>
-                            <td className="px-6 py-4 text-xs">{exp.category}</td>
-                            <td className="px-6 py-4 text-xs text-text-secondary truncate max-w-xs">{exp.description}</td>
-                            <td className="px-6 py-4 text-right font-bold text-money-gold">₹{exp.amount.toLocaleString()}</td>
-                            <td className="px-6 py-4 text-center">
+                          <tr key={exp.id} className="hover:bg-white/[0.02] transition-colors">
+                            <td className="px-5 py-3.5 text-xs text-text-secondary">{new Date(exp.date).toLocaleDateString('en-GB')}</td>
+                            <td className="px-5 py-3.5 text-xs font-bold text-money-green">{exp.paid_by}</td>
+                            <td className="px-5 py-3.5 text-xs"><span className="px-2 py-0.5 rounded-md bg-surface-elevated border border-divider text-[10px]">{exp.category}</span></td>
+                            <td className="px-5 py-3.5 text-xs text-text-secondary truncate max-w-xs">{exp.description}</td>
+                            <td className="px-5 py-3.5 text-right font-bold text-money-gold text-sm">₹{exp.amount.toLocaleString()}</td>
+                            <td className="px-5 py-3.5 text-center">
                               <button onClick={() => { setEditingExpense(exp); setModalType('expense'); setIsModalOpen(true); }}
-                                className="text-text-tertiary hover:text-money-gold mr-2"><i className="fas fa-edit"></i></button>
-                              <button onClick={() => confirmDeleteRequest(exp.id!, 'expense')} className="text-text-tertiary hover:text-red-400"><i className="fas fa-trash"></i></button>
+                                className="w-8 h-8 rounded-lg hover:bg-money-gold/5 text-text-tertiary hover:text-money-gold mr-1 transition-colors"><i className="fas fa-edit text-xs"></i></button>
+                              <button onClick={() => confirmDeleteRequest(exp.id!, 'expense')} className="w-8 h-8 rounded-lg hover:bg-red-500/5 text-text-tertiary hover:text-red-400 transition-colors"><i className="fas fa-trash text-xs"></i></button>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                     {filteredExpenses.length === 0 && (
-                      <div className="text-center py-12 text-text-secondary">
-                        <i className="fas fa-receipt text-3xl mb-4"></i><p>No expenses found</p>
+                      <div className="text-center py-14 text-text-tertiary flex flex-col items-center gap-3">
+                        <div className="w-14 h-14 rounded-2xl bg-surface-elevated border border-divider flex items-center justify-center">
+                          <i className="fas fa-receipt text-xl text-text-muted"></i>
+                        </div>
+                        <p className="text-sm">No expenses found</p>
                       </div>
                     )}
                   </div>
@@ -906,17 +927,18 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
             </div>
           )}
 
-          {/* --- CASH (Existing) --- */}
+          {/* --- CASH --- */}
           {currentView === 'cash' && (
-            <div className="space-y-6">
+            <div className="space-y-6 page-enter">
               {/* Cash Balance Card */}
-              <div className="glass-panel rounded-2xl p-6 border border-[#85bb65]/20 flex justify-between items-center"
-                style={{ background: 'linear-gradient(135deg, #1b3826 0%, #0c1410 100%)' }}>
-                <div>
-                  <p className="text-xs text-money-green/60 uppercase tracking-wider">Current Cash Balance</p>
-                  <h3 className="text-4xl font-bold text-white font-serif">₹{cashBalance.toLocaleString('en-IN')}</h3>
+              <div className="glass-panel rounded-2xl p-6 border border-money-green/10 flex justify-between items-center relative overflow-hidden"
+                style={{ background: 'linear-gradient(135deg, #0f2418 0%, #080f0c 100%)' }}>
+                <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[100px] opacity-10 bg-money-green pointer-events-none"></div>
+                <div className="relative z-10">
+                  <p className="text-[10px] text-money-green/50 uppercase tracking-[0.2em] font-semibold mb-1">Current Cash Balance</p>
+                  <h3 className="text-3xl sm:text-4xl font-extrabold text-white font-sans tracking-tight">₹{cashBalance.toLocaleString('en-IN')}</h3>
                 </div>
-                <button onClick={() => openCashModal()} className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold">
+                <button onClick={() => openCashModal()} className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-money-gold relative z-10 hover:border-money-gold/30">
                   <i className="fas fa-plus mr-2"></i>New Transaction
                 </button>
               </div>
@@ -924,79 +946,94 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
               {/* Cash Transactions Table */}
               <div className="glass-panel rounded-2xl overflow-hidden">
                 <table className="w-full">
-                  <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
+                  <thead className="bg-surface-highlight/50 border-b border-divider">
                     <tr>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Date</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Ref ID</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Category</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase">Description</th>
-                      <th className="px-6 py-4 text-right text-[10px] font-black text-text-tertiary uppercase">Amount</th>
-                      <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase">Actions</th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Date</th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Ref ID</th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Category</th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Description</th>
+                      <th className="px-5 py-3.5 text-right text-[10px] font-black text-text-tertiary uppercase tracking-wider">Amount</th>
+                      <th className="px-5 py-3.5 text-center text-[10px] font-black text-text-tertiary uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#85bb65]/5">
+                  <tbody className="divide-y divide-divider">
                     {filteredTransactions.map((tx) => (
-                      <tr key={tx.id} className="hover:bg-[#85bb65]/5">
-                        <td className="px-6 py-4 text-xs">{new Date(tx.date).toLocaleDateString('en-GB')}</td>
-                        <td className="px-6 py-4 text-xs font-bold text-money-green">{tx.custom_id}</td>
-                        <td className="px-6 py-4 text-xs">{tx.category}</td>
-                        <td className="px-6 py-4 text-xs text-text-secondary">{tx.clean_description}</td>
-                        <td className={`px-6 py-4 text-right font-bold ${tx.amount >= 0 ? 'text-money-green' : 'text-red-400'}`}>
+                      <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="px-5 py-3.5 text-xs text-text-secondary">{new Date(tx.date).toLocaleDateString('en-GB')}</td>
+                        <td className="px-5 py-3.5 text-xs font-bold text-money-green">{tx.custom_id}</td>
+                        <td className="px-5 py-3.5 text-xs"><span className="px-2 py-0.5 rounded-md bg-surface-elevated border border-divider text-[10px]">{tx.category}</span></td>
+                        <td className="px-5 py-3.5 text-xs text-text-secondary">{tx.clean_description}</td>
+                        <td className={`px-5 py-3.5 text-right font-bold text-sm ${tx.amount >= 0 ? 'text-money-green' : 'text-red-400'}`}>
                           {tx.amount >= 0 ? '+' : ''}₹{Math.abs(tx.amount).toLocaleString()}
                         </td>
-                        <td className="px-6 py-4 text-center">
-                          <button onClick={() => openCashModal(tx)} className="text-text-tertiary hover:text-money-gold mr-2"><i className="fas fa-edit"></i></button>
-                          <button onClick={() => confirmDeleteRequest(tx.id!, 'cash')} className="text-text-tertiary hover:text-red-400"><i className="fas fa-trash"></i></button>
+                        <td className="px-5 py-3.5 text-center">
+                          <button onClick={() => openCashModal(tx)} className="w-8 h-8 rounded-lg hover:bg-money-gold/5 text-text-tertiary hover:text-money-gold mr-1 transition-colors"><i className="fas fa-edit text-xs"></i></button>
+                          <button onClick={() => confirmDeleteRequest(tx.id!, 'cash')} className="w-8 h-8 rounded-lg hover:bg-red-500/5 text-text-tertiary hover:text-red-400 transition-colors"><i className="fas fa-trash text-xs"></i></button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                {filteredTransactions.length === 0 && (
+                  <div className="text-center py-14 text-text-tertiary flex flex-col items-center gap-3">
+                    <div className="w-14 h-14 rounded-2xl bg-surface-elevated border border-divider flex items-center justify-center">
+                      <i className="fas fa-book text-xl text-text-muted"></i>
+                    </div>
+                    <p className="text-sm">No cash transactions yet</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* --- CUSTOMERS (NEW) --- */}
+          {/* --- CUSTOMERS --- */}
           {currentView === 'customers' && (
-            <CustomerList
-              customers={customers}
-              onAdd={handleAddCustomer}
-              onUpdate={handleUpdateCustomer}
-              onDelete={handleDeleteCustomer}
-              primaryColor={primaryColor}
-            />
+            <div className="page-enter">
+              <CustomerList
+                customers={customers}
+                onAdd={handleAddCustomer}
+                onUpdate={handleUpdateCustomer}
+                onDelete={handleDeleteCustomer}
+                primaryColor={primaryColor}
+              />
+            </div>
           )}
 
-          {/* --- INVOICES (NEW) --- */}
+          {/* --- INVOICES --- */}
           {currentView === 'invoices' && (
-            <InvoiceList
-              invoices={invoices}
-              customers={customers}
-              userId={user?.id || ''}
-              location={location}
-              onAdd={handleAddInvoice}
-              onUpdate={handleUpdateInvoice}
-              onDelete={handleDeleteInvoice}
-              onRecordPayment={handleRecordPayment}
-              primaryColor={primaryColor}
-              screenTab={invoiceScreenTab}
-              onScreenTabChange={setInvoiceScreenTab}
-            />
+            <div className="page-enter">
+              <InvoiceList
+                invoices={invoices}
+                customers={customers}
+                userId={user?.id || ''}
+                location={location}
+                onAdd={handleAddInvoice}
+                onUpdate={handleUpdateInvoice}
+                onDelete={handleDeleteInvoice}
+                onRecordPayment={handleRecordPayment}
+                primaryColor={primaryColor}
+                screenTab={invoiceScreenTab}
+                onScreenTabChange={setInvoiceScreenTab}
+              />
+            </div>
           )}
 
-          {/* --- DATA IMPORT (NEW) --- */}
+          {/* --- DATA IMPORT --- */}
           {currentView === 'import' && (
-            <DataImport
-              userId={user?.id || ''}
-              onCustomersImported={handleImportCustomers}
-              onInvoicesImported={handleImportInvoices}
-              primaryColor={primaryColor}
-            />
+            <div className="page-enter">
+              <DataImport
+                userId={user?.id || ''}
+                onCustomersImported={handleImportCustomers}
+                onInvoicesImported={handleImportInvoices}
+                primaryColor={primaryColor}
+              />
+            </div>
           )}
 
           {/* --- SETTINGS --- */}
           {currentView === 'settings' && user && (
-            <SettingsView
+            <div className="page-enter">
+              <SettingsView
               companyInfo={COMPANY_INFO}
               location={location}
               onLocationChange={setLocation}
@@ -1040,6 +1077,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
               onOpenClients={() => setCurrentView('customers')}
               onOpenImport={() => setCurrentView('import')}
             />
+            </div>
           )}
         </main>
       </div>
@@ -1089,10 +1127,17 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
       {/* Delete Confirmation */}
       <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} title="Confirm Delete">
         <div className="space-y-6">
-          <p className="text-sm text-text-secondary">This action cannot be undone. Are you sure?</p>
-          <div className="flex gap-4 justify-end">
-            <button onClick={() => setDeleteId(null)} className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-text-secondary">Cancel</button>
-            <button onClick={executeDelete} className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-red-500 border border-red-500/20">Delete</button>
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+              <i className="fas fa-trash-alt text-red-400 text-sm"></i>
+            </div>
+            <div>
+              <p className="text-sm text-text-secondary leading-relaxed">This action cannot be undone. The selected record will be permanently removed from the system.</p>
+            </div>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <button onClick={() => setDeleteId(null)} className="neo-btn px-5 py-2.5 rounded-xl text-xs font-bold text-text-secondary hover:text-money-paper">Cancel</button>
+            <button onClick={executeDelete} className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-red-500/80 hover:bg-red-500 border border-red-500/30 transition-colors shadow-[0_0_20px_rgba(239,68,68,0.15)]">Delete</button>
           </div>
         </div>
       </Modal>
