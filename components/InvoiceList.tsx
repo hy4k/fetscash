@@ -48,6 +48,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
   onAdd,
   onUpdate,
   onDelete,
+  onRecordPayment,
   primaryColor,
   screenTab,
   onScreenTabChange,
@@ -62,14 +63,14 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
 
   const getStatusColor = (status: InvoiceStatus) => {
     const colors: { [key: string]: string } = {
-      draft: 'bg-gray-500',
-      sent: 'bg-blue-500',
-      paid: 'bg-money-green',
-      overdue: 'bg-red-500',
-      partially_paid: 'bg-yellow-500',
-      cancelled: 'bg-gray-700',
+      draft: 'border-gray-500/30 text-gray-400',
+      sent: 'border-blue-500/30 text-blue-400',
+      paid: 'border-money-green/30 text-money-green',
+      overdue: 'border-red-500/30 text-red-400',
+      partially_paid: 'border-amber-500/30 text-amber-400',
+      cancelled: 'border-gray-600/30 text-gray-500',
     };
-    return colors[status] || 'bg-gray-500';
+    return colors[status] || 'border-gray-500/30 text-gray-400';
   };
 
   const getStatusLabel = (status: InvoiceStatus) => {
@@ -257,13 +258,13 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex p-1 rounded-xl bg-[#0c1410]/80 border border-[#85bb65]/15 w-fit">
+        <div className="flex p-1 rounded-xl bg-surface border border-money-green/10 w-fit">
           <button
             type="button"
             onClick={() => onScreenTabChange('invoices')}
             className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
               screenTab === 'invoices'
-                ? 'neo-btn active text-money-gold border border-[#85bb65]/25'
+                ? 'border border-money-gold/30 text-money-gold bg-surface-elevated'
                 : 'text-text-tertiary hover:text-money-green'
             }`}
           >
@@ -275,7 +276,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
             onClick={() => onScreenTabChange('monthly_revenue')}
             className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
               screenTab === 'monthly_revenue'
-                ? 'neo-btn active text-money-gold border border-[#85bb65]/25'
+                ? 'border border-money-gold/30 text-money-gold bg-surface-elevated'
                 : 'text-text-tertiary hover:text-money-green'
             }`}
           >
@@ -296,21 +297,21 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
         <>
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="glass-panel rounded-xl p-4 border border-[#85bb65]/10">
-          <p className="text-[10px] font-bold text-money-green/60 uppercase tracking-wider">Total Invoiced</p>
-          <p className="text-xl font-bold text-white mt-1">{formatCurrency(stats.totalInvoiced, 'USD')}</p>
+        <div className="glass-panel rounded-2xl p-4 border-l-2 border-money-green/40">
+          <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total Invoiced</p>
+          <p className="text-xl font-bold text-money-paper mt-1">{formatCurrency(stats.totalInvoiced, 'USD')}</p>
         </div>
-        <div className="glass-panel rounded-xl p-4 border border-[#85bb65]/10">
-          <p className="text-[10px] font-bold text-money-green/60 uppercase tracking-wider">Total Paid</p>
+        <div className="glass-panel rounded-2xl p-4 border-l-2 border-money-green/60">
+          <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total Paid</p>
           <p className="text-xl font-bold text-money-green mt-1">{formatCurrency(stats.totalPaid, 'USD')}</p>
         </div>
-        <div className="glass-panel rounded-xl p-4 border border-[#85bb65]/10">
-          <p className="text-[10px] font-bold text-money-green/60 uppercase tracking-wider">Pending</p>
+        <div className="glass-panel rounded-2xl p-4 border-l-2 border-money-gold/40">
+          <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Pending</p>
           <p className="text-xl font-bold text-money-gold mt-1">{formatCurrency(stats.totalPending, 'USD')}</p>
         </div>
-        <div className="glass-panel rounded-xl p-4 border border-[#85bb65]/10">
-          <p className="text-[10px] font-bold text-money-green/60 uppercase tracking-wider">Overdue</p>
-          <p className={`text-xl font-bold mt-1 ${stats.overdueCount > 0 ? 'text-red-400' : 'text-white'}`}>
+        <div className="glass-panel rounded-2xl p-4 border-l-2 border-red-400/40">
+          <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Overdue</p>
+          <p className={`text-xl font-bold mt-1 ${stats.overdueCount > 0 ? 'text-red-400' : 'text-money-paper'}`}>
             {stats.overdueCount}
           </p>
         </div>
@@ -370,7 +371,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
       <div className="glass-panel rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#0c1410]/50 border-b border-[#85bb65]/20">
+            <thead className="bg-surface-highlight/50 border-b border-divider">
               <tr>
                 <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Invoice #</th>
                 <th className="px-6 py-4 text-left text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Client</th>
@@ -384,18 +385,20 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                 <th className="px-6 py-4 text-center text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#85bb65]/5">
+            <tbody className="divide-y divide-divider">
               {filteredInvoices.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="px-6 py-12 text-center">
-                    <i className="fas fa-file-invoice text-4xl text-text-tertiary mb-4"></i>
+                    <div className="mx-auto w-16 h-16 rounded-full bg-surface-highlight/50 border border-divider flex items-center justify-center mb-4">
+                      <i className="fas fa-file-invoice text-2xl text-text-muted"></i>
+                    </div>
                     <p className="text-text-secondary">No invoices found</p>
                     <p className="text-xs text-text-tertiary mt-2">Create your first invoice to get started</p>
                   </td>
                 </tr>
               ) : (
                 filteredInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-[#85bb65]/5 transition-colors">
+                  <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-4">
                       <span className="text-xs font-bold text-money-green">{inv.invoice_number}</span>
                     </td>
@@ -435,7 +438,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`px-2 py-1 rounded text-[10px] font-bold uppercase text-white ${getStatusColor(
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${getStatusColor(
                           inv.status
                         )}`}
                       >
@@ -501,8 +504,8 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
       )}
 
       {screenTab === 'monthly_revenue' && (
-        <div className="glass-panel rounded-2xl border border-[#85bb65]/10 overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#85bb65]/15">
+        <div className="glass-panel rounded-2xl border border-money-green/10 overflow-hidden">
+          <div className="px-5 py-4 border-b border-divider">
             <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary">Monthly revenue by client</h4>
             <p className="text-[10px] text-text-tertiary mt-1">
               Derived from your invoice register. Each row is one month, one client, and one currency.
@@ -511,7 +514,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-[#0c1410]/90 text-[9px] uppercase text-text-tertiary border-b border-[#85bb65]/20">
+                <tr className="bg-surface-highlight/50 text-[9px] uppercase text-text-tertiary border-b border-divider">
                   <th className="text-left px-4 py-3 font-black tracking-wider">Month</th>
                   <th className="text-left px-4 py-3 font-black tracking-wider">Client</th>
                   <th className="text-left px-4 py-3 font-black tracking-wider">Currency</th>
@@ -521,9 +524,9 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                   <th className="text-right px-4 py-3 font-black tracking-wider">Pending</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#85bb65]/10">
+              <tbody className="divide-y divide-divider">
                 {monthlyByClientRows.map((r, i) => (
-                  <tr key={`${r.month}-${r.customer_id}-${r.currency}-${i}`} className="hover:bg-[#85bb65]/5">
+                  <tr key={`${r.month}-${r.customer_id}-${r.currency}-${i}`} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
                       {new Date(`${r.month}-01`).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                     </td>
@@ -534,7 +537,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                       {formatMoneyCell(r.total_revenue, r.currency)}
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">{formatMoneyCell(r.paid_amount, r.currency)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums text-amber-200/90">
+                    <td className="px-4 py-3 text-right tabular-nums text-amber-200">
                       {formatMoneyCell(r.pending_amount, r.currency)}
                     </td>
                   </tr>
@@ -542,8 +545,11 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
               </tbody>
             </table>
             {monthlyByClientRows.length === 0 && (
-              <div className="text-center py-12 text-text-secondary text-sm">
-                No invoice data to summarize yet.
+              <div className="text-center py-12">
+                <div className="mx-auto w-16 h-16 rounded-full bg-surface-highlight/50 border border-divider flex items-center justify-center mb-4">
+                  <i className="fas fa-chart-line text-2xl text-text-muted"></i>
+                </div>
+                <p className="text-text-secondary text-sm">No invoice data to summarize yet.</p>
               </div>
             )}
           </div>

@@ -32,14 +32,14 @@ function branchLabel(loc: LocationType): string {
 const navItem = (active: boolean) =>
   `w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-[11px] font-bold uppercase tracking-wider transition-all border ${
     active
-      ? 'bg-money-green/15 border-money-green/35 text-money-green shadow-[inset_0_0_0_1px_rgba(133,187,101,0.12)]'
-      : 'border-transparent text-text-secondary hover:bg-[#0c1410]/80 hover:text-money-paper'
+      ? 'bg-money-green/15 border-money-green/35 text-money-green'
+      : 'border-transparent text-text-secondary hover:bg-surface/80 hover:text-money-paper'
   }`;
 
 const quickCard =
-  'glass-panel rounded-2xl p-5 border border-[#85bb65]/12 hover:border-money-gold/25 hover:shadow-[0_0_24px_rgba(212,175,55,0.08)] transition-all text-left group cursor-pointer';
+  'glass-panel rounded-2xl p-5 border border-money-green/10 hover:border-money-gold/20 hover:shadow-[0_0_24px_rgba(212,175,55,0.08)] transition-all text-left group cursor-pointer';
 
-const statMini = 'glass-panel rounded-xl px-4 py-4 border border-[#85bb65]/10 text-center';
+const statMini = 'glass-panel rounded-xl px-4 py-4 border border-money-green/10 text-center hover:border-money-gold/15 transition-colors';
 
 interface SettingsViewProps {
   companyInfo: CompanyInfoBlock;
@@ -234,7 +234,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <p className="text-sm font-bold text-money-green whitespace-nowrap">
             Total income (paid) <span className="tabular-nums">{formatIncomeLabel(totalIncomePaid)}</span>
           </p>
-          <div className="flex items-center gap-2 neo-btn px-4 py-2.5 rounded-full border border-[#85bb65]/20 text-xs font-bold text-money-paper">
+          <div className="flex items-center gap-2 neo-btn px-4 py-2.5 rounded-full border border-money-green/20 text-xs font-bold text-money-paper">
             <span
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px]"
               style={{ backgroundColor: primaryColor }}
@@ -248,7 +248,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
       {/* Location scope tabs */}
       <div className="flex justify-center">
-        <div className="inline-flex p-1 rounded-2xl bg-[#0c1410]/90 border border-[#85bb65]/15">
+        <div className="inline-flex p-1 rounded-2xl bg-surface/90 border border-money-green/15">
           {(['global', 'cochin', 'calicut'] as const).map((key) => {
             const active =
               key === 'global' ? scope === 'global' : scope === key;
@@ -259,7 +259,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 onClick={() => (key === 'global' ? setGlobalScope() : setBranchScope(key))}
                 className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                   active
-                    ? 'bg-[#1a2820] text-money-gold border border-[#85bb65]/25 shadow-inner'
+                    ? 'text-money-gold border border-money-gold/20'
                     : 'text-text-tertiary hover:text-money-green border border-transparent'
                 }`}
               >
@@ -273,7 +273,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Sidebar */}
         <aside className="w-full lg:w-72 shrink-0 space-y-4">
-          <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/12">
+          <div className="glass-panel rounded-2xl p-5 border border-money-green/10">
             <div className="flex items-center gap-2 mb-1">
               <i className="fas fa-cog text-money-gold" />
               <span className="text-sm font-black text-money-paper uppercase tracking-widest">Settings</span>
@@ -291,7 +291,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 onClick={() => setSection(item.id)}
               >
                 <span
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-sm bg-black/30 border border-[#85bb65]/10"
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-sm bg-black/30 border border-money-green/10"
                   style={{ color: section === item.id ? primaryColor : undefined }}
                 >
                   <i className={`fas ${item.icon}`} />
@@ -312,42 +312,42 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   <button type="button" className={quickCard} onClick={onQuickNewInvoice}>
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-300 text-xl mb-3 border border-amber-500/20">
+                    <div className="w-11 h-11 rounded-xl bg-surface-elevated border border-divider flex items-center justify-center text-money-gold text-lg mb-3 group-hover:border-money-gold/25 transition-colors">
                       <i className="fas fa-file-invoice" />
                     </div>
                     <p className="text-sm font-bold text-money-paper">New invoice</p>
                     <p className="text-[10px] text-text-tertiary mt-1">Create invoice</p>
                   </button>
                   <button type="button" className={quickCard} onClick={onQuickNewExpense}>
-                    <div className="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center text-red-300 text-xl mb-3 border border-red-500/20">
+                    <div className="w-11 h-11 rounded-xl bg-surface-elevated border border-divider flex items-center justify-center text-money-gold text-lg mb-3 group-hover:border-money-gold/25 transition-colors">
                       <i className="fas fa-receipt" />
                     </div>
                     <p className="text-sm font-bold text-money-paper">New expense</p>
                     <p className="text-[10px] text-text-tertiary mt-1">Record expense</p>
                   </button>
                   <button type="button" className={quickCard} onClick={onQuickAddClient}>
-                    <div className="w-12 h-12 rounded-xl bg-sky-500/15 flex items-center justify-center text-sky-300 text-xl mb-3 border border-sky-500/20">
+                    <div className="w-11 h-11 rounded-xl bg-surface-elevated border border-divider flex items-center justify-center text-money-gold text-lg mb-3 group-hover:border-money-gold/25 transition-colors">
                       <i className="fas fa-user-plus" />
                     </div>
                     <p className="text-sm font-bold text-money-paper">Add client</p>
                     <p className="text-[10px] text-text-tertiary mt-1">New client</p>
                   </button>
                   <button type="button" className={quickCard} onClick={onQuickCashBook}>
-                    <div className="w-12 h-12 rounded-xl bg-yellow-500/15 flex items-center justify-center text-yellow-200 text-xl mb-3 border border-yellow-500/25">
+                    <div className="w-11 h-11 rounded-xl bg-surface-elevated border border-divider flex items-center justify-center text-money-gold text-lg mb-3 group-hover:border-money-gold/25 transition-colors">
                       <i className="fas fa-landmark" />
                     </div>
                     <p className="text-sm font-bold text-money-paper">Bank / cash book</p>
                     <p className="text-[10px] text-text-tertiary mt-1">Cash entries &amp; INR</p>
                   </button>
                   <button type="button" className={quickCard} onClick={onOpenMonthlyRevenue}>
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-300 text-xl mb-3 border border-emerald-500/20">
+                    <div className="w-11 h-11 rounded-xl bg-surface-elevated border border-divider flex items-center justify-center text-money-gold text-lg mb-3 group-hover:border-money-gold/25 transition-colors">
                       <i className="fas fa-chart-line" />
                     </div>
                     <p className="text-sm font-bold text-money-paper">Monthly revenue</p>
                     <p className="text-[10px] text-text-tertiary mt-1">From invoices by client</p>
                   </button>
                   <button type="button" className={quickCard} onClick={() => setSection('products')}>
-                    <div className="w-12 h-12 rounded-xl bg-violet-500/15 flex items-center justify-center text-violet-300 text-xl mb-3 border border-violet-500/20">
+                    <div className="w-11 h-11 rounded-xl bg-surface-elevated border border-divider flex items-center justify-center text-money-gold text-lg mb-3 group-hover:border-money-gold/25 transition-colors">
                       <i className="fas fa-boxes-stacked" />
                     </div>
                     <p className="text-sm font-bold text-money-paper">Products</p>
@@ -398,7 +398,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setSection('products')}
-                    className="neo-btn px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-text-secondary border border-[#85bb65]/15"
+                    className="neo-btn px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-text-secondary border border-money-green/15"
                   >
                     Manage products
                   </button>
@@ -408,34 +408,34 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           )}
 
           {section === 'company' && (
-            <div className="glass-panel rounded-2xl p-8 border border-[#85bb65]/12">
-              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-6 border-b border-[#85bb65]/20 pb-4">
+            <div className="glass-panel rounded-2xl p-8 border border-money-green/10">
+              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-6 border-b border-divider pb-4">
                 Company information
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                <div>
-                  <label className="text-text-tertiary text-xs uppercase">Company name</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="p-4 rounded-xl bg-surface-elevated border border-divider">
+                  <label className="text-text-tertiary text-[10px] uppercase font-bold tracking-wider">Company name</label>
                   <p className="font-bold text-money-paper mt-1">{companyInfo.name}</p>
                 </div>
-                <div>
-                  <label className="text-text-tertiary text-xs uppercase">GST</label>
+                <div className="p-4 rounded-xl bg-surface-elevated border border-divider">
+                  <label className="text-text-tertiary text-[10px] uppercase font-bold tracking-wider">GST</label>
                   <p className="font-bold text-money-green mt-1">{companyInfo.gstNumber}</p>
                 </div>
-                <div className="sm:col-span-2">
-                  <label className="text-text-tertiary text-xs uppercase">Address</label>
+                <div className="sm:col-span-2 p-4 rounded-xl bg-surface-elevated border border-divider">
+                  <label className="text-text-tertiary text-[10px] uppercase font-bold tracking-wider">Address</label>
                   <p className="font-bold text-money-paper mt-1">{companyInfo.address}</p>
                 </div>
                 {(companyInfo.phone || companyInfo.email) && (
-                  <div className="sm:col-span-2 flex flex-wrap gap-6">
+                  <div className="sm:col-span-2 flex flex-wrap gap-4">
                     {companyInfo.phone && (
-                      <div>
-                        <label className="text-text-tertiary text-xs uppercase">Phone</label>
+                      <div className="p-4 rounded-xl bg-surface-elevated border border-divider flex-1 min-w-[200px]">
+                        <label className="text-text-tertiary text-[10px] uppercase font-bold tracking-wider">Phone</label>
                         <p className="font-bold text-money-paper mt-1">{companyInfo.phone}</p>
                       </div>
                     )}
                     {companyInfo.email && (
-                      <div>
-                        <label className="text-text-tertiary text-xs uppercase">Email</label>
+                      <div className="p-4 rounded-xl bg-surface-elevated border border-divider flex-1 min-w-[200px]">
+                        <label className="text-text-tertiary text-[10px] uppercase font-bold tracking-wider">Email</label>
                         <p className="font-bold text-money-paper mt-1">{companyInfo.email}</p>
                       </div>
                     )}
@@ -450,8 +450,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           )}
 
           {section === 'categories' && (
-            <div className="glass-panel rounded-2xl p-8 border border-[#85bb65]/12">
-              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-6 border-b border-[#85bb65]/20 pb-4">
+            <div className="glass-panel rounded-2xl p-8 border border-money-green/10">
+              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-6 border-b border-divider pb-4">
                 Expense categories
               </h3>
               <CategoryManager categories={categories} onAdd={onAddCategory} onDelete={onDeleteCategory} />
@@ -459,8 +459,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           )}
 
           {section === 'data' && (
-            <div className="glass-panel rounded-2xl p-8 border border-[#85bb65]/12 space-y-4">
-              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif border-b border-[#85bb65]/20 pb-4">
+            <div className="glass-panel rounded-2xl p-8 border border-money-green/10 space-y-6">
+              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif border-b border-divider pb-4">
                 Data &amp; export
               </h3>
               <p className="text-sm text-text-secondary leading-relaxed">
@@ -469,7 +469,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenImport}
-                className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/25 uppercase tracking-wider"
+                className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 uppercase tracking-wider"
               >
                 <i className="fas fa-file-import mr-2" />
                 Open data import
@@ -478,8 +478,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           )}
 
           {section === 'preferences' && (
-            <div className="glass-panel rounded-2xl p-8 border border-[#85bb65]/12">
-              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-4">
+            <div className="glass-panel rounded-2xl p-8 border border-money-green/10">
+              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-4 border-b border-divider pb-4">
                 Preferences
               </h3>
               <p className="text-sm text-text-secondary leading-relaxed">
@@ -490,8 +490,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           )}
 
           {section === 'account' && (
-            <div className="glass-panel rounded-2xl p-8 border border-[#85bb65]/12">
-              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-4">
+            <div className="glass-panel rounded-2xl p-8 border border-money-green/10">
+              <h3 className="text-xl font-black text-money-gold uppercase tracking-widest font-serif mb-4 border-b border-divider pb-4">
                 Account
               </h3>
               <p className="text-sm text-text-secondary leading-relaxed">
@@ -503,7 +503,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
           {section === 'products' && (
             <div className="space-y-6">
-              <div className="glass-panel rounded-2xl p-6 border border-[#85bb65]/12">
+              <div className="glass-panel rounded-2xl p-6 border border-money-green/10">
                 <h3 className="text-lg font-black text-money-gold uppercase tracking-widest font-serif mb-2">
                   Products
                 </h3>
@@ -569,7 +569,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     <button
                       type="submit"
                       disabled={productBusy}
-                      className="neo-btn px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-money-gold border border-money-gold/25"
+                      className="neo-btn px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-money-gold border border-money-gold/20"
                     >
                       {editingProductId ? 'Save changes' : 'Add product'}
                     </button>
@@ -585,10 +585,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   </div>
                 </form>
 
-                <div className="overflow-x-auto rounded-xl border border-[#85bb65]/10">
+                <div className="overflow-x-auto rounded-xl border border-divider">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="bg-[#0c1410]/90 text-[9px] uppercase text-text-tertiary border-b border-[#85bb65]/20">
+                      <tr className="bg-surface-highlight/50 text-[9px] uppercase text-text-tertiary border-b border-divider">
                         <th className="text-left px-4 py-3 font-black tracking-wider">Name</th>
                         <th className="text-left px-4 py-3 font-black tracking-wider">SKU</th>
                         <th className="text-left px-4 py-3 font-black tracking-wider">Category</th>
@@ -597,9 +597,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         <th className="text-center px-4 py-3 font-black tracking-wider">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#85bb65]/10">
+                    <tbody className="divide-y divide-divider">
                       {products.map((p) => (
-                        <tr key={p.id} className="hover:bg-[#85bb65]/5">
+                        <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
                           <td className="px-4 py-3 font-medium text-money-paper">{p.name}</td>
                           <td className="px-4 py-3 font-mono text-text-tertiary">{p.sku || '—'}</td>
                           <td className="px-4 py-3 text-text-secondary">{p.category || '—'}</td>

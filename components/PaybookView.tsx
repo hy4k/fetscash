@@ -412,7 +412,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Ledger control bar — accounts period */}
-      <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-[#85bb65]/15">
+      <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-divider">
         <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-5">
             <p className="text-[10px] font-black text-money-gold uppercase tracking-[0.22em] mb-1">Paybook</p>
@@ -475,7 +475,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/15">
+        <div className="glass-panel rounded-2xl p-5 border border-divider">
           <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary mb-3">Settlement rounds</h4>
           <p className="text-[10px] text-text-tertiary mb-3 leading-relaxed">
             Internal settlement rounds between partners (same source as before, now grouped with Paybook).
@@ -483,14 +483,14 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-[#85bb65]/20 text-text-tertiary uppercase text-[9px]">
+                <tr className="bg-surface-highlight/50 border-b border-divider text-text-tertiary uppercase text-[9px]">
                   <th className="text-left py-2">Settled date</th>
                   <th className="text-left py-2">Settlement</th>
                   <th className="text-right py-2">Mithun</th>
                   <th className="text-right py-2">Niyas</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#85bb65]/10">
+              <tbody className="divide-y divide-divider">
                 {settleCycles.map((c) => (
                   <tr key={c.id}>
                     <td className="py-2 text-text-secondary font-mono whitespace-nowrap">
@@ -511,7 +511,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-5 border border-[#85bb65]/15">
+        <div className="glass-panel rounded-2xl p-5 border border-divider">
           <h4 className="text-sm font-black uppercase tracking-widest text-text-secondary mb-3">Contributions</h4>
           <p className="text-[10px] text-text-tertiary mb-3 leading-relaxed">
             Ledger contributions linked to settlement rounds.
@@ -519,7 +519,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
           <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-[#85bb65]/20 text-text-tertiary uppercase text-[9px] sticky top-0 bg-[#0c1410]">
+                <tr className="bg-surface-highlight/50 border-b border-divider text-text-tertiary uppercase text-[9px] sticky top-0">
                   <th className="text-left py-2">Date</th>
                   <th className="text-left py-2">Contributor</th>
                   <th className="text-left py-2">Details</th>
@@ -528,7 +528,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                   <th className="text-center py-2">Closed</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#85bb65]/10">
+              <tbody className="divide-y divide-divider">
                 {settleContributions.map((c) => (
                   <tr key={c.id}>
                     <td className="py-2 font-mono whitespace-nowrap">
@@ -555,19 +555,19 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
       {/* Summary — trial balance style */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div
-          className="glass-panel rounded-xl p-5 border border-[#85bb65]/20"
-          style={{ borderLeftColor: primaryColor, borderLeftWidth: 3 }}
+          className="glass-panel rounded-xl p-5 border border-divider border-l-[3px]"
+          style={{ borderLeftColor: primaryColor }}
         >
           <p className="text-[10px] uppercase tracking-widest text-text-tertiary font-bold">Dr — Payroll (contract)</p>
           <p className="text-2xl font-bold tabular-nums text-money-green mt-1">{INR(totalPayroll)}</p>
           <p className="text-[10px] text-text-tertiary mt-2">{filteredSalary.length} employee(s)</p>
         </div>
-        <div className="glass-panel rounded-xl p-5 border border-[#85bb65]/20 border-l-amber-500/60 border-l-[3px]">
+        <div className="glass-panel rounded-xl p-5 border border-divider border-l-amber-500/60 border-l-[3px]">
           <p className="text-[10px] uppercase tracking-widest text-text-tertiary font-bold">Dr — Sundry &amp; misc.</p>
           <p className="text-2xl font-bold tabular-nums text-amber-200/90 mt-1">{INR(totalSundry)}</p>
           <p className="text-[10px] text-text-tertiary mt-2">{filteredExps.length} voucher(s)</p>
         </div>
-        <div className="glass-panel rounded-xl p-5 border border-money-gold/30 bg-[#0c1410]/40">
+        <div className="glass-panel rounded-xl p-5 border border-money-gold/30 bg-surface-elevated/60 border-l-money-gold/50 border-l-[3px]">
           <p className="text-[10px] uppercase tracking-widest text-money-gold font-bold">Period total (paybook)</p>
           <p className="text-2xl font-serif font-bold tabular-nums text-money-gold mt-1">{INR(grandTotal)}</p>
           <p className="text-[10px] text-text-secondary mt-2">
@@ -585,8 +585,8 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
       </div>
 
       {loading && (
-        <div className="text-center text-text-tertiary text-sm py-6">
-          <i className="fas fa-circle-notch fa-spin mr-2" />
+        <div className="flex items-center justify-center gap-3 rounded-2xl bg-surface-elevated/30 border border-divider py-8 text-sm text-text-tertiary">
+          <i className="fas fa-circle-notch fa-spin" />
           Loading ledgers…
         </div>
       )}
@@ -616,7 +616,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               type="button"
               onClick={() => downloadPayrollRegisterPdf(filteredSalary, payrollPdfTitle)}
               disabled={filteredSalary.length === 0}
-              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-text-secondary border border-[#85bb65]/25 inline-flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+              className="neo-btn px-4 py-2.5 rounded-xl text-[11px] font-bold text-text-secondary border border-divider inline-flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
             >
               <i className="fas fa-table" /> Summary table PDF
             </button>
@@ -644,10 +644,10 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
             return (
               <div
                 key={row.id ?? idx}
-                className="rounded-2xl border border-[#85bb65]/15 bg-[#0c1410]/55 overflow-hidden shadow-sm shadow-black/20"
+                className="rounded-2xl border border-divider bg-surface-elevated overflow-hidden shadow-sm shadow-black/20"
               >
                 <div className="flex flex-wrap items-stretch gap-3 p-4 sm:gap-4">
-                  <div className="flex items-center justify-center w-9 shrink-0 rounded-lg bg-black/25 text-text-tertiary text-xs font-mono tabular-nums">
+                  <div className="flex items-center justify-center w-9 shrink-0 rounded-lg bg-surface-highlight/70 text-text-tertiary text-xs font-mono tabular-nums">
                     {idx + 1}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -673,10 +673,10 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                       <div className="text-[9px] uppercase tracking-wider text-text-tertiary font-bold">Net est.</div>
                       <div className="text-lg font-bold tabular-nums text-emerald-200 leading-none">{INR(b.netSalary)}</div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 border-l border-[#85bb65]/15 pl-3 ml-auto">
+                    <div className="flex items-center gap-1 shrink-0 border-l border-divider pl-3 ml-auto">
                       <button
                         type="button"
-                        className="p-2.5 rounded-xl text-text-tertiary hover:text-money-gold hover:bg-[#85bb65]/10 transition-colors"
+                        className="p-2.5 rounded-xl text-text-tertiary hover:text-money-gold hover:bg-money-green/10 transition-colors"
                         onClick={() => row.id != null && openEditSalary(row)}
                         title="Edit"
                         aria-label="Edit payroll line"
@@ -704,12 +704,12 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                     </div>
                   </div>
                 </div>
-                <details className="group border-t border-[#85bb65]/10 bg-black/15 [&_summary::-webkit-details-marker]:hidden">
-                  <summary className="cursor-pointer select-none px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-text-tertiary hover:text-money-green flex items-center gap-2">
+                <details className="group border-t border-divider bg-surface-highlight/30 [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="cursor-pointer select-none px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-text-tertiary hover:text-money-green flex items-center gap-2">
                     <i className="fas fa-chevron-right text-[9px] transition-transform group-open:rotate-90" />
                     Expand — attendance, rates, deductions
                   </summary>
-                  <div className="px-4 pb-4 pt-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2 text-[11px] font-mono text-text-secondary">
+                  <div className="px-5 pb-5 pt-2 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-3 text-[11px] font-mono text-text-secondary">
                     <div>
                       <span className="text-text-tertiary text-[9px] uppercase block">Monthly</span>
                       {INR(parseAmountDisplay(row.monthly_salary))}
@@ -750,8 +750,10 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
         </div>
 
         {!loading && filteredSalary.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-[#85bb65]/25 bg-[#0c1410]/30 text-center py-12 text-text-secondary text-sm px-4">
-            <i className="fas fa-users-slash text-2xl mb-2 block opacity-40" />
+          <div className="rounded-2xl border border-dashed border-divider bg-surface/40 text-center py-12 text-text-secondary text-sm px-4">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-highlight/60 text-text-tertiary">
+              <i className="fas fa-users-slash text-lg" />
+            </div>
             No payroll for <strong className="text-money-paper">{periodSummaryLabel}</strong>. Try another period or{' '}
             <strong>All periods</strong> / <strong>All branches</strong>.
           </div>
@@ -780,7 +782,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
           {filteredExps.map((row) => (
             <div
               key={row.id}
-              className="rounded-xl border border-[#85bb65]/12 bg-[#0c1410]/50 p-4 flex flex-wrap gap-3 items-start justify-between"
+              className="rounded-xl border border-divider bg-surface-elevated p-4 flex flex-wrap gap-3 items-start justify-between"
             >
               <div className="flex min-w-0 flex-1 gap-3">
                 <div className="shrink-0 text-[11px] font-mono text-text-tertiary tabular-nums w-[5.5rem]">
@@ -797,7 +799,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                     <span className="font-medium text-money-paper text-sm leading-snug break-words">{row.name}</span>
                   </div>
                   <div className="text-[10px] text-text-tertiary mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
-                    <span className="rounded-md bg-black/20 px-1.5 py-0.5">{row.category || 'Uncategorised'}</span>
+                    <span className="rounded-md bg-surface-highlight/60 px-1.5 py-0.5">{row.category || 'Uncategorised'}</span>
                     {ledgerMonth === PAYBOOK_ALL_PERIODS && (
                       <span className="font-mono">{row.month || '—'}</span>
                     )}
@@ -810,10 +812,10 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                   <div className="text-[9px] uppercase text-text-tertiary font-bold">Amount</div>
                   <div className="text-base font-bold tabular-nums text-amber-100/90">{INR(parseAmountDisplay(row.amount))}</div>
                 </div>
-                <div className="flex gap-1 border-l border-[#85bb65]/15 pl-3">
+                <div className="flex gap-1 border-l border-divider pl-3">
                   <button
                     type="button"
-                    className="p-2.5 rounded-xl text-text-tertiary hover:text-money-gold hover:bg-[#85bb65]/10"
+                    className="p-2.5 rounded-xl text-text-tertiary hover:text-money-gold hover:bg-money-green/10"
                     onClick={() => row.id != null && openEditExp(row)}
                     aria-label="Edit voucher"
                   >
@@ -834,8 +836,10 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
         </div>
 
         {!loading && filteredExps.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-[#85bb65]/25 bg-[#0c1410]/30 text-center py-12 text-text-secondary text-sm px-4">
-            <i className="fas fa-receipt text-2xl mb-2 block opacity-40" />
+          <div className="rounded-2xl border border-dashed border-divider bg-surface/40 text-center py-12 text-text-secondary text-sm px-4">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-highlight/60 text-text-tertiary">
+              <i className="fas fa-receipt text-lg" />
+            </div>
             No sundry vouchers for <strong className="text-money-paper">{periodSummaryLabel}</strong>. Change period or branch filter.
           </div>
         )}
@@ -982,7 +986,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
                 onChange={(e) => setEditingSalary({ ...editingSalary, end_date: e.target.value as any })}
               />
             </div>
-            <div className="sm:col-span-2 flex gap-3 justify-end pt-4 border-t border-[#85bb65]/10">
+            <div className="sm:col-span-2 flex gap-3 justify-end pt-4 border-t border-divider">
               <button type="button" className="neo-btn px-5 py-2.5 rounded-xl text-xs font-bold text-text-secondary" onClick={() => setSalaryModal(false)}>
                 Cancel
               </button>
@@ -1061,7 +1065,7 @@ export const PaybookView: React.FC<PaybookViewProps> = ({ location, primaryColor
               <label className={labelCls}>Tag colour</label>
               <input
                 type="color"
-                className="h-10 w-full rounded-lg cursor-pointer bg-[#131f19] border border-[#85bb65]/20"
+                className="h-10 w-full rounded-lg cursor-pointer bg-surface-elevated border border-divider"
                 value={editingExp.color || '#85bb65'}
                 onChange={(e) => setEditingExp({ ...editingExp, color: e.target.value })}
               />

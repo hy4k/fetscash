@@ -159,12 +159,12 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
   };
 
   const inputClass =
-    'w-full neo-input rounded-xl p-4 text-sm font-medium placeholder-text-tertiary focus:border-money-gold/30 transition-all';
+    'w-full neo-input rounded-xl p-4 text-sm font-medium placeholder-text-tertiary focus:border-money-gold/30 transition-all duration-200';
   const labelClass =
-    'block text-xs font-bold text-[#8ba696] mb-2 ml-1 uppercase tracking-wider';
+    'block text-xs font-bold text-text-secondary mb-2 ml-1 uppercase tracking-wider';
 
   return (
-    <form className="space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar pr-2">
+    <form className="space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar pr-2">
       {/* Invoice Header */}
       <div className="grid grid-cols-2 gap-5">
         <div className="col-span-2">
@@ -191,10 +191,11 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
         </div>
 
         {selectedCustomer && (
-          <div className="col-span-2 glass-panel rounded-xl p-4 border border-money-gold/20">
+          <div className="col-span-2 glass-panel rounded-2xl p-5 border border-money-gold/15 relative overflow-hidden transition-all duration-200">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-money-gold/30" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">
+                <span className="text-2xl bg-surface-elevated rounded-xl px-2 py-1 border border-divider">
                   {selectedCustomer.country === 'India' ? '🇮🇳' : 
                    selectedCustomer.country === 'USA' ? '🇺🇸' : 
                    selectedCustomer.country === 'UK' ? '🇬🇧' : 
@@ -205,13 +206,15 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                   <p className="text-xs text-text-tertiary">{selectedCustomer.email}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-text-secondary">Payment Terms: Net {selectedCustomer.payment_terms} days</p>
-                <p className="text-xs text-money-gold">Currency: {selectedCustomer.currency}</p>
+              <div className="text-right space-y-0.5">
+                <p className="text-xs text-text-secondary">Net {selectedCustomer.payment_terms} days</p>
+                <p className="text-xs font-semibold text-money-gold">{selectedCustomer.currency}</p>
               </div>
             </div>
             {selectedCustomer.country === 'India' && selectedCustomer.gst_number && (
-              <p className="text-xs text-money-green mt-2">GST: {selectedCustomer.gst_number}</p>
+              <div className="mt-3 pt-3 border-t border-divider">
+                <p className="text-xs text-money-green">GST: {selectedCustomer.gst_number}</p>
+              </div>
             )}
           </div>
         )}
@@ -222,7 +225,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
             type="text"
             readOnly
             value={invoice?.invoice_number || `Auto-assigned on save (${location === 'calicut' ? 'C' : 'K'}...)`}
-            className={`${inputClass} opacity-70 cursor-not-allowed border border-money-gold/20 text-money-gold font-mono`}
+            className={`${inputClass} opacity-70 cursor-not-allowed border border-money-gold/15 text-money-gold font-mono`}
             title="Invoice number is auto-generated based on client and branch"
           />
         </div>
@@ -282,7 +285,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
       </div>
 
       {/* Service Lines */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider">
           Service Details
         </h3>
@@ -291,33 +294,39 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
         {formData.service_lines?.map((line, index) => (
           <div
             key={index}
-            className="glass-panel rounded-xl p-4 border border-[#85bb65]/10 flex justify-between items-center"
+            className="glass-panel rounded-xl p-4 border border-money-green/10 transition-all duration-200 hover:border-money-green/20 group"
           >
-            <div className="flex-1">
-              <p className="text-sm font-bold text-money-paper">{line.description}</p>
-              <p className="text-xs text-text-tertiary">
-                {line.quantity} × {getCurrencySymbol(formData.currency || 'USD')}
-                {line.rate.toFixed(2)}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <p className="text-sm font-bold text-money-gold">
-                {getCurrencySymbol(formData.currency || 'USD')}
-                {line.amount?.toFixed(2)}
-              </p>
-              <button
-                type="button"
-                onClick={() => removeServiceLine(index)}
-                className="text-red-400 hover:text-red-500"
-              >
-                <i className="fas fa-trash"></i>
-              </button>
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <div className="col-span-6">
+                <p className="text-sm font-bold text-money-paper">{line.description}</p>
+              </div>
+              <div className="col-span-3">
+                <p className="text-xs text-text-tertiary">
+                  {line.quantity} × {getCurrencySymbol(formData.currency || 'USD')}
+                  {line.rate.toFixed(2)}
+                </p>
+              </div>
+              <div className="col-span-2 text-right">
+                <p className="text-sm font-bold text-money-gold">
+                  {getCurrencySymbol(formData.currency || 'USD')}
+                  {line.amount?.toFixed(2)}
+                </p>
+              </div>
+              <div className="col-span-1 text-right">
+                <button
+                  type="button"
+                  onClick={() => removeServiceLine(index)}
+                  className="text-text-muted hover:text-red-400 transition-colors duration-200"
+                >
+                  <i className="fas fa-trash"></i>
+                </button>
+              </div>
             </div>
           </div>
         ))}
 
         {/* Add New Line */}
-        <div className="glass-panel rounded-xl p-4 border border-[#85bb65]/20 border-dashed">
+        <div className="glass-panel rounded-2xl p-5 border-2 border-dashed border-money-green/20 transition-all duration-200 hover:border-money-green/30 hover:bg-surface-elevated/50">
           <div className="grid grid-cols-12 gap-3 items-end">
             <div className="col-span-5">
               <input
@@ -370,7 +379,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                 type="button"
                 onClick={addServiceLine}
                 disabled={!newServiceLine.description || !newServiceLine.rate}
-                className="w-full neo-btn py-4 rounded-xl text-xs font-bold text-money-gold disabled:opacity-50"
+                className="w-full neo-btn py-4 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 disabled:opacity-50 transition-all duration-200 hover:shadow-[0_0_15px_rgba(212,175,55,0.15)]"
               >
                 <i className="fas fa-plus"></i> Add
               </button>
@@ -380,11 +389,12 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
       </div>
 
       {/* Totals */}
-      <div className="glass-panel rounded-xl p-6 border border-[#85bb65]/10">
-        <div className="space-y-2">
+      <div className="glass-panel rounded-2xl p-6 border border-divider relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-money-gold" />
+        <div className="space-y-3 pt-1">
           <div className="flex justify-between text-sm">
-            <span className="text-text-secondary">Subtotal:</span>
-            <span className="font-bold">
+            <span className="text-text-secondary">Subtotal</span>
+            <span className="font-bold text-money-paper">
               {getCurrencySymbol(formData.currency || 'USD')}
               {formData.subtotal?.toFixed(2)}
             </span>
@@ -392,16 +402,16 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
           
           <div className="flex justify-between text-sm">
             <span className="text-text-secondary">
-              GST ({formData.gst_rate}%):
+              GST ({formData.gst_rate}%)
             </span>
-            <span className="font-bold">
+            <span className="font-bold text-money-paper">
               {getCurrencySymbol(formData.currency || 'USD')}
               {formData.gst_amount?.toFixed(2)}
             </span>
           </div>
           
-          <div className="flex justify-between text-lg font-bold pt-2 border-t border-[#85bb65]/20">
-            <span className="text-money-gold">Total:</span>
+          <div className="flex justify-between text-lg font-bold pt-3 border-t border-divider">
+            <span className="text-money-gold">Total</span>
             <span className="text-money-gold">
               {getCurrencySymbol(formData.currency || 'USD')}
               {formData.total_amount?.toFixed(2)}
@@ -409,7 +419,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
           </div>
           
           {selectedCustomer?.country !== 'India' && formData.total_amount > 0 && (
-            <p className="text-xs text-money-green/60 mt-2">
+            <p className="text-xs text-text-muted mt-2">
               Foreign inward remittance: No GST applicable
             </p>
           )}
@@ -432,26 +442,26 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-4 pt-4 mt-2 border-t border-[#85bb65]/10 justify-end">
+      <div className="flex gap-3 pt-6 mt-2 border-t border-divider justify-end">
         <button
           type="button"
           onClick={onCancel}
-          className="neo-btn px-6 py-3.5 rounded-xl text-sm font-bold text-text-secondary hover:text-white transition-all active:scale-95"
+          className="neo-btn px-6 py-3 rounded-xl text-sm font-semibold text-text-secondary hover:text-money-paper transition-all duration-200 active:scale-95"
         >
           Cancel
         </button>
         <button
           type="button"
           onClick={(e) => handleSubmit(e as any, 'draft')}
-          className="neo-btn px-6 py-3.5 rounded-xl text-sm font-bold text-text-secondary hover:text-white transition-all active:scale-95"
+          className="neo-btn px-6 py-3 rounded-xl text-sm font-semibold text-text-secondary border border-divider hover:text-money-paper hover:border-text-secondary/30 transition-all duration-200 active:scale-95"
         >
-          Save as Draft
+          Save Draft
         </button>
         <button
           type="button"
           onClick={(e) => handleSubmit(e as any, 'sent')}
           disabled={!formData.customer_id || !formData.service_lines?.length}
-          className="neo-btn px-8 py-3.5 rounded-xl text-sm font-bold text-money-gold transition-all active:scale-95 border border-money-gold/20 shadow-[0_0_15px_rgba(212,175,55,0.1)] hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] disabled:opacity-50"
+          className="neo-btn px-8 py-3 rounded-xl text-sm font-semibold text-money-gold border border-money-gold/20 shadow-[0_0_15px_rgba(212,175,55,0.1)] hover:shadow-[0_0_25px_rgba(212,175,55,0.2)] disabled:opacity-50 transition-all duration-200 active:scale-95"
         >
           Create & Send Invoice
         </button>
