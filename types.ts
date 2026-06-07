@@ -184,19 +184,21 @@ export interface FetsTransaction {
 export interface BankAccount {
   id: string;
   user_id: string;
-  account_name: string;            // "Federal Bank - Current Account"
-  bank_name: string;               // Federal Bank
-  account_number: string;          // Masked: ****1234
-  ifsc_code?: string;              // FDRL000****
-  swift_code?: string;             // For foreign remittances
-  account_type: 'Current' | 'Savings' | 'FCNR' | 'NRE' | 'NRO';
-  currency: 'INR' | 'USD' | 'Multi';
+  account_name: string;
+  bank_name: string;
+  account_number?: string;
+  ifsc_code?: string;
+  swift_code?: string;
+  account_type: 'Current' | 'Savings' | 'FCNR' | 'NRE' | 'NRO' | 'Cash';
+  currency: 'INR' | 'USD' | 'EUR' | 'GBP' | 'CAD';
   branch?: string;
-  contact_person?: string;
   opening_balance: number;
   current_balance: number;
-  as_of_date: string;
+  as_of_date?: string;
   is_active: boolean;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface BankTransaction {
@@ -206,19 +208,18 @@ export interface BankTransaction {
   transaction_date: string;
   description: string;
   reference_number?: string;
-  debit?: number;
-  credit?: number;
+  debit: number;
+  credit: number;
   balance?: number;
   transaction_type: 'income' | 'expense' | 'transfer' | 'unknown';
-  
-  // Reconciliation
-  matched_invoice_id?: string;
-  matched_expense_id?: string;
+  matched_invoice_id?: string | null;
+  matched_expense_id?: string | null;
+  matched_payment_id?: string | null;
   is_reconciled: boolean;
-  
-  // Import
   import_batch_id?: string;
-  raw_data?: string;               // Original CSV data
+  raw_data?: string;
+  notes?: string;
+  created_at?: string;
 }
 
 // ============================================
@@ -329,4 +330,87 @@ export interface SettleUpContribution {
   contributor?: string | null;
   is_settled?: boolean | null;
   cycle_id?: number | null;
+}
+
+// ============================================
+// RECONCILIATION
+// ============================================
+export interface ReconciliationMatch {
+  id: string;
+  user_id: string;
+  bank_transaction_id: string;
+  matched_type: 'invoice' | 'payment' | 'expense';
+  matched_id: string;
+  matched_amount: number;
+  status: 'proposed' | 'confirmed' | 'rejected';
+  notes?: string;
+  created_at?: string;
+}
+
+// ============================================
+// GST RETURNS
+// ============================================
+export type GSTReturnType = 'GSTR1' | 'GSTR3B';
+export type GSTReturnStatus = 'draft' | 'ready' | 'filed' | 'pending';
+
+export interface GSTReturn {
+  id: string;
+  user_id: string;
+  return_period: string; // MM-YYYY
+  return_type: GSTReturnType;
+  filing_due_date?: string;
+  filed_date?: string;
+  filed_reference?: string;
+  status: GSTReturnStatus;
+  taxable_value_igst: number;
+  taxable_value_cgst: number;
+  taxable_value_sgst: number;
+  tax_igst: number;
+  tax_cgst: number;
+  tax_sgst: number;
+  total_tax: number;
+  total_invoices: number;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface GSTReturnItem {
+  id: string;
+  gst_return_id: string;
+  invoice_id?: string;
+  invoice_number?: string;
+  customer_name?: string;
+  taxable_value: number;
+  igst: number;
+  cgst: number;
+  sgst: number;
+  total_tax: number;
+  total_amount: number;
+  created_at?: string;
+}
+
+// ============================================
+// CURRENCY
+// ============================================
+export interface CurrencyRate {
+  id: string;
+  user_id: string;
+  base_currency: 'INR' | 'USD' | 'EUR' | 'GBP' | 'CAD';
+  target_currency: 'INR' | 'USD' | 'EUR' | 'GBP' | 'CAD';
+  rate: number;
+  effective_date: string;
+  source?: string;
+  notes?: string;
+  created_at?: string;
+}
+
+export interface MonthlyCurrencyReportRow {
+  month: string;
+  currency: string;
+  invoice_count: number;
+  total_revenue: number;
+  paid_amount: number;
+  pending_amount: number;
+  inr_equivalent: number;
 }

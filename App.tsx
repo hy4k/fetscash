@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { resolveWorkspaceUserId } from './utils/workspaceUser';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoice, Payment, ProductRow } from './types';
+import { BankReconciliationView } from './components/BankReconciliationView';
+import { GSTReturnsView } from './components/GSTReturnsView';
+import { MultiCurrencyReportView } from './components/MultiCurrencyReportView';
 import { CATEGORY_REPLENISHMENT } from './constants';
 import HoloToggle from './components/HoloToggle';
 import { ExpenseForm } from './components/ExpenseForm';
@@ -23,7 +26,7 @@ import {
 } from 'recharts';
 
 // Main views for the application
-type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'import' | 'settings';
+type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'import' | 'settings' | 'bank' | 'gst' | 'currency';
 
 // Company info for invoices
 const COMPANY_INFO = {
@@ -53,6 +56,7 @@ function App() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [globalExpenseCount, setGlobalExpenseCount] = useState(0);
   const [globalCashCount, setGlobalCashCount] = useState(0);
 
@@ -275,6 +279,10 @@ function App() {
     const { data: prodData, error: prodErr } = await supabase.from('products').select('*').order('name');
     if (prodErr) console.error('products fetch:', prodErr);
     setProducts((prodData as ProductRow[]) || []);
+
+    const { data: payData, error: payErr } = await supabase.from('payments').select('*').eq('user_id', userId).order('payment_date', { ascending: false });
+    if (payErr) console.error('payments fetch:', payErr);
+    setPayments((payData as Payment[]) || []);
 
     const [geC, gcC, gxC, gzC] = await Promise.all([
       supabase.from('expenses').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('location', 'cochin'),
@@ -686,8 +694,11 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                currentView === 'customers' ? 'Clients' :
                currentView === 'invoices'
                  ? invoiceScreenTab === 'monthly_revenue'
-                   ? 'Invoices · Monthly revenue'
+                   ? 'Invoices · Monthly Revenue'
                    : 'Invoices'
+               : currentView === 'bank' ? 'Bank Reconciliation'
+               : currentView === 'gst' ? 'GST Returns'
+               : currentView === 'currency' ? 'Multi-Currency Report'
                : currentView === 'import' ? 'Data Import' : 'Settings'}
             </h2>
             <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1">
@@ -1014,6 +1025,38 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                 primaryColor={primaryColor}
                 screenTab={invoiceScreenTab}
                 onScreenTabChange={setInvoiceScreenTab}
+              />
+            </div>
+          )}
+
+          {/* --- BANK RECONCILIATION --- */}
+          {currentView === 'bank' && user && (
+            <div className="page-enter">
+              <BankReconciliationView
+                userId={user.id}
+                invoices={invoices}
+                expenses={expenses}
+                payments={payments}
+              />
+            </div>
+          )}
+
+          {/* --- GST RETURNS --- */}
+          {currentView === 'gst' && user && (
+            <div className="page-enter">
+              <GSTReturnsView
+                userId={user.id}
+                invoices={invoices}
+                customers={customers}
+              />
+            </div>
+          )}
+
+          {/* --- MULTI-CURRENCY REPORT --- */}
+          {currentView === 'currency' && user && (
+            <div className="page-enter">
+              <MultiCurrencyReportView
+                userId={user.id}
               />
             </div>
           )}
