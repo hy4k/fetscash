@@ -27,6 +27,7 @@ print('Uploaded tar.')
 cmd = f"""
 cd {remote_dir}
 tar xzf {remote_tar} --overwrite
+rm -f roster.html
 rm {remote_tar}
 echo DEPLOY_OK
 ls -la
