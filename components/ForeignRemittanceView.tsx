@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import { ForeignRemittance, Customer, BankAccount, RemittanceStatus } from '../types';
 import { Modal } from './Modal';
 import { isMigration003Applied } from '../utils/schemaCheck';
+import { FIRCFormGenerator } from './FIRCFormGenerator';
 
 interface ForeignRemittanceViewProps {
   userId: string;
@@ -87,6 +88,8 @@ export const ForeignRemittanceView: React.FC<ForeignRemittanceViewProps> = ({
   // Payment modal
   const [payOpen, setPayOpen] = useState(false);
   const [payForm, setPayForm] = useState({ payment_date: '', payment_reference: '', payment_inr_amount: '' });
+  const [fircGenOpen, setFircGenOpen] = useState(false);
+  const [fircGenRemittance, setFircGenRemittance] = useState<ForeignRemittance | null>(null);
 
   const fetchRemittances = async () => {
     setLoading(true);
@@ -387,6 +390,14 @@ export const ForeignRemittanceView: React.FC<ForeignRemittanceViewProps> = ({
                       <i className="fas fa-file-alt mr-1.5"></i>Fill FIRC Form
                     </button>
                   )}
+                  {(r.status === 'invoice_uploaded' || r.status === 'firc_ready') && (
+                    <button
+                      onClick={() => { setFircGenRemittance(r); setFircGenOpen(true); }}
+                      className="neo-btn px-3 py-2 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20"
+                    >
+                      <i className="fas fa-print mr-1.5"></i>Generate Bank Form
+                    </button>
+                  )}
                   {(r.status === 'firc_ready' || r.status === 'firc_submitted') && (
                     <button onClick={() => openFircModal(r)} className="neo-btn px-3 py-2 rounded-xl text-xs font-bold text-sky-200 border border-sky-400/20">
                       <i className="fas fa-edit mr-1.5"></i>Edit FIRC
@@ -588,6 +599,16 @@ export const ForeignRemittanceView: React.FC<ForeignRemittanceViewProps> = ({
           </div>
         </div>
       </Modal>
+
+      {/* FIRC Bank Form Generator */}
+      {fircGenRemittance && (
+        <FIRCFormGenerator
+          remittance={fircGenRemittance}
+          customer={customers.find((c) => c.id === fircGenRemittance.customer_id) || ({ name: '', country: 'Other' } as Customer)}
+          isOpen={fircGenOpen}
+          onClose={() => { setFircGenOpen(false); setFircGenRemittance(null); }}
+        />
+      )}
 
       {/* Payment Modal */}
       <Modal isOpen={payOpen} onClose={() => { setPayOpen(false); setPayForm({ payment_date: '', payment_reference: '', payment_inr_amount: '' }); }} title="Record Bank Deposit" maxWidthClass="max-w-md">
