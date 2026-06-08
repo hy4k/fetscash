@@ -43,7 +43,7 @@ export async function resolveWorkspaceUserId(): Promise<string | null> {
   const fromEnv = (import.meta.env.VITE_WORKSPACE_USER_ID as string | undefined)?.trim();
   if (fromEnv) return fromEnv;
 
-  const tries = ['expenses', 'fets_cash_transactions', 'invoices', 'customers', 'categories'] as const;
+  const tries = ['invoices', 'customers', 'expenses', 'fets_cash_transactions', 'categories'] as const;
   for (const table of tries) {
     const id = await bestUserIdFromTable(table);
     if (id) return id;
