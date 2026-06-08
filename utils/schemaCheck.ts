@@ -25,6 +25,22 @@ export async function isMigration002Applied(): Promise<boolean> {
   return cached;
 }
 
+export async function isMigration003Applied(): Promise<boolean> {
+  const now = Date.now();
+  if (cached !== null && now - cachedAt < CACHE_MS) return cached;
+  try {
+    const { error } = await supabase
+      .from('foreign_remittances')
+      .select('id', { count: 'exact', head: true })
+      .limit(1);
+    cached = !error || !error.message.includes('does not exist');
+  } catch {
+    cached = false;
+  }
+  cachedAt = now;
+  return cached;
+}
+
 export function clearSchemaCache() {
   cached = null;
   cachedAt = 0;

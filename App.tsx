@@ -5,6 +5,7 @@ import { User, Expense, LocationType, Category, FetsTransaction, Customer, Invoi
 import { BankReconciliationView } from './components/BankReconciliationView';
 import { GSTReturnsView } from './components/GSTReturnsView';
 import { MultiCurrencyReportView } from './components/MultiCurrencyReportView';
+import { ForeignRemittanceView } from './components/ForeignRemittanceView';
 import { CATEGORY_REPLENISHMENT } from './constants';
 import HoloToggle from './components/HoloToggle';
 import { ExpenseForm } from './components/ExpenseForm';
@@ -26,7 +27,7 @@ import {
 } from 'recharts';
 
 // Main views for the application
-type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'import' | 'settings' | 'bank' | 'gst' | 'currency';
+type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'import' | 'settings' | 'bank' | 'gst' | 'currency' | 'remittance';
 
 // Company info for invoices
 const COMPANY_INFO = {
@@ -699,6 +700,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                : currentView === 'bank' ? 'Bank Reconciliation'
                : currentView === 'gst' ? 'GST Returns'
                : currentView === 'currency' ? 'Multi-Currency Report'
+               : currentView === 'remittance' ? 'Foreign Remittance'
                : currentView === 'import' ? 'Data Import' : 'Settings'}
             </h2>
             <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1">
@@ -1057,6 +1059,16 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
             <div className="page-enter">
               <MultiCurrencyReportView
                 userId={user.id}
+              />
+            </div>
+          )}
+
+          {/* --- FOREIGN REMITTANCE --- */}
+          {currentView === 'remittance' && user && (
+            <div className="page-enter">
+              <ForeignRemittanceView
+                userId={user.id}
+                customers={customers}
               />
             </div>
           )}
