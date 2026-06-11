@@ -66,7 +66,6 @@ interface SettingsViewProps {
   onQuickCashBook: () => void;
   onOpenMonthlyRevenue: () => void;
   onOpenClients: () => void;
-  onOpenImport: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -94,7 +93,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onQuickCashBook,
   onOpenMonthlyRevenue,
   onOpenClients,
-  onOpenImport,
 }) => {
   const [section, setSection] = useState<SettingsNavId>('overview');
   const [scope, setScope] = useState<'global' | LocationType>(() => location);
@@ -464,16 +462,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 Data &amp; export
               </h3>
               <p className="text-sm text-text-secondary leading-relaxed">
-                Import clients and invoices from spreadsheets, or prepare data for reporting workflows.
+                Export your data for reporting and accounting workflows.
               </p>
-              <button
-                type="button"
-                onClick={onOpenImport}
-                className="neo-btn px-6 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 uppercase tracking-wider"
-              >
-                <i className="fas fa-file-import mr-2" />
-                Open data import
-              </button>
             </div>
           )}
 

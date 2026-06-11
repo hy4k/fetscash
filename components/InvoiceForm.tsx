@@ -72,9 +72,10 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
       const isIndian = selectedCustomer.country === 'India';
       const gstRate = isIndian ? 18 : 0;
       
+      // Only auto-set currency from customer on NEW invoices (not when editing)
       setFormData((prev) => ({
         ...prev,
-        currency: selectedCustomer.currency,
+        ...(invoice ? {} : { currency: selectedCustomer.currency }),
         gst_rate: gstRate,
       }));
     }
@@ -275,12 +276,22 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
         <div>
           <label className={labelClass}>Currency</label>
-          <input
-            type="text"
-            value={formData.currency}
-            disabled
-            className={`${inputClass} opacity-70 cursor-not-allowed`}
-          />
+          <div className="flex gap-2">
+            {(['USD','INR','EUR','GBP','CAD'] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, currency: c }))}
+                className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                  formData.currency === c
+                    ? 'bg-money-green/10 border border-money-green/30 text-money-green'
+                    : 'neo-btn text-text-secondary hover:text-money-paper'
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

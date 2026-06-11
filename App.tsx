@@ -15,10 +15,9 @@ import { CustomerList } from './components/CustomerList';
 import { CustomerForm } from './components/CustomerForm';
 import { InvoiceList } from './components/InvoiceList';
 import { InvoiceForm } from './components/InvoiceForm';
-import { DataImport } from './components/DataImport';
+import { PaybookView } from './components/PaybookView';
 import { Modal } from './components/Modal';
 import { Sidebar } from './components/Sidebar';
-import { PaybookView } from './components/PaybookView';
 import { SettingsView } from './components/SettingsView';
 import { StatsCard } from './components/StatsCard';
 import {
@@ -27,7 +26,7 @@ import {
 } from 'recharts';
 
 // Main views for the application
-type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'import' | 'settings' | 'bank' | 'gst' | 'currency' | 'remittance';
+type ViewType = 'dashboard' | 'expenses' | 'cash' | 'customers' | 'invoices' | 'paybook' | 'settings' | 'bank' | 'gst' | 'currency' | 'remittance';
 
 // Company info for invoices
 const COMPANY_INFO = {
@@ -79,7 +78,7 @@ function App() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [showFilters, setShowFilters] = useState(true);
-  const [expenseSection, setExpenseSection] = useState<'register' | 'paybook'>('paybook');
+
 
   // --- Theme ---
   const primaryColor = location === 'cochin' ? '#85bb65' : '#3e5c76';
@@ -471,27 +470,6 @@ function App() {
   };
 
   // --- HANDLERS: Import ---
-  const handleImportCustomers = async (customersToImport: any[]) => {
-    if (!user) return;
-    const withUserId = customersToImport.map(c => ({ ...c, user_id: user.id }));
-    const { error } = await supabase.from('customers').insert(withUserId);
-    if (error) console.error('Import error:', error);
-    fetchAllData(user.id, location);
-  };
-
-  const handleImportInvoices = async (invoicesToImport: any[]) => {
-    if (!user) return;
-    // Map customer names to IDs
-    const withUserId = invoicesToImport.map(inv => {
-      const customer = customers.find(c => c.name.toLowerCase() === inv.customer_name?.toLowerCase());
-      return { ...inv, customer_id: customer?.id || '', user_id: user?.id };
-    }).filter(inv => inv.customer_id);
-    
-    const { error } = await supabase.from('invoices').insert(withUserId);
-    if (error) console.error('Import error:', error);
-    fetchAllData(user.id, location);
-  };
-
   // --- Existing expense handlers (simplified) ---
   const handleSaveExpense = async (expData: Partial<Expense>) => {
     if (!user) return;
@@ -690,7 +668,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
           <div className="flex flex-col">
             <h2 className="text-2xl font-black text-money-gold capitalize tracking-widest font-serif">
               {currentView === 'dashboard' ? 'Dashboard' :
-               currentView === 'expenses' ? (expenseSection === 'paybook' ? 'Paybook' : 'Expense Register') :
+               currentView === 'expenses' ? 'Expense Register' :
                currentView === 'cash' ? 'Cash Book' :
                currentView === 'customers' ? 'Clients' :
                currentView === 'invoices'
@@ -701,7 +679,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                : currentView === 'gst' ? 'GST Returns'
                : currentView === 'currency' ? 'Multi-Currency Report'
                : currentView === 'remittance' ? 'Foreign Remittance'
-               : currentView === 'import' ? 'Data Import' : 'Settings'}
+               : currentView === 'paybook' ? 'Paybook' : 'Settings'}
             </h2>
             <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1">
               Forum Testing & Educational Services <span className="mx-1.5 opacity-40">•</span> {location === 'cochin' ? 'Cochin' : 'Calicut'} <span className="mx-1.5 opacity-40">•</span> GST {COMPANY_INFO.gstNumber}
@@ -837,10 +815,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                     className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-text-secondary flex items-center gap-2 hover:text-money-green">
                     <i className="fas fa-users"></i> View Clients
                   </button>
-                  <button onClick={() => setCurrentView('import')}
-                    className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-text-secondary flex items-center gap-2 hover:text-money-green">
-                    <i className="fas fa-file-import"></i> Import Data
-                  </button>
+
                 </div>
               </div>
             </div>
@@ -849,94 +824,61 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
           {/* --- EXPENSES --- */}
           {currentView === 'expenses' && (
             <div className="space-y-6 page-enter">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <p className="text-[11px] text-text-tertiary max-w-xl sm:order-last leading-relaxed">
-                  <strong className="text-money-green/90">Paybook</strong> is payroll, payslips, and sundry vouchers.{' '}
-                  <strong className="text-text-secondary">Expense register</strong> is the branch day-book of posted expenses.
-                </p>
-                <div className="flex p-1 rounded-xl bg-surface border border-divider w-fit">
-                  <button
-                    type="button"
-                    onClick={() => setExpenseSection('register')}
-                    className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                      expenseSection === 'register'
-                        ? 'active text-money-gold bg-money-green/5 border border-money-green/15'
-                        : 'text-text-tertiary hover:text-money-green'
-                    }`}
-                  >
-                    <i className="fas fa-list-ul mr-2 opacity-80" />
-                    Expense register
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setExpenseSection('paybook')}
-                    className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                      expenseSection === 'paybook'
-                        ? 'active text-money-gold bg-money-green/5 border border-money-green/15'
-                        : 'text-text-tertiary hover:text-money-green'
-                    }`}
-                  >
-                    <i className="fas fa-book mr-2 opacity-80" />
-                    Paybook
-                  </button>
+              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                <div className="relative flex-1 max-w-md">
+                  <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-muted"></i>
+                  <input type="text" placeholder="Search expenses..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="neo-input w-full rounded-xl py-3 pl-11 text-sm" />
                 </div>
+                <button onClick={() => { setEditingExpense(null); setModalType('expense'); setIsModalOpen(true); }}
+                  className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center justify-center gap-2 hover:border-money-gold/40">
+                  <i className="fas fa-plus"></i> Add Expense
+                </button>
               </div>
 
-              {expenseSection === 'paybook' ? (
-                <PaybookView location={location} primaryColor={primaryColor} />
-              ) : (
-                <>
-                  <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-                    <div className="relative flex-1 max-w-md">
-                      <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-text-muted"></i>
-                      <input type="text" placeholder="Search expenses..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="neo-input w-full rounded-xl py-3 pl-11 text-sm" />
+              <div className="glass-panel rounded-2xl overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-surface-highlight/50 border-b border-divider">
+                    <tr>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Date</th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">ID</th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Category</th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Description</th>
+                      <th className="px-5 py-3.5 text-right text-[10px] font-black text-text-tertiary uppercase tracking-wider">Amount</th>
+                      <th className="px-5 py-3.5 text-center text-[10px] font-black text-text-tertiary uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-divider">
+                    {filteredExpenses.map((exp) => (
+                      <tr key={exp.id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="px-5 py-3.5 text-xs text-text-secondary">{new Date(exp.date).toLocaleDateString('en-GB')}</td>
+                        <td className="px-5 py-3.5 text-xs font-bold text-money-green">{exp.paid_by}</td>
+                        <td className="px-5 py-3.5 text-xs"><span className="px-2 py-0.5 rounded-md bg-surface-elevated border border-divider text-[10px]">{exp.category}</span></td>
+                        <td className="px-5 py-3.5 text-xs text-text-secondary truncate max-w-xs">{exp.description}</td>
+                        <td className="px-5 py-3.5 text-right font-bold text-money-gold text-sm">₹{exp.amount.toLocaleString()}</td>
+                        <td className="px-5 py-3.5 text-center">
+                          <button onClick={() => { setEditingExpense(exp); setModalType('expense'); setIsModalOpen(true); }}
+                            className="w-8 h-8 rounded-lg hover:bg-money-gold/5 text-text-tertiary hover:text-money-gold mr-1 transition-colors"><i className="fas fa-edit text-xs"></i></button>
+                          <button onClick={() => confirmDeleteRequest(exp.id!, 'expense')} className="w-8 h-8 rounded-lg hover:bg-red-500/5 text-text-tertiary hover:text-red-400 transition-colors"><i className="fas fa-trash text-xs"></i></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredExpenses.length === 0 && (
+                  <div className="text-center py-14 text-text-tertiary flex flex-col items-center gap-3">
+                    <div className="w-14 h-14 rounded-2xl bg-surface-elevated border border-divider flex items-center justify-center">
+                      <i className="fas fa-receipt text-xl text-text-muted"></i>
                     </div>
-                    <button onClick={() => { setEditingExpense(null); setModalType('expense'); setIsModalOpen(true); }}
-                      className="neo-btn px-5 py-3 rounded-xl text-xs font-bold text-money-gold border border-money-gold/20 flex items-center justify-center gap-2 hover:border-money-gold/40">
-                      <i className="fas fa-plus"></i> Add Expense
-                    </button>
+                    <p className="text-sm">No expenses found</p>
                   </div>
+                )}
+              </div>
+            </div>
+          )}
 
-                  <div className="glass-panel rounded-2xl overflow-hidden">
-                    <table className="w-full">
-                      <thead className="bg-surface-highlight/50 border-b border-divider">
-                        <tr>
-                          <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Date</th>
-                          <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">ID</th>
-                          <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Category</th>
-                          <th className="px-5 py-3.5 text-left text-[10px] font-black text-text-tertiary uppercase tracking-wider">Description</th>
-                          <th className="px-5 py-3.5 text-right text-[10px] font-black text-text-tertiary uppercase tracking-wider">Amount</th>
-                          <th className="px-5 py-3.5 text-center text-[10px] font-black text-text-tertiary uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-divider">
-                        {filteredExpenses.map((exp) => (
-                          <tr key={exp.id} className="hover:bg-white/[0.02] transition-colors">
-                            <td className="px-5 py-3.5 text-xs text-text-secondary">{new Date(exp.date).toLocaleDateString('en-GB')}</td>
-                            <td className="px-5 py-3.5 text-xs font-bold text-money-green">{exp.paid_by}</td>
-                            <td className="px-5 py-3.5 text-xs"><span className="px-2 py-0.5 rounded-md bg-surface-elevated border border-divider text-[10px]">{exp.category}</span></td>
-                            <td className="px-5 py-3.5 text-xs text-text-secondary truncate max-w-xs">{exp.description}</td>
-                            <td className="px-5 py-3.5 text-right font-bold text-money-gold text-sm">₹{exp.amount.toLocaleString()}</td>
-                            <td className="px-5 py-3.5 text-center">
-                              <button onClick={() => { setEditingExpense(exp); setModalType('expense'); setIsModalOpen(true); }}
-                                className="w-8 h-8 rounded-lg hover:bg-money-gold/5 text-text-tertiary hover:text-money-gold mr-1 transition-colors"><i className="fas fa-edit text-xs"></i></button>
-                              <button onClick={() => confirmDeleteRequest(exp.id!, 'expense')} className="w-8 h-8 rounded-lg hover:bg-red-500/5 text-text-tertiary hover:text-red-400 transition-colors"><i className="fas fa-trash text-xs"></i></button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {filteredExpenses.length === 0 && (
-                      <div className="text-center py-14 text-text-tertiary flex flex-col items-center gap-3">
-                        <div className="w-14 h-14 rounded-2xl bg-surface-elevated border border-divider flex items-center justify-center">
-                          <i className="fas fa-receipt text-xl text-text-muted"></i>
-                        </div>
-                        <p className="text-sm">No expenses found</p>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+          {currentView === 'paybook' && (
+            <div className="space-y-6 page-enter">
+              <PaybookView location={location} primaryColor={primaryColor} />
             </div>
           )}
 
@@ -1073,17 +1015,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
             </div>
           )}
 
-          {/* --- DATA IMPORT --- */}
-          {currentView === 'import' && (
-            <div className="page-enter">
-              <DataImport
-                userId={user?.id || ''}
-                onCustomersImported={handleImportCustomers}
-                onInvoicesImported={handleImportInvoices}
-                primaryColor={primaryColor}
-              />
-            </div>
-          )}
+
 
           {/* --- SETTINGS --- */}
           {currentView === 'settings' && user && (
@@ -1114,7 +1046,6 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
               }}
               onQuickNewExpense={() => {
                 setCurrentView('expenses');
-                setExpenseSection('register');
                 setEditingExpense(null);
                 setModalType('expense');
                 setIsModalOpen(true);
@@ -1130,7 +1061,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here`}
                 setCurrentView('invoices');
               }}
               onOpenClients={() => setCurrentView('customers')}
-              onOpenImport={() => setCurrentView('import')}
+
             />
             </div>
           )}

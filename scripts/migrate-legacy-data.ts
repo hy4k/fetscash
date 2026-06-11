@@ -304,7 +304,7 @@ async function migrateLegacyData(userId: string) {
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId);
 
-    const { count: invoiceCount: invoiceTotal, data: invoiceList } = await supabase
+    const { count: invoiceTotal, data: invoiceList } = await supabase
       .from('invoices')
       .select('total_amount, status')
       .eq('user_id', userId)
