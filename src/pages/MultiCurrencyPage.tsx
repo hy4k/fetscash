@@ -1,14 +1,27 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import React from 'react';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { LoadingPage } from '@/components/error/LoadingPage';
+import { MultiCurrencyReportView } from '../../components/MultiCurrencyReportView';
 
 export default function MultiCurrencyPage() {
+  const user = useAuthStore((s) => s.user);
+  const isLoading = useAuthStore((s) => s.isLoading);
+
+  if (isLoading) return <LoadingPage />;
+  if (!user) {
+    return (
+      <div className="page-enter flex items-center justify-center min-h-[60vh]">
+        <div className="text-text-secondary text-center">
+          <p>Connection required</p>
+          <p className="text-xs text-text-tertiary mt-1">Please configure Supabase to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="page-enter space-y-8">
-      <Card>
-        <CardHeader><CardTitle>Multi-Currency Report</CardTitle></CardHeader>
-        <CardContent>
-          <p className="text-text-secondary">Multi-Currency Report content coming in Stage 5.</p>
-        </CardContent>
-      </Card>
+    <div className="page-enter">
+      <MultiCurrencyReportView userId={user.id} />
     </div>
   );
 }
