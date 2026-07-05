@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FETS Cash — Forum Testing &amp; Educational Services</title>
-    <meta name="description" content="Financial dashboard for Forum Testing &amp; Educational Services — Invoicing, Cash Book, Expenses, and Payroll">
-    <!-- Tailwind CSS -->
+    <title>FETS Cash V2 — Forum Testing &amp; Educational Services</title>
+    <meta name="description" content="FETS Cash V2 — Employee Salary Management, Expense Tracking, and Partner Reconciliation">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -18,10 +18,6 @@
                         'surface-elevated': '#15221b',
                         'surface-highlight': '#1b2d24',
                         divider: 'rgba(133, 187, 101, 0.08)',
-                        primary: {
-                            cochin: '#85bb65',
-                            calicut: '#3e5c76',
-                        },
                         money: {
                             green: '#85bb65',
                             dark: '#003b1f',
@@ -39,6 +35,7 @@
                         sans: ['Inter', 'system-ui', 'sans-serif'],
                         engraved: ['Cinzel Decorative', 'cursive'],
                         serif: ['Rye', 'serif'],
+                        mono: ['"Courier New"', 'monospace'],
                     },
                     boxShadow: {
                         'neo-flat': '6px 6px 14px #050a08, -6px -6px 14px #162820',
@@ -70,16 +67,14 @@
             }
         }
     </script>
-    <!-- Fonts and Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&family=Rye&display=swap" rel="stylesheet">
 
     <style>
-        html, body, #root {
-            height: 100%;
-        }
+        html, body, #root { height: 100%; }
         body {
             background-color: #080f0c;
             color: #e8f5e9;
@@ -89,8 +84,6 @@
                 radial-gradient(circle at 20% 0%, rgba(133,187,101,0.04) 0%, transparent 40%),
                 radial-gradient(circle at 80% 100%, rgba(62,92,118,0.06) 0%, transparent 40%);
         }
-
-        /* Subtle noise overlay */
         body::before {
             content: "";
             position: fixed;
@@ -99,72 +92,77 @@
             pointer-events: none;
             z-index: 9999;
         }
-
-        /* Glass panel */
         .glass-panel {
-            background: rgba(21, 34, 27, 0.55);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(133, 187, 101, 0.10);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(15, 26, 20, 0.75);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid rgba(133, 187, 101, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(133, 187, 101, 0.06);
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .glass-panel:hover {
-            border-color: rgba(133, 187, 101, 0.18);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(133, 187, 101, 0.15);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(133, 187, 101, 0.08);
         }
-
-        /* Neomorphism Button */
         .neo-btn {
-            background: #15221b;
-            box-shadow: 5px 5px 10px #080e0b, -5px -5px 10px #22362c;
-            border: 1px solid rgba(133, 187, 101, 0.06);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(145deg, #15221b, #0f1a14);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(133, 187, 101, 0.1);
+            border: 1px solid rgba(133, 187, 101, 0.18);
+            border-radius: 12px;
+            color: #85bb65;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-        }
-        .neo-btn::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(133,187,101,0.08) 0%, transparent 60%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .neo-btn:hover::after { opacity: 1; }
-        .neo-btn:active {
-            box-shadow: inset 4px 4px 8px #080e0b, inset -4px -4px 8px #22362c;
-            transform: translateY(1px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         .neo-btn:hover {
-            box-shadow: 7px 7px 14px #080e0b, -7px -7px 14px #22362c;
+            background: linear-gradient(145deg, #1a2e23, #15221b);
+            border-color: rgba(133, 187, 101, 0.35);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(133, 187, 101, 0.15);
             transform: translateY(-1px);
-            border-color: rgba(133, 187, 101, 0.12);
         }
-        .neo-btn.active {
-             box-shadow: inset 4px 4px 8px #080e0b, inset -4px -4px 8px #22362c;
-             color: #85bb65;
-             border-color: rgba(133, 187, 101, 0.25);
+        .neo-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(133, 187, 101, 0.08);
         }
-
-        /* Input */
+        .neo-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
         .neo-input {
-            background: #101b15;
-            box-shadow: inset 3px 3px 6px #060a08, inset -3px -3px 6px #1a2c22;
-            border: none;
+            background: rgba(8, 15, 12, 0.6);
+            border: 1px solid rgba(133, 187, 101, 0.1);
+            border-radius: 10px;
             color: #e8f5e9;
-            transition: all 0.3s ease;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.2s ease;
         }
         .neo-input:focus {
-            box-shadow: inset 5px 5px 10px #060a08, inset -5px -5px 10px #1a2c22;
-            outline: none;
-            border: 1px solid rgba(133, 187, 101, 0.25);
+            border-color: rgba(133, 187, 101, 0.35);
+            box-shadow: 0 0 0 3px rgba(133, 187, 101, 0.08), inset 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         .neo-input::placeholder {
-            color: #2d4a3a;
+            color: #4a6354;
         }
-
-        /* Engraved text */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(133,187,101,0.15); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(133,187,101,0.3); }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(133,187,101,0.15); border-radius: 3px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(133,187,101,0.3); }
         .engraved-text {
             font-family: 'Cinzel Decorative', cursive;
             background: linear-gradient(to bottom, #cfc09f 22%, #634f2c 24%, #cfc09f 26%, #cfc09f 27%, #ffecb3 40%, #3a2c0f 78%);
@@ -173,49 +171,62 @@
             color: #fff;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
         }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(133,187,101,0.15); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(133,187,101,0.35); }
-
-        /* Chart tooltip */
-        .recharts-tooltip-cursor { fill: rgba(133, 187, 101, 0.04) !important; }
-
-        /* Page transitions */
         .page-enter { animation: fadeIn 0.35s ease-out forwards; }
-
-        /* Loading skeleton */
-        .skeleton {
-            background: linear-gradient(90deg, rgba(133,187,101,0.05) 25%, rgba(133,187,101,0.12) 50%, rgba(133,187,101,0.05) 75%);
-            background-size: 200% 100%;
-            animation: skeleton 1.5s ease-in-out infinite;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes skeleton {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        .card-glow {
+            position: relative;
+            background: linear-gradient(135deg, #0f1a14 0%, #15221b 50%, #0f1a14 100%);
+            border: 1px solid rgba(133, 187, 101, 0.12);
+            border-radius: 18px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(133, 187, 101, 0.08), 0 0 60px rgba(133, 187, 101, 0.04);
+            overflow: hidden;
         }
-
-        /* Safe area for mobile bottom nav */
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .card-glow::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1.5px;
+            background: linear-gradient(135deg, rgba(133, 187, 101, 0.15), rgba(212, 175, 55, 0.08), transparent 60%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .tab-pill {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: rgba(8, 15, 12, 0.6);
+            border: 1px solid rgba(133, 187, 101, 0.08);
+            border-radius: 12px;
+        }
+        .tab-pill__item {
+            flex: 1;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            color: #8ba696;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .tab-pill__item:hover { color: #e8f5e9; }
+        .tab-pill__item--active {
+            color: #080f0c;
+            background: linear-gradient(145deg, #85bb65, #6fa84d);
+            box-shadow: 0 2px 12px rgba(133, 187, 101, 0.25);
+        }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "recharts": "https://aistudiocdn.com/recharts@^3.5.0",
-    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.84.0",
-    "framer-motion": "https://aistudiocdn.com/framer-motion@^11.0.8"
-  }
-}
-</script>
-
 </head>
 <body class="h-full antialiased selection:bg-money-green/25 selection:text-white">
-    <div id="root" class="h-full flex flex-col sm:flex-row"></div>
-<script type="module" src="/index.tsx"></script>
+    <div id="root" class="h-full"></div>
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
