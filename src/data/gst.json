@@ -1,0 +1,969 @@
+{
+  "gstin": "32AAIFF5955B1ZO",
+  "legal_name": "Forun Testing And Educational Services",
+  "filing_frequency": "Monthly",
+  "registered_since": "2024-09",
+  "scraped_at": "2026-08-10",
+  "itc_balance": {
+    "igst": 11908,
+    "cgst": 123604,
+    "sgst": 144125,
+    "cess": 87,
+    "total": 279724,
+    "as_of": "2026-08-10"
+  },
+  "cash_ledger_balance": 0,
+  "open_liabilities": 0,
+  "turnover": [
+    {
+      "fy": "2024-25",
+      "system_calculated": 1243794,
+      "estimated": 1741311.6
+    },
+    {
+      "fy": "2025-26",
+      "system_calculated": 5588373.5,
+      "estimated": null
+    },
+    {
+      "fy": "2026-27",
+      "system_calculated": 0,
+      "estimated": null
+    }
+  ],
+  "annual_returns": [
+    {
+      "fy": "2024-25",
+      "gstr9": "not_filed",
+      "gstr9c": "not_filed",
+      "note": "Optional - aggregate turnover below Rs 2 crore"
+    },
+    {
+      "fy": "2025-26",
+      "gstr9": "not_due",
+      "gstr9c": "not_due",
+      "note": "Due 31-12-2026; expected optional - turnover below Rs 2 crore"
+    }
+  ],
+  "periods": [
+    {
+      "fy": "2024-25",
+      "period": "September",
+      "period_start": "2024-09-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320924692416W",
+        "filed_on": "2024-10-25",
+        "due_date": "2024-10-11",
+        "days_late": 14
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA320924692443Z",
+        "filed_on": "2024-10-25",
+        "due_date": "2024-10-20",
+        "days_late": 5
+      }
+    },
+    {
+      "fy": "2024-25",
+      "period": "October",
+      "period_start": "2024-10-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA321024292681G",
+        "filed_on": "2024-11-17",
+        "due_date": "2024-11-11",
+        "days_late": 6
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA321024292706C",
+        "filed_on": "2024-11-17",
+        "due_date": "2024-11-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2024-25",
+      "period": "November",
+      "period_start": "2024-11-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA321124466134N",
+        "filed_on": "2024-12-20",
+        "due_date": "2024-12-11",
+        "days_late": 9
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA321124466281M",
+        "filed_on": "2024-12-20",
+        "due_date": "2024-12-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2024-25",
+      "period": "December",
+      "period_start": "2024-12-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA321224607327L",
+        "filed_on": "2025-01-22",
+        "due_date": "2025-01-11",
+        "days_late": 11
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA321224607421V",
+        "filed_on": "2025-01-22",
+        "due_date": "2025-01-20",
+        "days_late": 2
+      }
+    },
+    {
+      "fy": "2024-25",
+      "period": "January",
+      "period_start": "2025-01-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320125562931F",
+        "filed_on": "2025-02-21",
+        "due_date": "2025-02-11",
+        "days_late": 10
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA3201255629662",
+        "filed_on": "2025-02-21",
+        "due_date": "2025-02-20",
+        "days_late": 1
+      }
+    },
+    {
+      "fy": "2024-25",
+      "period": "February",
+      "period_start": "2025-02-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320225374234J",
+        "filed_on": "2025-03-18",
+        "due_date": "2025-03-11",
+        "days_late": 7
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA3202253743496",
+        "filed_on": "2025-03-18",
+        "due_date": "2025-03-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2024-25",
+      "period": "March",
+      "period_start": "2025-03-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320325323781J",
+        "filed_on": "2025-04-16",
+        "due_date": "2025-04-11",
+        "days_late": 5
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA320325333371Q",
+        "filed_on": "2025-04-16",
+        "due_date": "2025-04-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "April",
+      "period_start": "2025-04-01",
+      "gstr1": {
+        "status": "filed",
+        "arn": "AA3204251727076",
+        "filed_on": "2025-05-10",
+        "due_date": "2025-05-11",
+        "days_late": 0
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA3204252971838",
+        "filed_on": "2025-05-19",
+        "due_date": "2025-05-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "May",
+      "period_start": "2025-05-01",
+      "gstr1": {
+        "status": "filed",
+        "arn": "AA3205252157949",
+        "filed_on": "2025-06-11",
+        "due_date": "2025-06-11",
+        "days_late": 0
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA3205253657740",
+        "filed_on": "2025-06-18",
+        "due_date": "2025-06-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "June",
+      "period_start": "2025-06-01",
+      "gstr1": {
+        "status": "filed",
+        "arn": "AA320625188477T",
+        "filed_on": "2025-07-11",
+        "due_date": "2025-07-11",
+        "days_late": 0
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA3206252791571",
+        "filed_on": "2025-07-14",
+        "due_date": "2025-07-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "July",
+      "period_start": "2025-07-01",
+      "gstr1": {
+        "status": "filed",
+        "arn": "AA320725227032P",
+        "filed_on": "2025-08-11",
+        "due_date": "2025-08-11",
+        "days_late": 0
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA3207254693830",
+        "filed_on": "2025-08-20",
+        "due_date": "2025-08-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "August",
+      "period_start": "2025-08-01",
+      "gstr1": {
+        "status": "filed",
+        "arn": "AA320825224334G",
+        "filed_on": "2025-09-11",
+        "due_date": "2025-09-11",
+        "days_late": 0
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA3208253422494",
+        "filed_on": "2025-09-18",
+        "due_date": "2025-09-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "September",
+      "period_start": "2025-09-01",
+      "gstr1": {
+        "status": "filed",
+        "arn": "AA320925206699U",
+        "filed_on": "2025-10-11",
+        "due_date": "2025-10-11",
+        "days_late": 0
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA320925557268T",
+        "filed_on": "2025-10-22",
+        "due_date": "2025-10-20",
+        "days_late": 2
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "October",
+      "period_start": "2025-10-01",
+      "gstr1": {
+        "status": "filed",
+        "arn": "AA321025178920F",
+        "filed_on": "2025-11-11",
+        "due_date": "2025-11-11",
+        "days_late": 0
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA3210254048997",
+        "filed_on": "2025-11-19",
+        "due_date": "2025-11-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "November",
+      "period_start": "2025-11-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA321125544060X",
+        "filed_on": "2025-12-20",
+        "due_date": "2025-12-11",
+        "days_late": 9
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA321125544151U",
+        "filed_on": "2025-12-20",
+        "due_date": "2025-12-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "December",
+      "period_start": "2025-12-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA321225645323L",
+        "filed_on": "2026-01-20",
+        "due_date": "2026-01-11",
+        "days_late": 9
+      },
+      "gstr3b": {
+        "status": "filed",
+        "arn": "AA3212256453877",
+        "filed_on": "2026-01-20",
+        "due_date": "2026-01-20",
+        "days_late": 0
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "January",
+      "period_start": "2026-01-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320126607338H",
+        "filed_on": "2026-02-21",
+        "due_date": "2026-02-11",
+        "days_late": 10
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA320126607341U",
+        "filed_on": "2026-02-21",
+        "due_date": "2026-02-20",
+        "days_late": 1
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "February",
+      "period_start": "2026-02-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320226650546B",
+        "filed_on": "2026-03-31",
+        "due_date": "2026-03-11",
+        "days_late": 20
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA320226650593C",
+        "filed_on": "2026-03-31",
+        "due_date": "2026-03-20",
+        "days_late": 11
+      }
+    },
+    {
+      "fy": "2025-26",
+      "period": "March",
+      "period_start": "2026-03-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320326875904Y",
+        "filed_on": "2026-07-09",
+        "due_date": "2026-04-11",
+        "days_late": 89
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA320326875905W",
+        "filed_on": "2026-07-09",
+        "due_date": "2026-04-20",
+        "days_late": 80
+      }
+    },
+    {
+      "fy": "2026-27",
+      "period": "April",
+      "period_start": "2026-04-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320426681222G",
+        "filed_on": "2026-07-09",
+        "due_date": "2026-05-11",
+        "days_late": 59
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA320426681223E",
+        "filed_on": "2026-07-09",
+        "due_date": "2026-05-20",
+        "days_late": 50
+      }
+    },
+    {
+      "fy": "2026-27",
+      "period": "May",
+      "period_start": "2026-05-01",
+      "gstr1": {
+        "status": "filed_late",
+        "arn": "AA320526662570A",
+        "filed_on": "2026-07-09",
+        "due_date": "2026-06-11",
+        "days_late": 28
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA3205266625750",
+        "filed_on": "2026-07-09",
+        "due_date": "2026-06-20",
+        "days_late": 19
+      }
+    },
+    {
+      "fy": "2026-27",
+      "period": "June",
+      "period_start": "2026-06-01",
+      "gstr1": {
+        "status": "filed",
+        "arn": "AA320626151087B",
+        "filed_on": "2026-07-09",
+        "due_date": "2026-07-11",
+        "days_late": 0
+      },
+      "gstr3b": {
+        "status": "filed_late",
+        "arn": "AA320626705471G",
+        "filed_on": "2026-07-22",
+        "due_date": "2026-07-20",
+        "days_late": 2
+      }
+    },
+    {
+      "fy": "2026-27",
+      "period": "July",
+      "period_start": "2026-07-01",
+      "gstr1": {
+        "status": "pending",
+        "due_date": "2026-08-11",
+        "days_overdue": 0
+      },
+      "gstr3b": {
+        "status": "pending",
+        "due_date": "2026-08-20",
+        "days_overdue": 0
+      }
+    }
+  ],
+  "filings": [
+    {
+      "fy": "2024-25",
+      "period": "September",
+      "return": "GSTR-1",
+      "arn": "AA320924692416W",
+      "filed_on": "2024-10-25",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2024-10-11",
+      "days_late": 14
+    },
+    {
+      "fy": "2024-25",
+      "period": "September",
+      "return": "GSTR-3B",
+      "arn": "AA320924692443Z",
+      "filed_on": "2024-10-25",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2024-10-20",
+      "days_late": 5
+    },
+    {
+      "fy": "2024-25",
+      "period": "October",
+      "return": "GSTR-1",
+      "arn": "AA321024292681G",
+      "filed_on": "2024-11-17",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2024-11-11",
+      "days_late": 6
+    },
+    {
+      "fy": "2024-25",
+      "period": "October",
+      "return": "GSTR-3B",
+      "arn": "AA321024292706C",
+      "filed_on": "2024-11-17",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2024-11-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2024-25",
+      "period": "November",
+      "return": "GSTR-1",
+      "arn": "AA321124466134N",
+      "filed_on": "2024-12-20",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2024-12-11",
+      "days_late": 9
+    },
+    {
+      "fy": "2024-25",
+      "period": "November",
+      "return": "GSTR-3B",
+      "arn": "AA321124466281M",
+      "filed_on": "2024-12-20",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2024-12-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2024-25",
+      "period": "December",
+      "return": "GSTR-1",
+      "arn": "AA321224607327L",
+      "filed_on": "2025-01-22",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-01-11",
+      "days_late": 11
+    },
+    {
+      "fy": "2024-25",
+      "period": "December",
+      "return": "GSTR-3B",
+      "arn": "AA321224607421V",
+      "filed_on": "2025-01-22",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-01-20",
+      "days_late": 2
+    },
+    {
+      "fy": "2024-25",
+      "period": "January",
+      "return": "GSTR-1",
+      "arn": "AA320125562931F",
+      "filed_on": "2025-02-21",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-02-11",
+      "days_late": 10
+    },
+    {
+      "fy": "2024-25",
+      "period": "January",
+      "return": "GSTR-3B",
+      "arn": "AA3201255629662",
+      "filed_on": "2025-02-21",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-02-20",
+      "days_late": 1
+    },
+    {
+      "fy": "2024-25",
+      "period": "February",
+      "return": "GSTR-1",
+      "arn": "AA320225374234J",
+      "filed_on": "2025-03-18",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-03-11",
+      "days_late": 7
+    },
+    {
+      "fy": "2024-25",
+      "period": "February",
+      "return": "GSTR-3B",
+      "arn": "AA3202253743496",
+      "filed_on": "2025-03-18",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-03-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2024-25",
+      "period": "March",
+      "return": "GSTR-1",
+      "arn": "AA320325323781J",
+      "filed_on": "2025-04-16",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-04-11",
+      "days_late": 5
+    },
+    {
+      "fy": "2024-25",
+      "period": "March",
+      "return": "GSTR-3B",
+      "arn": "AA320325333371Q",
+      "filed_on": "2025-04-16",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-04-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "April",
+      "return": "GSTR-1",
+      "arn": "AA3204251727076",
+      "filed_on": "2025-05-10",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-05-11",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "April",
+      "return": "GSTR-3B",
+      "arn": "AA3204252971838",
+      "filed_on": "2025-05-19",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-05-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "May",
+      "return": "GSTR-1",
+      "arn": "AA3205252157949",
+      "filed_on": "2025-06-11",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-06-11",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "May",
+      "return": "GSTR-3B",
+      "arn": "AA3205253657740",
+      "filed_on": "2025-06-18",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-06-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "June",
+      "return": "GSTR-1",
+      "arn": "AA320625188477T",
+      "filed_on": "2025-07-11",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-07-11",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "June",
+      "return": "GSTR-3B",
+      "arn": "AA3206252791571",
+      "filed_on": "2025-07-14",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-07-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "July",
+      "return": "GSTR-1",
+      "arn": "AA320725227032P",
+      "filed_on": "2025-08-11",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-08-11",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "July",
+      "return": "GSTR-3B",
+      "arn": "AA3207254693830",
+      "filed_on": "2025-08-20",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-08-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "August",
+      "return": "GSTR-1",
+      "arn": "AA320825224334G",
+      "filed_on": "2025-09-11",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-09-11",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "August",
+      "return": "GSTR-3B",
+      "arn": "AA3208253422494",
+      "filed_on": "2025-09-18",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-09-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "September",
+      "return": "GSTR-1",
+      "arn": "AA320925206699U",
+      "filed_on": "2025-10-11",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-10-11",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "September",
+      "return": "GSTR-3B",
+      "arn": "AA320925557268T",
+      "filed_on": "2025-10-22",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-10-20",
+      "days_late": 2
+    },
+    {
+      "fy": "2025-26",
+      "period": "October",
+      "return": "GSTR-1",
+      "arn": "AA321025178920F",
+      "filed_on": "2025-11-11",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-11-11",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "October",
+      "return": "GSTR-3B",
+      "arn": "AA3210254048997",
+      "filed_on": "2025-11-19",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-11-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "November",
+      "return": "GSTR-1",
+      "arn": "AA321125544060X",
+      "filed_on": "2025-12-20",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-12-11",
+      "days_late": 9
+    },
+    {
+      "fy": "2025-26",
+      "period": "November",
+      "return": "GSTR-3B",
+      "arn": "AA321125544151U",
+      "filed_on": "2025-12-20",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2025-12-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "December",
+      "return": "GSTR-1",
+      "arn": "AA321225645323L",
+      "filed_on": "2026-01-20",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-01-11",
+      "days_late": 9
+    },
+    {
+      "fy": "2025-26",
+      "period": "December",
+      "return": "GSTR-3B",
+      "arn": "AA3212256453877",
+      "filed_on": "2026-01-20",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-01-20",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "January",
+      "return": "GSTR-1",
+      "arn": "AA320126607338H",
+      "filed_on": "2026-02-21",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-02-11",
+      "days_late": 10
+    },
+    {
+      "fy": "2025-26",
+      "period": "January",
+      "return": "GSTR-3B",
+      "arn": "AA320126607341U",
+      "filed_on": "2026-02-21",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-02-20",
+      "days_late": 1
+    },
+    {
+      "fy": "2025-26",
+      "period": "February",
+      "return": "GSTR-1",
+      "arn": "AA320226650546B",
+      "filed_on": "2026-03-31",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-03-11",
+      "days_late": 20
+    },
+    {
+      "fy": "2025-26",
+      "period": "February",
+      "return": "GSTR-3B",
+      "arn": "AA320226650593C",
+      "filed_on": "2026-03-31",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-03-20",
+      "days_late": 11
+    },
+    {
+      "fy": "2025-26",
+      "period": "March",
+      "return": "GSTR-1",
+      "arn": "AA320326875904Y",
+      "filed_on": "2026-07-09",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-04-11",
+      "days_late": 89
+    },
+    {
+      "fy": "2026-27",
+      "period": "April",
+      "return": "GSTR-1",
+      "arn": "AA320426681222G",
+      "filed_on": "2026-07-09",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-05-11",
+      "days_late": 59
+    },
+    {
+      "fy": "2026-27",
+      "period": "May",
+      "return": "GSTR-1",
+      "arn": "AA320526662570A",
+      "filed_on": "2026-07-09",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-06-11",
+      "days_late": 28
+    },
+    {
+      "fy": "2026-27",
+      "period": "June",
+      "return": "GSTR-1",
+      "arn": "AA320626151087B",
+      "filed_on": "2026-07-09",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-07-11",
+      "days_late": 0
+    },
+    {
+      "fy": "2025-26",
+      "period": "March",
+      "return": "GSTR-3B",
+      "arn": "AA320326875905W",
+      "filed_on": "2026-07-09",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-04-20",
+      "days_late": 80
+    },
+    {
+      "fy": "2026-27",
+      "period": "April",
+      "return": "GSTR-3B",
+      "arn": "AA320426681223E",
+      "filed_on": "2026-07-09",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-05-20",
+      "days_late": 50
+    },
+    {
+      "fy": "2026-27",
+      "period": "May",
+      "return": "GSTR-3B",
+      "arn": "AA3205266625750",
+      "filed_on": "2026-07-09",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-06-20",
+      "days_late": 19
+    },
+    {
+      "fy": "2026-27",
+      "period": "June",
+      "return": "GSTR-3B",
+      "arn": "AA320626705471G",
+      "filed_on": "2026-07-22",
+      "mode": "ONLINE",
+      "filed_by": "Mithun Rahim",
+      "due_date": "2026-07-20",
+      "days_late": 2
+    }
+  ]
+}

@@ -1,0 +1,4348 @@
+{
+  "source": "csv-import",
+  "customers": [
+    {
+      "id": "elance-learning-provider-pvt-ltd",
+      "name": "Elance Learning Provider Pvt Ltd",
+      "contact_person": "Elance Learning Provider Pvt Ltd",
+      "email": "",
+      "phone": "",
+      "address": "Floor No.: FOURTH FLOOR\nBuilding No./Flat No.: 2/1149/1173\nHILITE Business Park\nTHONDAYAD BYPASS, City/Town/Village: Kozhikode\n\nDistrict: Kozhikode\nState: Kerala\nPIN Code: 673014",
+      "tax_id": "32AAFCE9145C1ZY",
+      "balance": 81420.0,
+      "total_invoices": 2,
+      "unpaid_invoices": 2
+    },
+    {
+      "id": "ets-digital-llc",
+      "name": "ETS Digital LLC",
+      "contact_person": "PSI",
+      "email": "",
+      "phone": "",
+      "address": "ETS Digital\n18000 W 105th Street\nOlathe KS 66061\nUnited States",
+      "tax_id": "",
+      "balance": 13156.0,
+      "total_invoices": 5,
+      "unpaid_invoices": 5
+    },
+    {
+      "id": "ets-india-private-limited",
+      "name": "ETS India Private Limited",
+      "contact_person": "ETS India Private Limited",
+      "email": "",
+      "phone": "",
+      "address": "Floor 5, Tower C, Building No. 6\nDLF Cyber City, DLF Phase 3\nSector 24, Gurgaon – 122002\nPlace of supply: Haryana",
+      "tax_id": "06AAGCE5881J1ZA",
+      "balance": 387040.0,
+      "total_invoices": 14,
+      "unpaid_invoices": 14
+    },
+    {
+      "id": "international-testing-training-services-",
+      "name": "INTERNATIONAL TESTING TRAINING SERVICES LTD",
+      "contact_person": "ITTS",
+      "email": "",
+      "phone": "",
+      "address": "UNIVERSAL SQUARE MAIN BUILDING 3RD FLOOR\nDEVONSHIRE ST. NOR TH MANCHESTER M12 6JH GB",
+      "tax_id": "",
+      "balance": 95300.0,
+      "total_invoices": 1,
+      "unpaid_invoices": 1
+    },
+    {
+      "id": "ncs-pearson-incorporated",
+      "name": "NCS PEARSON INCORPORATED",
+      "contact_person": "PEARSON VUE",
+      "email": "",
+      "phone": "",
+      "address": "1 Penns Way, OPS 2/2\nNew Castle, DE 19720",
+      "tax_id": "",
+      "balance": 621584.5,
+      "total_invoices": 12,
+      "unpaid_invoices": 12
+    },
+    {
+      "id": "paragon-testing-enterprises-inc",
+      "name": "PARAGON TESTING ENTERPRISES INC.",
+      "contact_person": "PARAGON TESTING ENTERPRISES INC.",
+      "email": "",
+      "phone": "",
+      "address": "2015 MAIN STREET, VANCOUVER, BRITISH COLUMBIA, CANADA, V5T 3C2",
+      "tax_id": "",
+      "balance": 61583.0,
+      "total_invoices": 4,
+      "unpaid_invoices": 4
+    },
+    {
+      "id": "pearson-vue",
+      "name": "Pearson Vue",
+      "contact_person": "Pearson Vue",
+      "email": "",
+      "phone": "+91 88260 10117",
+      "address": "India",
+      "tax_id": "",
+      "balance": 0.0,
+      "total_invoices": 0,
+      "unpaid_invoices": 0
+    },
+    {
+      "id": "planet-edu-exams-pvt-ltd",
+      "name": "Planet EDU Exams Pvt. Ltd",
+      "contact_person": "Planet EDU Exams Pvt. Ltd",
+      "email": "",
+      "phone": "9349747767",
+      "address": "7th Floor, BAB Towers, Near Hotel Harbour View, Opp Cochin Shipyard, Atlantis Mg. Road, Kochi – 682015",
+      "tax_id": "32AAGCP0307G1Z0",
+      "balance": 76700.0,
+      "total_invoices": 2,
+      "unpaid_invoices": 2
+    },
+    {
+      "id": "prometric-b-v",
+      "name": "PROMETRIC B.V",
+      "contact_person": "PROMETRIC B.V",
+      "email": "",
+      "phone": "",
+      "address": "HIOGEHILWEG 8\nAMSTERDAM\nNETHERLANDS",
+      "tax_id": "",
+      "balance": 7065816.9,
+      "total_invoices": 15,
+      "unpaid_invoices": 15
+    },
+    {
+      "id": "shilpa-t",
+      "name": "Shilpa T",
+      "contact_person": "",
+      "email": "",
+      "phone": "9895692197",
+      "address": "Krishnaprabha, Vilwamkadu,Kinavalloor, Palakkad, Kerala-678612",
+      "tax_id": "",
+      "balance": 0.0,
+      "total_invoices": 0,
+      "unpaid_invoices": 0
+    },
+    {
+      "id": "vsion-tech-park-pvt-ltd",
+      "name": "Vsion Tech Park Pvt Ltd",
+      "contact_person": "Vsion Tech Park Pvt Ltd",
+      "email": "bdm@vstechpark.com",
+      "phone": "",
+      "address": "10074, near Kaveri Grameena bank, 2nd Phase, Vijayanagar 4th Stage, Mysuru, Karnataka 570017",
+      "tax_id": "29AAFCV9109B1ZA",
+      "balance": 70800.0,
+      "total_invoices": 1,
+      "unpaid_invoices": 1
+    }
+  ],
+  "invoices": [
+    {
+      "id": "CEL-04",
+      "invoice_number": "CEL-04",
+      "customer_name": "PARAGON TESTING ENTERPRISES INC.",
+      "client_label": "PARAGON TESTING ENTERPRISES INC.",
+      "reference": "",
+      "invoice_date": "2026-08-02",
+      "due_date": "",
+      "total_amount": 222.0,
+      "balance": 222.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CEL-04",
+          "item": "CELPIP",
+          "qty": 1.0,
+          "rate": 222.0,
+          "amount": 222.0,
+          "description": "Exam Registration"
+        }
+      ]
+    },
+    {
+      "id": "PRM-02",
+      "invoice_number": "PRM-02",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2026-07-15",
+      "due_date": "",
+      "total_amount": 2569.9,
+      "balance": 2569.9,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PRM-02",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 2569.9,
+          "amount": 2569.9,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CEL-03",
+      "invoice_number": "CEL-03",
+      "customer_name": "PARAGON TESTING ENTERPRISES INC.",
+      "client_label": "PARAGON TESTING ENTERPRISES INC.",
+      "reference": "",
+      "invoice_date": "2026-07-13",
+      "due_date": "",
+      "total_amount": 378.0,
+      "balance": 378.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CEL-03",
+          "item": "CELPIP",
+          "qty": 1.0,
+          "rate": 378.0,
+          "amount": 378.0,
+          "description": "Exam Registration"
+        }
+      ]
+    },
+    {
+      "id": "PSI-001",
+      "invoice_number": "PSI-001",
+      "customer_name": "ETS Digital LLC",
+      "client_label": "PSI",
+      "reference": "",
+      "invoice_date": "2026-07-10",
+      "due_date": "",
+      "total_amount": 69.0,
+      "balance": 69.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PSI-001",
+          "item": "PSI Exam",
+          "qty": 1.0,
+          "rate": 69.0,
+          "amount": 69.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CEL-02",
+      "invoice_number": "CEL-02",
+      "customer_name": "PARAGON TESTING ENTERPRISES INC.",
+      "client_label": "PARAGON TESTING ENTERPRISES INC.",
+      "reference": "",
+      "invoice_date": "2026-06-10",
+      "due_date": "",
+      "total_amount": 366.0,
+      "balance": 366.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CEL-02",
+          "item": "CELPIP",
+          "qty": 1.0,
+          "rate": 366.0,
+          "amount": 366.0,
+          "description": "Exam Registration"
+        }
+      ]
+    },
+    {
+      "id": "PVCH-03",
+      "invoice_number": "PVCH-03",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2026-05-20",
+      "due_date": "",
+      "total_amount": 22555.0,
+      "balance": 22555.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PVCH-03",
+          "item": "PEARSON EXAM",
+          "qty": 1.0,
+          "rate": 22555.0,
+          "amount": 22555.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PVCL-02",
+      "invoice_number": "PVCL-02",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2026-05-20",
+      "due_date": "",
+      "total_amount": 15600.0,
+      "balance": 15600.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PVCL-02",
+          "item": "PEARSON EXAM",
+          "qty": 1.0,
+          "rate": 15600.0,
+          "amount": 15600.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CEL-01",
+      "invoice_number": "CEL-01",
+      "customer_name": "PARAGON TESTING ENTERPRISES INC.",
+      "client_label": "PARAGON TESTING ENTERPRISES INC.",
+      "reference": "",
+      "invoice_date": "2026-05-10",
+      "due_date": "",
+      "total_amount": 60617.0,
+      "balance": 60617.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CEL-01",
+          "item": "CELPIP",
+          "qty": 1.0,
+          "rate": 60617.0,
+          "amount": 60617.0,
+          "description": "Exam Registration"
+        }
+      ]
+    },
+    {
+      "id": "PVCL - 01",
+      "invoice_number": "PVCL - 01",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2026-04-29",
+      "due_date": "",
+      "total_amount": 7537.5,
+      "balance": 7537.5,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PVCL - 01",
+          "item": "PEARSON EXAM",
+          "qty": 1.0,
+          "rate": 7537.5,
+          "amount": 7537.5,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PVCH - 02",
+      "invoice_number": "PVCH - 02",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2026-04-28",
+      "due_date": "",
+      "total_amount": 14235.0,
+      "balance": 14235.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PVCH - 02",
+          "item": "PEARSON EXAM",
+          "qty": 1.0,
+          "rate": 14235.0,
+          "amount": 14235.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "ITTS-01",
+      "invoice_number": "ITTS-01",
+      "customer_name": "INTERNATIONAL TESTING TRAINING SERVICES LTD",
+      "client_label": "ITTS",
+      "reference": "",
+      "invoice_date": "2026-04-17",
+      "due_date": "",
+      "total_amount": 95300.0,
+      "balance": 95300.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "ITTS-01",
+          "item": "MRCA Exam",
+          "qty": 1.0,
+          "rate": 95300.0,
+          "amount": 95300.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PRM - 01",
+      "invoice_number": "PRM - 01",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2026-04-16",
+      "due_date": "",
+      "total_amount": 2174760.0,
+      "balance": 2174760.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PRM - 01",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 2174760.0,
+          "amount": 2174760.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PVCH - 01",
+      "invoice_number": "PVCH - 01",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2026-04-06",
+      "due_date": "",
+      "total_amount": 10823.0,
+      "balance": 10823.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PVCH - 01",
+          "item": "PEARSON EXAM",
+          "qty": 1.0,
+          "rate": 10823.0,
+          "amount": 10823.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CP-09",
+      "invoice_number": "CP-09",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2026-03-11",
+      "due_date": "",
+      "total_amount": 164556.0,
+      "balance": 164556.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-09",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 164556.0,
+          "amount": 164556.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PV-06",
+      "invoice_number": "PV-06",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2026-03-02",
+      "due_date": "",
+      "total_amount": 122257.0,
+      "balance": 122257.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PV-06",
+          "item": "PEARSON EXAM",
+          "qty": 1.0,
+          "rate": 122257.0,
+          "amount": 122257.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CP-08",
+      "invoice_number": "CP-08",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2026-01-10",
+      "due_date": "",
+      "total_amount": 275370.0,
+      "balance": 275370.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-08",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 275370.0,
+          "amount": 275370.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PSI-04",
+      "invoice_number": "PSI-04",
+      "customer_name": "ETS Digital LLC",
+      "client_label": "PSI",
+      "reference": "",
+      "invoice_date": "2026-01-05",
+      "due_date": "",
+      "total_amount": 4719.0,
+      "balance": 4719.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PSI-04",
+          "item": "PSI Exam",
+          "qty": 1.0,
+          "rate": 4719.0,
+          "amount": 4719.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CP-07",
+      "invoice_number": "CP-07",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2025-12-11",
+      "due_date": "",
+      "total_amount": 1350001.0,
+      "balance": 1350001.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-07",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 1350001.0,
+          "amount": 1350001.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CE-08",
+      "invoice_number": "CE-08",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-11-26",
+      "due_date": "",
+      "total_amount": 23600.0,
+      "balance": 23600.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CE-08",
+          "item": "TOEFL",
+          "qty": 16.0,
+          "rate": 1000.0,
+          "amount": 18880.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "CE-08",
+          "item": "GRE",
+          "qty": 4.0,
+          "rate": 1000.0,
+          "amount": 4720.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CP-06",
+      "invoice_number": "CP-06",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2025-11-10",
+      "due_date": "",
+      "total_amount": 228599.0,
+      "balance": 228599.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-06",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 228599.0,
+          "amount": 228599.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PV-05",
+      "invoice_number": "PV-05",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2025-10-28",
+      "due_date": "",
+      "total_amount": 83725.0,
+      "balance": 83725.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PV-05",
+          "item": "MRCA Exam",
+          "qty": 1.0,
+          "rate": 83725.0,
+          "amount": 83725.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PSI-03",
+      "invoice_number": "PSI-03",
+      "customer_name": "ETS Digital LLC",
+      "client_label": "PSI",
+      "reference": "",
+      "invoice_date": "2025-10-24",
+      "due_date": "",
+      "total_amount": 5144.0,
+      "balance": 5144.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PSI-03",
+          "item": "TOEFL",
+          "qty": 1.0,
+          "rate": 5144.0,
+          "amount": 5144.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CE-07",
+      "invoice_number": "CE-07",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-10-07",
+      "due_date": "",
+      "total_amount": 40120.0,
+      "balance": 40120.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CE-07",
+          "item": "TOEFL",
+          "qty": 29.0,
+          "rate": 1000.0,
+          "amount": 34220.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "CE-07",
+          "item": "GRE",
+          "qty": 5.0,
+          "rate": 1000.0,
+          "amount": 5900.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CP-05",
+      "invoice_number": "CP-05",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2025-09-15",
+      "due_date": "",
+      "total_amount": 64138.0,
+      "balance": 64138.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-05",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 64138.0,
+          "rate": 1.0,
+          "amount": 64138.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CE-06",
+      "invoice_number": "CE-06",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-09-08",
+      "due_date": "",
+      "total_amount": 63720.0,
+      "balance": 63720.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CE-06",
+          "item": "TOEFL",
+          "qty": 48.0,
+          "rate": 1000.0,
+          "amount": 56640.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "CE-06",
+          "item": "GRE",
+          "qty": 6.0,
+          "rate": 1000.0,
+          "amount": 7080.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PV-04",
+      "invoice_number": "PV-04",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2025-08-29",
+      "due_date": "",
+      "total_amount": 94440.0,
+      "balance": 94440.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PV-04",
+          "item": "MRCA Exam",
+          "qty": 1.0,
+          "rate": 94440.0,
+          "amount": 94440.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CP-04",
+      "invoice_number": "CP-04",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2025-08-13",
+      "due_date": "",
+      "total_amount": 1258569.0,
+      "balance": 1258569.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-04",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1258569.0,
+          "rate": 1.0,
+          "amount": 1258569.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CE-05",
+      "invoice_number": "CE-05",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-08-08",
+      "due_date": "",
+      "total_amount": 34220.0,
+      "balance": 34220.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CE-05",
+          "item": "TOEFL",
+          "qty": 26.0,
+          "rate": 1000.0,
+          "amount": 30680.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "CE-05",
+          "item": "GRE",
+          "qty": 3.0,
+          "rate": 1000.0,
+          "amount": 3540.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PV-03",
+      "invoice_number": "PV-03",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2025-07-21",
+      "due_date": "",
+      "total_amount": 12937.0,
+      "balance": 12937.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PV-03",
+          "item": "MRCA Exam",
+          "qty": 1.0,
+          "rate": 12937.0,
+          "amount": 12937.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PSI-02",
+      "invoice_number": "PSI-02",
+      "customer_name": "ETS Digital LLC",
+      "client_label": "PSI",
+      "reference": "",
+      "invoice_date": "2025-07-15",
+      "due_date": "",
+      "total_amount": 3217.0,
+      "balance": 3217.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PSI-02",
+          "item": "PSI Exam",
+          "qty": 1.0,
+          "rate": 3217.0,
+          "amount": 3217.0,
+          "description": "Exam registration"
+        }
+      ]
+    },
+    {
+      "id": "CP-03",
+      "invoice_number": "CP-03",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2025-07-09",
+      "due_date": "",
+      "total_amount": 220513.0,
+      "balance": 220513.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-03",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 220513.0,
+          "amount": 220513.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CE-04",
+      "invoice_number": "CE-04",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-07-03",
+      "due_date": "",
+      "total_amount": 28320.0,
+      "balance": 28320.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CE-04",
+          "item": "TOEFL",
+          "qty": 23.0,
+          "rate": 1000.0,
+          "amount": 27140.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "CE-04",
+          "item": "GRE",
+          "qty": 1.0,
+          "rate": 1000.0,
+          "amount": 1180.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PV-02",
+      "invoice_number": "PV-02",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2025-06-25",
+      "due_date": "",
+      "total_amount": 34837.5,
+      "balance": 34837.5,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PV-02",
+          "item": "MRCA Exam",
+          "qty": 1.0,
+          "rate": 34837.5,
+          "amount": 34837.5,
+          "description": "Convera Confirmation Number     :  OTR6359144"
+        }
+      ]
+    },
+    {
+      "id": "CE-03",
+      "invoice_number": "CE-03",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-06-05",
+      "due_date": "",
+      "total_amount": 24780.0,
+      "balance": 24780.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CE-03",
+          "item": "TOEFL",
+          "qty": 17.0,
+          "rate": 1000.0,
+          "amount": 20060.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "CE-03",
+          "item": "GRE",
+          "qty": 4.0,
+          "rate": 1000.0,
+          "amount": 4720.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CP-02",
+      "invoice_number": "CP-02",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2025-05-15",
+      "due_date": "",
+      "total_amount": 168404.0,
+      "balance": 168404.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-02",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 168404.0,
+          "amount": 168404.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "PV-01",
+      "invoice_number": "PV-01",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2025-05-10",
+      "due_date": "",
+      "total_amount": 54550.0,
+      "balance": 54550.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PV-01",
+          "item": "MRCA Exam",
+          "qty": 1.0,
+          "rate": 54550.0,
+          "amount": 54550.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "M-02",
+      "invoice_number": "M-02",
+      "customer_name": "Elance Learning Provider Pvt Ltd",
+      "client_label": "Elance Learning Provider Pvt Ltd",
+      "reference": "",
+      "invoice_date": "2025-05-10",
+      "due_date": "",
+      "total_amount": 26550.0,
+      "balance": 26550.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "M-02",
+          "item": "CMA US Mock exam",
+          "qty": 15.0,
+          "rate": 1500.0,
+          "amount": 26550.0,
+          "description": "May 10 Cochin"
+        }
+      ]
+    },
+    {
+      "id": "M-01",
+      "invoice_number": "M-01",
+      "customer_name": "Elance Learning Provider Pvt Ltd",
+      "client_label": "Elance Learning Provider Pvt Ltd",
+      "reference": "",
+      "invoice_date": "2025-05-06",
+      "due_date": "",
+      "total_amount": 54870.0,
+      "balance": 54870.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "M-01",
+          "item": "CMA US Mock exam",
+          "qty": 31.0,
+          "rate": 1500.0,
+          "amount": 54870.0,
+          "description": "Till April 30 , 2025"
+        }
+      ]
+    },
+    {
+      "id": "CE-02",
+      "invoice_number": "CE-02",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-05-03",
+      "due_date": "",
+      "total_amount": 37760.0,
+      "balance": 37760.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CE-02",
+          "item": "TOEFL",
+          "qty": 25.0,
+          "rate": 1000.0,
+          "amount": 29500.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "CE-02",
+          "item": "GRE",
+          "qty": 7.0,
+          "rate": 1000.0,
+          "amount": 8260.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CP-01",
+      "invoice_number": "CP-01",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2025-04-11",
+      "due_date": "",
+      "total_amount": 1141397.0,
+      "balance": 1141397.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CP-01",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1.0,
+          "rate": 1141397.0,
+          "amount": 1141397.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "CE-01",
+      "invoice_number": "CE-01",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-04-05",
+      "due_date": "",
+      "total_amount": 20060.0,
+      "balance": 20060.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "CE-01",
+          "item": "TOEFL",
+          "qty": 13.0,
+          "rate": 1000.0,
+          "amount": 15340.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "CE-01",
+          "item": "GRE",
+          "qty": 4.0,
+          "rate": 1000.0,
+          "amount": 4720.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "VT-01",
+      "invoice_number": "VT-01",
+      "customer_name": "Vsion Tech Park Pvt Ltd",
+      "client_label": "Vsion Tech Park Pvt Ltd",
+      "reference": "",
+      "invoice_date": "2025-03-28",
+      "due_date": "",
+      "total_amount": 70800.0,
+      "balance": 70800.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "VT-01",
+          "item": "ACCA CBT Exam",
+          "qty": 40.0,
+          "rate": 300.0,
+          "amount": 14160.0,
+          "description": "March 03, 2025"
+        },
+        {
+          "invoice_number": "VT-01",
+          "item": "ACCA CBT Exam",
+          "qty": 40.0,
+          "rate": 300.0,
+          "amount": 14160.0,
+          "description": "March 04, 2025"
+        },
+        {
+          "invoice_number": "VT-01",
+          "item": "ACCA CBT Exam",
+          "qty": 40.0,
+          "rate": 300.0,
+          "amount": 14160.0,
+          "description": "March 05, 2025"
+        },
+        {
+          "invoice_number": "VT-01",
+          "item": "ACCA CBT Exam",
+          "qty": 40.0,
+          "rate": 300.0,
+          "amount": 14160.0,
+          "description": "March 06, 2025"
+        },
+        {
+          "invoice_number": "VT-01",
+          "item": "ACCA CBT Exam",
+          "qty": 40.0,
+          "rate": 300.0,
+          "amount": 14160.0,
+          "description": "March 07, 2025"
+        }
+      ]
+    },
+    {
+      "id": "B-14",
+      "invoice_number": "B-14",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2025-03-13",
+      "due_date": "",
+      "total_amount": 2900.0,
+      "balance": 2900.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "B-14",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 290.0,
+          "rate": 10.0,
+          "amount": 2900.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "IE-0111",
+      "invoice_number": "IE-0111",
+      "customer_name": "Planet EDU Exams Pvt. Ltd",
+      "client_label": "Planet EDU Exams Pvt. Ltd",
+      "reference": "",
+      "invoice_date": "2025-03-12",
+      "due_date": "",
+      "total_amount": 35400.0,
+      "balance": 35400.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "IE-0111",
+          "item": "IELTS Paper Based Exam",
+          "qty": 1.0,
+          "rate": 30000.0,
+          "amount": 35400.0,
+          "description": "HSN Code : 999295\n15 - March - 2025"
+        }
+      ]
+    },
+    {
+      "id": "A-16",
+      "invoice_number": "A-16",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-03-06",
+      "due_date": "",
+      "total_amount": 10620.0,
+      "balance": 10620.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "A-16",
+          "item": "TOEFL",
+          "qty": 4.0,
+          "rate": 1000.0,
+          "amount": 4720.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "A-16",
+          "item": "GRE",
+          "qty": 5.0,
+          "rate": 1000.0,
+          "amount": 5900.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "IE-0110",
+      "invoice_number": "IE-0110",
+      "customer_name": "Planet EDU Exams Pvt. Ltd",
+      "client_label": "Planet EDU Exams Pvt. Ltd",
+      "reference": "",
+      "invoice_date": "2025-03-05",
+      "due_date": "",
+      "total_amount": 41300.0,
+      "balance": 41300.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "IE-0110",
+          "item": "IELTS Paper Based Exam",
+          "qty": 1.0,
+          "rate": 35000.0,
+          "amount": 41300.0,
+          "description": "08 - March - 2025"
+        }
+      ]
+    },
+    {
+      "id": "PSI-01",
+      "invoice_number": "PSI-01",
+      "customer_name": "ETS Digital LLC",
+      "client_label": "PSI",
+      "reference": "",
+      "invoice_date": "2025-03-03",
+      "due_date": "",
+      "total_amount": 7.0,
+      "balance": 7.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PSI-01",
+          "item": "PSI Exam",
+          "qty": 1.0,
+          "rate": 7.0,
+          "amount": 7.0,
+          "description": "Exam Registration fee"
+        }
+      ]
+    },
+    {
+      "id": "PV-10",
+      "invoice_number": "PV-10",
+      "customer_name": "NCS PEARSON INCORPORATED",
+      "client_label": "PEARSON VUE",
+      "reference": "",
+      "invoice_date": "2025-02-27",
+      "due_date": "",
+      "total_amount": 148087.5,
+      "balance": 148087.5,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "PV-10",
+          "item": "MRCA Exam",
+          "qty": 1.0,
+          "rate": 148087.5,
+          "amount": 148087.5,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "A-15",
+      "invoice_number": "A-15",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-02-06",
+      "due_date": "",
+      "total_amount": 23600.0,
+      "balance": 23600.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "A-15",
+          "item": "TOEFL",
+          "qty": 8.0,
+          "rate": 1000.0,
+          "amount": 9440.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "A-15",
+          "item": "GRE",
+          "qty": 12.0,
+          "rate": 1000.0,
+          "amount": 14160.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "A-14",
+      "invoice_number": "A-14",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2025-01-06",
+      "due_date": "",
+      "total_amount": 44840.0,
+      "balance": 44840.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "A-14",
+          "item": "TOEFL",
+          "qty": 21.0,
+          "rate": 1000.0,
+          "amount": 24780.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "A-14",
+          "item": "GRE",
+          "qty": 17.0,
+          "rate": 1000.0,
+          "amount": 20060.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "A-11",
+      "invoice_number": "A-11",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2024-12-30",
+      "due_date": "",
+      "total_amount": 1180.0,
+      "balance": 1180.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "A-11",
+          "item": "TOEIC",
+          "qty": 1.0,
+          "rate": 1000.0,
+          "amount": 1180.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "B-13",
+      "invoice_number": "B-13",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2024-12-13",
+      "due_date": "",
+      "total_amount": 10400.0,
+      "balance": 10400.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "B-13",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 1040.0,
+          "rate": 10.0,
+          "amount": 10400.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "A-13",
+      "invoice_number": "A-13",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2024-12-09",
+      "due_date": "",
+      "total_amount": 28320.0,
+      "balance": 28320.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "A-13",
+          "item": "TOEFL",
+          "qty": 18.0,
+          "rate": 1000.0,
+          "amount": 21240.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "A-13",
+          "item": "GRE",
+          "qty": 6.0,
+          "rate": 1000.0,
+          "amount": 7080.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "B-12",
+      "invoice_number": "B-12",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2024-11-15",
+      "due_date": "",
+      "total_amount": 1160.0,
+      "balance": 1160.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "B-12",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 116.0,
+          "rate": 10.0,
+          "amount": 1160.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "A-12",
+      "invoice_number": "A-12",
+      "customer_name": "ETS India Private Limited",
+      "client_label": "ETS India Private Limited",
+      "reference": "",
+      "invoice_date": "2024-11-08",
+      "due_date": "",
+      "total_amount": 5900.0,
+      "balance": 5900.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "A-12",
+          "item": "TOEFL",
+          "qty": 3.0,
+          "rate": 1000.0,
+          "amount": 3540.0,
+          "description": ""
+        },
+        {
+          "invoice_number": "A-12",
+          "item": "GRE",
+          "qty": 2.0,
+          "rate": 1000.0,
+          "amount": 2360.0,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "B-11",
+      "invoice_number": "B-11",
+      "customer_name": "PROMETRIC B.V",
+      "client_label": "PROMETRIC B.V",
+      "reference": "",
+      "invoice_date": "2024-10-28",
+      "due_date": "",
+      "total_amount": 2480.0,
+      "balance": 2480.0,
+      "paid_amount": 0.0,
+      "status": "sent",
+      "items": [
+        {
+          "invoice_number": "B-11",
+          "item": "ICMA - Exam Registration Fees",
+          "qty": 248.0,
+          "rate": 10.0,
+          "amount": 2480.0,
+          "description": ""
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "id": "acca-cbt-exam",
+      "name": "ACCA CBT Exam",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 300.0,
+      "description": "March 03, 2025",
+      "tax_list": "[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "acca-cbt-exam-march-03",
+      "name": "ACCA CBT Exam - March 03",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 300.0,
+      "description": "",
+      "tax_list": "[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "additional-expense",
+      "name": "Additional Expense",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 10000.0,
+      "description": "Rent for Table & Chair, housekeeping, DG backup and Administrations for - 01 March 2025 to 07 March 2025",
+      "tax_list": "[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "celpip",
+      "name": "CELPIP",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 366.0,
+      "description": "Exam Registration",
+      "tax_list": "[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "cma-us-mock-exam",
+      "name": "CMA US Mock exam",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 1500.0,
+      "description": "",
+      "tax_list": "[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "gre",
+      "name": "GRE",
+      "hsn": "HSN/SAC - 999295",
+      "buy_rate": 0.0,
+      "sale_rate": 1000.0,
+      "description": "",
+      "tax_list": "[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "icma-exam-registration-fees",
+      "name": "ICMA - Exam Registration Fees",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 10.0,
+      "description": "",
+      "tax_list": "[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "ielts-paper-based-exam",
+      "name": "IELTS Paper Based Exam",
+      "hsn": "HSN/SAC - 999295",
+      "buy_rate": 0.0,
+      "sale_rate": 35000.0,
+      "description": "",
+      "tax_list": "[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "mrca-exam",
+      "name": "MRCA Exam",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 0.0,
+      "description": "",
+      "tax_list": "[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "pearson-exam",
+      "name": "PEARSON EXAM",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 122257.0,
+      "description": "",
+      "tax_list": "[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "psi-exam",
+      "name": "PSI Exam",
+      "hsn": "",
+      "buy_rate": 0.0,
+      "sale_rate": 7.0,
+      "description": "",
+      "tax_list": "[ IGST : 0%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "toefl",
+      "name": "TOEFL",
+      "hsn": "HSN/SAC - 999295",
+      "buy_rate": 0.0,
+      "sale_rate": 1000.0,
+      "description": "",
+      "tax_list": "[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+    },
+    {
+      "id": "toeic",
+      "name": "TOEIC",
+      "hsn": "HSN/SAC - 999295",
+      "buy_rate": 0.0,
+      "sale_rate": 1000.0,
+      "description": "",
+      "tax_list": "[ IGST : 18%, SGST : 0%, CGST : 0% ]"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "EXP1",
+      "date": "2024-09-12",
+      "category": "Cleaning Materials",
+      "type": "DIRECT",
+      "amount": 1500.0,
+      "description": "Cleaning Materials"
+    },
+    {
+      "id": "EXP3",
+      "date": "2024-09-13",
+      "category": "Cleaning Materials",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "Cleaning Materials"
+    },
+    {
+      "id": "EXP2",
+      "date": "2024-09-14",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 70.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP2",
+      "date": "2024-09-14",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 280.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP2",
+      "date": "2024-09-14",
+      "category": "A/C Door Clean",
+      "type": "DIRECT",
+      "amount": 450.0,
+      "description": "A/C Door Clean"
+    },
+    {
+      "id": "EXP2",
+      "date": "2024-09-14",
+      "category": "A/C Transport Charge",
+      "type": "DIRECT",
+      "amount": 300.0,
+      "description": "A/C Transport Charge"
+    },
+    {
+      "id": "EXP4",
+      "date": "2024-09-14",
+      "category": "Plastic Waste",
+      "type": "DIRECT",
+      "amount": 160.0,
+      "description": "Plastic Waste"
+    },
+    {
+      "id": "EXP5",
+      "date": "2024-09-17",
+      "category": "Locker Logo Print",
+      "type": "DIRECT",
+      "amount": 320.0,
+      "description": "Locker Logo Print"
+    },
+    {
+      "id": "EXP6",
+      "date": "2024-09-17",
+      "category": "Keychain For Locker",
+      "type": "DIRECT",
+      "amount": 135.0,
+      "description": "Keychain For Locker"
+    },
+    {
+      "id": "EXP7",
+      "date": "2024-09-23",
+      "category": "Print",
+      "type": "DIRECT",
+      "amount": 170.0,
+      "description": "Print"
+    },
+    {
+      "id": "EXP8",
+      "date": "2024-09-24",
+      "category": "Cleaning",
+      "type": "DIRECT",
+      "amount": 100.0,
+      "description": "Cleaning"
+    },
+    {
+      "id": "EXP8",
+      "date": "2024-09-24",
+      "category": "Print",
+      "type": "DIRECT",
+      "amount": 120.0,
+      "description": "Print"
+    },
+    {
+      "id": "EXP8",
+      "date": "2024-09-24",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 180.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP9",
+      "date": "2024-09-25",
+      "category": "Akshaya Service Charge",
+      "type": "DIRECT",
+      "amount": 80.0,
+      "description": "Akshaya Service Charge"
+    },
+    {
+      "id": "EXP10",
+      "date": "2024-09-26",
+      "category": "Stool",
+      "type": "DIRECT",
+      "amount": 580.0,
+      "description": "Stool"
+    },
+    {
+      "id": "EXP10",
+      "date": "2024-09-26",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 454.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP10",
+      "date": "2024-09-26",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 110.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP11",
+      "date": "2024-09-26",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP12",
+      "date": "2024-10-01",
+      "category": "Codelattice Digital",
+      "type": "DIRECT",
+      "amount": 1667.0,
+      "description": "Codelattice Digital"
+    },
+    {
+      "id": "EXP14",
+      "date": "2024-10-02",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 270.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP15",
+      "date": "2024-10-07",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 180.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP16",
+      "date": "2024-10-10",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 530.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP17",
+      "date": "2024-10-12",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 358.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP17",
+      "date": "2024-10-12",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 225.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP18",
+      "date": "2024-10-16",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP19",
+      "date": "2024-10-23",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 70.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP20",
+      "date": "2024-10-26",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 90.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP21",
+      "date": "2024-10-26",
+      "category": "Netcom Services",
+      "type": "DIRECT",
+      "amount": 6254.0,
+      "description": "Netcom Services"
+    },
+    {
+      "id": "EXP22",
+      "date": "2024-10-28",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 320.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP22",
+      "date": "2024-10-28",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 280.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP23",
+      "date": "2024-11-01",
+      "category": "Nexstay",
+      "type": "DIRECT",
+      "amount": 6288.0,
+      "description": "Nexstay"
+    },
+    {
+      "id": "EXP24",
+      "date": "2024-11-08",
+      "category": "Recharge",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "Recharge"
+    },
+    {
+      "id": "EXP24",
+      "date": "2024-11-08",
+      "category": "Accounts",
+      "type": "DIRECT",
+      "amount": 100.0,
+      "description": "Accounts"
+    },
+    {
+      "id": "EXP26",
+      "date": "2024-11-09",
+      "category": "Nexstay (Room Stay)",
+      "type": "DIRECT",
+      "amount": 4946.0,
+      "description": "Nexstay (Room Stay)"
+    },
+    {
+      "id": "EXP25",
+      "date": "2024-11-09",
+      "category": "Nexstay (Room Stay)",
+      "type": "DIRECT",
+      "amount": 4726.0,
+      "description": "Nexstay (Room Stay)"
+    },
+    {
+      "id": "EXP27",
+      "date": "2024-11-12",
+      "category": "Cleaning Materials",
+      "type": "DIRECT",
+      "amount": 115.0,
+      "description": "Cleaning Materials"
+    },
+    {
+      "id": "EXP28",
+      "date": "2024-11-17",
+      "category": "Dan Associates",
+      "type": "DIRECT",
+      "amount": 1500.0,
+      "description": "Dan Associates"
+    },
+    {
+      "id": "EXP29",
+      "date": "2024-11-18",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 21839.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP30",
+      "date": "2024-11-18",
+      "category": "Office Supply Purchase",
+      "type": "DIRECT",
+      "amount": 1118.0,
+      "description": "Office Supply Purchase"
+    },
+    {
+      "id": "EXP31",
+      "date": "2024-11-18",
+      "category": "Server Charge For 4 Years",
+      "type": "DIRECT",
+      "amount": 3312.0,
+      "description": "Server Charge For 4 Years"
+    },
+    {
+      "id": "EXP32",
+      "date": "2024-11-19",
+      "category": "Tissue",
+      "type": "DIRECT",
+      "amount": 99.0,
+      "description": "Tissue"
+    },
+    {
+      "id": "EXP33",
+      "date": "2024-11-20",
+      "category": "Plastic Waste",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "Plastic Waste"
+    },
+    {
+      "id": "EXP34",
+      "date": "2024-11-21",
+      "category": "Dan Associates",
+      "type": "DIRECT",
+      "amount": 1250.0,
+      "description": "Dan Associates"
+    },
+    {
+      "id": "EXP35",
+      "date": "2024-12-03",
+      "category": "Nexstay (Room Stay)",
+      "type": "DIRECT",
+      "amount": 4901.0,
+      "description": "Nexstay (Room Stay)"
+    },
+    {
+      "id": "EXP37",
+      "date": "2024-12-04",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 854.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP36",
+      "date": "2024-12-05",
+      "category": "Nexstay (Room Stay)",
+      "type": "DIRECT",
+      "amount": 5026.0,
+      "description": "Nexstay (Room Stay)"
+    },
+    {
+      "id": "EXP38",
+      "date": "2024-12-06",
+      "category": "Recharge",
+      "type": "DIRECT",
+      "amount": 199.0,
+      "description": "Recharge"
+    },
+    {
+      "id": "EXP39",
+      "date": "2024-12-10",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP40",
+      "date": "2024-12-11",
+      "category": "Cleaning Materials",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "Cleaning Materials"
+    },
+    {
+      "id": "EXP41",
+      "date": "2024-12-11",
+      "category": "Scratch Sheets & A4",
+      "type": "DIRECT",
+      "amount": 560.0,
+      "description": "Scratch Sheets & A4"
+    },
+    {
+      "id": "EXP41",
+      "date": "2024-12-14",
+      "category": "Nexstay (Room Stay)",
+      "type": "DIRECT",
+      "amount": 1967.0,
+      "description": "Nexstay (Room Stay)"
+    },
+    {
+      "id": "EXP42",
+      "date": "2024-12-14",
+      "category": "Ethernet Adapter",
+      "type": "DIRECT",
+      "amount": 750.0,
+      "description": "Ethernet Adapter"
+    },
+    {
+      "id": "EXP40",
+      "date": "2024-12-15",
+      "category": "Nexstay (Room Stay)",
+      "type": "DIRECT",
+      "amount": 3134.0,
+      "description": "Nexstay (Room Stay)"
+    },
+    {
+      "id": "EXP43",
+      "date": "2024-12-23",
+      "category": "Printer Toner Refill",
+      "type": "DIRECT",
+      "amount": 700.0,
+      "description": "Printer Toner Refill"
+    },
+    {
+      "id": "EXP44",
+      "date": "2024-12-24",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 13445.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP45",
+      "date": "2024-12-24",
+      "category": "Bank Charges",
+      "type": "DIRECT",
+      "amount": 13400.0,
+      "description": "Bank Charges"
+    },
+    {
+      "id": "EXP46",
+      "date": "2024-12-24",
+      "category": "Dan Associates",
+      "type": "DIRECT",
+      "amount": 6000.0,
+      "description": "Dan Associates"
+    },
+    {
+      "id": "EXP47",
+      "date": "2024-12-24",
+      "category": "Dan Associates",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "Dan Associates"
+    },
+    {
+      "id": "EXP48",
+      "date": "2024-12-28",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 70.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-01-04",
+      "category": "Microsoft 365 Renewal",
+      "type": "DIRECT",
+      "amount": 171.0,
+      "description": "Microsoft 365 Renewal"
+    },
+    {
+      "id": "EXP60",
+      "date": "2025-01-05",
+      "category": "Salary",
+      "type": "DIRECT",
+      "amount": 35000.0,
+      "description": "Salary"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-01-06",
+      "category": "Recharge",
+      "type": "DIRECT",
+      "amount": 489.0,
+      "description": "Recharge"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-01-06",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 12898.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-01-06",
+      "category": "Cleaning Staff Salary",
+      "type": "DIRECT",
+      "amount": 8000.0,
+      "description": "Cleaning Staff Salary"
+    },
+    {
+      "id": "EXP59",
+      "date": "2025-01-10",
+      "category": "Forun Rent",
+      "type": "DIRECT",
+      "amount": 100000.0,
+      "description": "Forun Rent"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-01-14",
+      "category": "Netcom Services",
+      "type": "DIRECT",
+      "amount": 2596.0,
+      "description": "Netcom Services"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-01-14",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 116.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-01-18",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-01-20",
+      "category": "Pen (Sign Pen)",
+      "type": "DIRECT",
+      "amount": 60.0,
+      "description": "Pen (Sign Pen)"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-01-20",
+      "category": "Sign Pen",
+      "type": "DIRECT",
+      "amount": 219.0,
+      "description": "Sign Pen"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-01-21",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 47.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-01-22",
+      "category": "Carpentry",
+      "type": "DIRECT",
+      "amount": 800.0,
+      "description": "Carpentry"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-01-22",
+      "category": "Newspaper",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "Newspaper"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-01-24",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 630.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-01-25",
+      "category": "Exhaust Fan",
+      "type": "DIRECT",
+      "amount": 3200.0,
+      "description": "Exhaust Fan"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-01-27",
+      "category": "Exhaust Fan Carpenter Expense",
+      "type": "DIRECT",
+      "amount": 1300.0,
+      "description": "Exhaust Fan Carpenter Expense"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-01-27",
+      "category": "Mohan Chettan",
+      "type": "DIRECT",
+      "amount": 2325.0,
+      "description": "Mohan Chettan"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-01-27",
+      "category": "Netcom Services",
+      "type": "DIRECT",
+      "amount": 3000.0,
+      "description": "Netcom Services"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-01-29",
+      "category": "Push & Pull Sticker",
+      "type": "DIRECT",
+      "amount": 136.0,
+      "description": "Push & Pull Sticker"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-01-29",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-01-29",
+      "category": "Battery",
+      "type": "DIRECT",
+      "amount": 40.0,
+      "description": "Battery"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-01-29",
+      "category": "Plastic Waste",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "Plastic Waste"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-01-30",
+      "category": "Netcom Services",
+      "type": "DIRECT",
+      "amount": 3844.0,
+      "description": "Netcom Services"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-01-30",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 369.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-02-01",
+      "category": "Bank Expense",
+      "type": "DIRECT",
+      "amount": 13400.0,
+      "description": "Bank Expense"
+    },
+    {
+      "id": "EXP59",
+      "date": "2025-02-03",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 350.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP60",
+      "date": "2025-02-05",
+      "category": "Tissue",
+      "type": "DIRECT",
+      "amount": 100.0,
+      "description": "Tissue"
+    },
+    {
+      "id": "EXP61",
+      "date": "2025-02-05",
+      "category": "Salary",
+      "type": "DIRECT",
+      "amount": 35000.0,
+      "description": "Salary"
+    },
+    {
+      "id": "EXP61",
+      "date": "2025-02-06",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-02-09",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 330.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-02-09",
+      "category": "Cleaning Staff Salary",
+      "type": "DIRECT",
+      "amount": 8000.0,
+      "description": "Cleaning Staff Salary"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-02-10",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-02-12",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 100.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-02-15",
+      "category": "Scratch Sheets & Pencils",
+      "type": "DIRECT",
+      "amount": 460.0,
+      "description": "Scratch Sheets & Pencils"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-02-17",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-02-20",
+      "category": "Print Out",
+      "type": "DIRECT",
+      "amount": 60.0,
+      "description": "Print Out"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-02-20",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 801.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-02-21",
+      "category": "Dan Associates",
+      "type": "DIRECT",
+      "amount": 1000.0,
+      "description": "Dan Associates"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-02-21",
+      "category": "Dan Associates",
+      "type": "DIRECT",
+      "amount": 1500.0,
+      "description": "Dan Associates"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-02-24",
+      "category": "Printer Toner Refill",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "Printer Toner Refill"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-02-26",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 210.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-02-27",
+      "category": "Forun Rent",
+      "type": "DIRECT",
+      "amount": 100000.0,
+      "description": "Forun Rent"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-02-27",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 330.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-02-27",
+      "category": "2Nd Floor Rent",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "2Nd Floor Rent"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-02-27",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 20878.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-02-28",
+      "category": "Acca Networking",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "Acca Networking"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-03-01",
+      "category": "Bank Expense",
+      "type": "DIRECT",
+      "amount": 13445.0,
+      "description": "Bank Expense"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-03-01",
+      "category": "Dan Associates",
+      "type": "DIRECT",
+      "amount": 2500.0,
+      "description": "Dan Associates"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-03-02",
+      "category": "Equitea Feb",
+      "type": "DIRECT",
+      "amount": 457.0,
+      "description": "Equitea Feb"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-03-03",
+      "category": "Acca Cleaning Charge",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "Acca Cleaning Charge"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-03-04",
+      "category": "Backup Staff",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "Backup Staff"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-03-05",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-03-07",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 330.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-03-07",
+      "category": "Cleaning Materials",
+      "type": "DIRECT",
+      "amount": 99.0,
+      "description": "Cleaning Materials"
+    },
+    {
+      "id": "EXP62",
+      "date": "2025-03-10",
+      "category": "Salary",
+      "type": "DIRECT",
+      "amount": 41160.0,
+      "description": "Salary"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-03-13",
+      "category": "Cleaning Staff Salary",
+      "type": "DIRECT",
+      "amount": 8000.0,
+      "description": "Cleaning Staff Salary"
+    },
+    {
+      "id": "EXP63",
+      "date": "2025-03-15",
+      "category": "Acca Exp",
+      "type": "DIRECT",
+      "amount": 1500.0,
+      "description": "Acca Exp"
+    },
+    {
+      "id": "EXP64",
+      "date": "2025-03-18",
+      "category": "Electrician Acca",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "Electrician Acca"
+    },
+    {
+      "id": "EXP65",
+      "date": "2025-03-18",
+      "category": "Rent March",
+      "type": "DIRECT",
+      "amount": 100000.0,
+      "description": "Rent March"
+    },
+    {
+      "id": "EXP67",
+      "date": "2025-03-18",
+      "category": "Office Stationery Exp",
+      "type": "DIRECT",
+      "amount": 1008.0,
+      "description": "Office Stationery Exp"
+    },
+    {
+      "id": "EXP66",
+      "date": "2025-03-18",
+      "category": "Bank Charge",
+      "type": "DIRECT",
+      "amount": 13500.0,
+      "description": "Bank Charge"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-03-19",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 30018.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-03-20",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 70.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-03-22",
+      "category": "Plastic Waste",
+      "type": "DIRECT",
+      "amount": 300.0,
+      "description": "Plastic Waste"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-03-25",
+      "category": "Netcom Services",
+      "type": "DIRECT",
+      "amount": 5000.0,
+      "description": "Netcom Services"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-03-27",
+      "category": "Hand Wash & Air Freshner",
+      "type": "DIRECT",
+      "amount": 192.0,
+      "description": "Hand Wash & Air Freshner"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-03-28",
+      "category": "Tissue",
+      "type": "DIRECT",
+      "amount": 100.0,
+      "description": "Tissue"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-03-29",
+      "category": "Harpic",
+      "type": "DIRECT",
+      "amount": 418.0,
+      "description": "Harpic"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-04-02",
+      "category": "Extension Cable",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "Extension Cable"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-04-02",
+      "category": "Acca 2Nd Floor",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "Acca 2Nd Floor"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-04-06",
+      "category": "Cleaning Staff Salary",
+      "type": "DIRECT",
+      "amount": 8000.0,
+      "description": "Cleaning Staff Salary"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-04-08",
+      "category": "Equitea March",
+      "type": "DIRECT",
+      "amount": 754.0,
+      "description": "Equitea March"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-04-10",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-04-10",
+      "category": "Tissue",
+      "type": "DIRECT",
+      "amount": 100.0,
+      "description": "Tissue"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-04-11",
+      "category": "Accounting Software Renewal",
+      "type": "DIRECT",
+      "amount": 799.0,
+      "description": "Accounting Software Renewal"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-04-12",
+      "category": "Forun Rent",
+      "type": "DIRECT",
+      "amount": 100000.0,
+      "description": "Forun Rent"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-04-12",
+      "category": "Matrix",
+      "type": "DIRECT",
+      "amount": 800.0,
+      "description": "Matrix"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-04-12",
+      "category": "Table & Curtain Acca",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "Table & Curtain Acca"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-04-12",
+      "category": "Mohan Chettan",
+      "type": "DIRECT",
+      "amount": 1000.0,
+      "description": "Mohan Chettan"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-04-12",
+      "category": "Loan Reimbursed Of 15L",
+      "type": "DIRECT",
+      "amount": 100000.0,
+      "description": "Loan Reimbursed Of 15L"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-04-15",
+      "category": "Cleaning Charge By Ikka",
+      "type": "DIRECT",
+      "amount": 1000.0,
+      "description": "Cleaning Charge By Ikka"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-04-15",
+      "category": "Glass Frame Work",
+      "type": "DIRECT",
+      "amount": 46000.0,
+      "description": "Glass Frame Work"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-04-16",
+      "category": "Gst March",
+      "type": "DIRECT",
+      "amount": 2134.0,
+      "description": "Gst March"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-04-18",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 250.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-04-21",
+      "category": "Computer Service",
+      "type": "DIRECT",
+      "amount": 2200.0,
+      "description": "Computer Service"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-04-22",
+      "category": "Voice Cancellation Headsets",
+      "type": "DIRECT",
+      "amount": 2750.0,
+      "description": "Voice Cancellation Headsets"
+    },
+    {
+      "id": "EXP59",
+      "date": "2025-04-24",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP63",
+      "date": "2025-04-24",
+      "category": "Plastic Waste",
+      "type": "DIRECT",
+      "amount": 100.0,
+      "description": "Plastic Waste"
+    },
+    {
+      "id": "EXP60",
+      "date": "2025-04-25",
+      "category": "Newspaper",
+      "type": "DIRECT",
+      "amount": 1460.0,
+      "description": "Newspaper"
+    },
+    {
+      "id": "EXP61",
+      "date": "2025-04-25",
+      "category": "Cochin Centre Kmm Ramp",
+      "type": "DIRECT",
+      "amount": 3500.0,
+      "description": "Cochin Centre Kmm Ramp"
+    },
+    {
+      "id": "EXP64",
+      "date": "2025-04-27",
+      "category": "Officfe Phone Recharge",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "Officfe Phone Recharge"
+    },
+    {
+      "id": "EXP65",
+      "date": "2025-04-28",
+      "category": "Matrix",
+      "type": "DIRECT",
+      "amount": 1600.0,
+      "description": "Matrix"
+    },
+    {
+      "id": "EXP62",
+      "date": "2025-04-28",
+      "category": "Washroom Mirror",
+      "type": "DIRECT",
+      "amount": 5500.0,
+      "description": "Washroom Mirror"
+    },
+    {
+      "id": "EXP66",
+      "date": "2025-04-29",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 21974.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP67",
+      "date": "2025-05-01",
+      "category": "Equitea April",
+      "type": "DIRECT",
+      "amount": 866.0,
+      "description": "Equitea April"
+    },
+    {
+      "id": "EXP68",
+      "date": "2025-05-01",
+      "category": "Google Workspace",
+      "type": "DIRECT",
+      "amount": 265.39,
+      "description": "Google Workspace"
+    },
+    {
+      "id": "EXP69",
+      "date": "2025-05-03",
+      "category": "Google Workspace 3 Mail Id Account",
+      "type": "DIRECT",
+      "amount": 568.7,
+      "description": "Google Workspace 3 Mail Id Account"
+    },
+    {
+      "id": "EXP71",
+      "date": "2025-05-05",
+      "category": "Stationery",
+      "type": "DIRECT",
+      "amount": 394.0,
+      "description": "Stationery"
+    },
+    {
+      "id": "EXP70",
+      "date": "2025-05-05",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 660.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP72",
+      "date": "2025-05-06",
+      "category": "Chair",
+      "type": "DIRECT",
+      "amount": 8500.0,
+      "description": "Chair"
+    },
+    {
+      "id": "EXP73",
+      "date": "2025-05-06",
+      "category": "Cleaning Staff Salary",
+      "type": "DIRECT",
+      "amount": 8000.0,
+      "description": "Cleaning Staff Salary"
+    },
+    {
+      "id": "EXP74",
+      "date": "2025-05-06",
+      "category": "Bank Expense",
+      "type": "DIRECT",
+      "amount": 13500.0,
+      "description": "Bank Expense"
+    },
+    {
+      "id": "EXP75",
+      "date": "2025-05-07",
+      "category": "Box File",
+      "type": "DIRECT",
+      "amount": 270.0,
+      "description": "Box File"
+    },
+    {
+      "id": "EXP76",
+      "date": "2025-05-08",
+      "category": "Garbage Bag",
+      "type": "DIRECT",
+      "amount": 195.0,
+      "description": "Garbage Bag"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-05-10",
+      "category": "Dan Associates",
+      "type": "DIRECT",
+      "amount": 2000.0,
+      "description": "Dan Associates"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-05-10",
+      "category": "Cochin Test Centre",
+      "type": "DIRECT",
+      "amount": 1000.0,
+      "description": "Cochin Test Centre"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-05-15",
+      "category": "Lamination & Signages",
+      "type": "DIRECT",
+      "amount": 420.0,
+      "description": "Lamination & Signages"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-05-16",
+      "category": "Tca Id Card",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "Tca Id Card"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-05-16",
+      "category": "Forun Rent",
+      "type": "DIRECT",
+      "amount": 100000.0,
+      "description": "Forun Rent"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-05-17",
+      "category": "A4 Sheets & Double Sided Tape",
+      "type": "DIRECT",
+      "amount": 325.0,
+      "description": "A4 Sheets & Double Sided Tape"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-05-20",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 210.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-05-20",
+      "category": "Cochin Centre",
+      "type": "DIRECT",
+      "amount": 45003.0,
+      "description": "Cochin Centre"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-05-20",
+      "category": "Loan Reimbursed Of 15L",
+      "type": "DIRECT",
+      "amount": 25000.0,
+      "description": "Loan Reimbursed Of 15L"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-05-21",
+      "category": "Waste Clearance",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "Waste Clearance"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-05-24",
+      "category": "Cochin Centre",
+      "type": "DIRECT",
+      "amount": 5250.0,
+      "description": "Cochin Centre"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-05-25",
+      "category": "Officfe Phone Recharge",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "Officfe Phone Recharge"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-05-29",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 19848.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-05-30",
+      "category": "Battery",
+      "type": "DIRECT",
+      "amount": 255.0,
+      "description": "Battery"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-06-02",
+      "category": "Computer Purchase",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "Computer Purchase"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-06-02",
+      "category": "Bank Charges",
+      "type": "DIRECT",
+      "amount": 13500.0,
+      "description": "Bank Charges"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-06-04",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-06-04",
+      "category": "Office Stationery Exp",
+      "type": "DIRECT",
+      "amount": 798.0,
+      "description": "Office Stationery Exp"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-06-06",
+      "category": "Office Stationery Exp",
+      "type": "DIRECT",
+      "amount": 845.0,
+      "description": "Office Stationery Exp"
+    },
+    {
+      "id": "EXP43",
+      "date": "2025-06-09",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-06-11",
+      "category": "Cleaning Staff Salary",
+      "type": "DIRECT",
+      "amount": 8000.0,
+      "description": "Cleaning Staff Salary"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-06-12",
+      "category": "Airtel Bill",
+      "type": "DIRECT",
+      "amount": 14156.46,
+      "description": "Airtel Bill"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-06-13",
+      "category": "Equitea May",
+      "type": "DIRECT",
+      "amount": 537.0,
+      "description": "Equitea May"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-06-15",
+      "category": "A4 Sheet",
+      "type": "DIRECT",
+      "amount": 203.0,
+      "description": "A4 Sheet"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-06-16",
+      "category": "Scratch Sheets & Pencils",
+      "type": "DIRECT",
+      "amount": 725.0,
+      "description": "Scratch Sheets & Pencils"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-06-16",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 140.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-06-18",
+      "category": "Amazon Business",
+      "type": "DIRECT",
+      "amount": 16687.97,
+      "description": "Amazon Business"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-06-18",
+      "category": "Microsystems Infotech",
+      "type": "DIRECT",
+      "amount": 122000.0,
+      "description": "Microsystems Infotech"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-06-18",
+      "category": "Chartered Accountant",
+      "type": "DIRECT",
+      "amount": 1185.0,
+      "description": "Chartered Accountant"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-06-19",
+      "category": "Website & Mail",
+      "type": "DIRECT",
+      "amount": 1380.0,
+      "description": "Website & Mail"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-06-19",
+      "category": "Exhaust Fan",
+      "type": "DIRECT",
+      "amount": 2700.0,
+      "description": "Exhaust Fan"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-06-19",
+      "category": "Mohan Chetan",
+      "type": "DIRECT",
+      "amount": 300.0,
+      "description": "Mohan Chetan"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-06-19",
+      "category": "Waste Clearance",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "Waste Clearance"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-06-23",
+      "category": "Scratch Sheets",
+      "type": "DIRECT",
+      "amount": 680.0,
+      "description": "Scratch Sheets"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-06-23",
+      "category": "Officfe Phone Recharge",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "Officfe Phone Recharge"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-06-23",
+      "category": "Office Stationery Exp",
+      "type": "DIRECT",
+      "amount": 1017.0,
+      "description": "Office Stationery Exp"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-06-27",
+      "category": "Plastic Waste",
+      "type": "DIRECT",
+      "amount": 100.0,
+      "description": "Plastic Waste"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-06-27",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 21378.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-06-28",
+      "category": "System Rent For July 30",
+      "type": "DIRECT",
+      "amount": 3500.0,
+      "description": "System Rent For July 30"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-06-28",
+      "category": "Office Supplies",
+      "type": "DIRECT",
+      "amount": 1647.0,
+      "description": "Office Supplies"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-06-28",
+      "category": "Office Stationery Exp",
+      "type": "DIRECT",
+      "amount": 663.0,
+      "description": "Office Stationery Exp"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-06-28",
+      "category": "Bucket",
+      "type": "DIRECT",
+      "amount": 130.0,
+      "description": "Bucket"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-06-29",
+      "category": "Waste Clearance",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "Waste Clearance"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-06-29",
+      "category": "A4 Sheet",
+      "type": "DIRECT",
+      "amount": 550.0,
+      "description": "A4 Sheet"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-06-30",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 70.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-07-01",
+      "category": "Cleaning & Hygiene",
+      "type": "DIRECT",
+      "amount": 1.0,
+      "description": "Cleaning & Hygiene"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-07-01",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 1.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-07-02",
+      "category": "Office Supplies",
+      "type": "DIRECT",
+      "amount": 4997.0,
+      "description": "Office Supplies"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-07-06",
+      "category": "Bank Charge",
+      "type": "DIRECT",
+      "amount": 13500.0,
+      "description": "Bank Charge"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-07-06",
+      "category": "Office Stationery Exp",
+      "type": "DIRECT",
+      "amount": 3000.0,
+      "description": "Office Stationery Exp"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-07-06",
+      "category": "Water Can",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "Water Can"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-07-06",
+      "category": "Computer Service",
+      "type": "DIRECT",
+      "amount": 2500.0,
+      "description": "Computer Service"
+    },
+    {
+      "id": "EXP59",
+      "date": "2025-07-06",
+      "category": "Waste Clearance",
+      "type": "DIRECT",
+      "amount": 1200.0,
+      "description": "Waste Clearance"
+    },
+    {
+      "id": "EXP60",
+      "date": "2025-07-06",
+      "category": "Salary",
+      "type": "DIRECT",
+      "amount": 16000.0,
+      "description": "Salary"
+    },
+    {
+      "id": "EXP61",
+      "date": "2025-07-06",
+      "category": "Cleaning Staff Salary",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "Cleaning Staff Salary"
+    },
+    {
+      "id": "EXP60",
+      "date": "2025-07-14",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-07-15",
+      "category": "Plastic Waste",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "Plastic Waste"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-07-15",
+      "category": "Forun Rent",
+      "type": "DIRECT",
+      "amount": 100000.0,
+      "description": "Forun Rent"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-07-15",
+      "category": "Mohan Chettan",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "Mohan Chettan"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-07-15",
+      "category": "Office Supplies",
+      "type": "DIRECT",
+      "amount": 5194.0,
+      "description": "Office Supplies"
+    },
+    {
+      "id": "EXP62",
+      "date": "2025-07-15",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 8653.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-07-17",
+      "category": "Carpentry",
+      "type": "DIRECT",
+      "amount": 50000.0,
+      "description": "Carpentry"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-07-17",
+      "category": "01 Cleaning & Hygiene",
+      "type": "DIRECT",
+      "amount": 1.0,
+      "description": "01 Cleaning & Hygiene"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-07-17",
+      "category": "03 It & Office Equipments",
+      "type": "DIRECT",
+      "amount": 1.0,
+      "description": "03 It & Office Equipments"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-07-17",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 1.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-07-17",
+      "category": "05 - Utilities",
+      "type": "DIRECT",
+      "amount": 1.0,
+      "description": "05 - Utilities"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-07-17",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 2.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-07-17",
+      "category": "07 - Assets & Hardware",
+      "type": "DIRECT",
+      "amount": 1.0,
+      "description": "07 - Assets & Hardware"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-07-17",
+      "category": "08 - Branding & External Services",
+      "type": "DIRECT",
+      "amount": 2.0,
+      "description": "08 - Branding & External Services"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-07-17",
+      "category": "09 - Salaries & Staff",
+      "type": "DIRECT",
+      "amount": 2.0,
+      "description": "09 - Salaries & Staff"
+    },
+    {
+      "id": "EXP63",
+      "date": "2025-07-17",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 37318.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP64",
+      "date": "2025-07-17",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 260.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP65",
+      "date": "2025-07-17",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 2000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP66",
+      "date": "2025-07-17",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 40000.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP61",
+      "date": "2025-07-17",
+      "category": "10 - Finance & Professional Services",
+      "type": "DIRECT",
+      "amount": 29098.0,
+      "description": "10 - Finance & Professional Services"
+    },
+    {
+      "id": "EXP76",
+      "date": "2025-07-18",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 30000.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP67",
+      "date": "2025-07-19",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 16540.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP68",
+      "date": "2025-07-19",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 540.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP75",
+      "date": "2025-07-19",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 30000.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP69",
+      "date": "2025-07-23",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 3500.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP70",
+      "date": "2025-07-23",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 27416.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP71",
+      "date": "2025-07-23",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 23708.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP72",
+      "date": "2025-07-23",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 1600.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP74",
+      "date": "2025-07-24",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 4000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP73",
+      "date": "2025-07-25",
+      "category": "01 Cleaning & Hygiene",
+      "type": "DIRECT",
+      "amount": 396.0,
+      "description": "01 Cleaning & Hygiene"
+    },
+    {
+      "id": "EXP77",
+      "date": "2025-07-25",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 2000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP95",
+      "date": "2025-07-25",
+      "category": "05 - Utilities",
+      "type": "DIRECT",
+      "amount": 8853.54,
+      "description": "05 - Utilities"
+    },
+    {
+      "id": "EXP92",
+      "date": "2025-07-26",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 20000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP93",
+      "date": "2025-07-26",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 8400.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP79",
+      "date": "2025-07-27",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 1600.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP80",
+      "date": "2025-07-28",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 30000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP82",
+      "date": "2025-07-28",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 25000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP94",
+      "date": "2025-07-28",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 25000.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP83",
+      "date": "2025-07-29",
+      "category": "10 - Finance & Professional Services",
+      "type": "DIRECT",
+      "amount": 2000.0,
+      "description": "10 - Finance & Professional Services"
+    },
+    {
+      "id": "EXP84",
+      "date": "2025-07-29",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 3697.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP85",
+      "date": "2025-07-29",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 13950.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP86",
+      "date": "2025-07-30",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 1600.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP87",
+      "date": "2025-07-30",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 6227.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP88",
+      "date": "2025-07-30",
+      "category": "01 Cleaning & Hygiene",
+      "type": "DIRECT",
+      "amount": 2613.0,
+      "description": "01 Cleaning & Hygiene"
+    },
+    {
+      "id": "EXP89",
+      "date": "2025-07-30",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 1811.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP90",
+      "date": "2025-07-30",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 29500.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP91",
+      "date": "2025-07-31",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 20940.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP96",
+      "date": "2025-07-31",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 7264.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP100",
+      "date": "2025-07-31",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 6250.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP97",
+      "date": "2025-08-01",
+      "category": "07 - Assets & Hardware",
+      "type": "DIRECT",
+      "amount": 750.0,
+      "description": "07 - Assets & Hardware"
+    },
+    {
+      "id": "EXP98",
+      "date": "2025-08-01",
+      "category": "09 - Salaries & Staff",
+      "type": "DIRECT",
+      "amount": 1500.0,
+      "description": "09 - Salaries & Staff"
+    },
+    {
+      "id": "EXP99",
+      "date": "2025-08-01",
+      "category": "09 - Salaries & Staff",
+      "type": "DIRECT",
+      "amount": 1000.0,
+      "description": "09 - Salaries & Staff"
+    },
+    {
+      "id": "EXP101",
+      "date": "2025-08-02",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP102",
+      "date": "2025-08-02",
+      "category": "08 - Branding & External Services",
+      "type": "DIRECT",
+      "amount": 1233.0,
+      "description": "08 - Branding & External Services"
+    },
+    {
+      "id": "EXP103",
+      "date": "2025-08-05",
+      "category": "10 - Finance & Professional Services",
+      "type": "DIRECT",
+      "amount": 13500.0,
+      "description": "10 - Finance & Professional Services"
+    },
+    {
+      "id": "EXP104",
+      "date": "2025-08-05",
+      "category": "05 - Utilities",
+      "type": "DIRECT",
+      "amount": 14289.0,
+      "description": "05 - Utilities"
+    },
+    {
+      "id": "EXP105",
+      "date": "2025-08-05",
+      "category": "09 - Salaries & Staff",
+      "type": "DIRECT",
+      "amount": 6400.0,
+      "description": "09 - Salaries & Staff"
+    },
+    {
+      "id": "EXP106",
+      "date": "2025-08-06",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 3000.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP44",
+      "date": "2025-08-07",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 2000.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-08-08",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 20000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-08-09",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-08-10",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 800.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-08-11",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 200.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-08-12",
+      "category": "03 It & Office Equipments",
+      "type": "DIRECT",
+      "amount": 4200.0,
+      "description": "03 It & Office Equipments"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-08-12",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 3000.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-08-13",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 105000.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-08-14",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 20000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-08-20",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-08-21",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-08-25",
+      "category": "03 It & Office Equipments",
+      "type": "DIRECT",
+      "amount": 1499.0,
+      "description": "03 It & Office Equipments"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-08-26",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 1100.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-08-26",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 900.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-08-26",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 315.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-08-26",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 700.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP59",
+      "date": "2025-08-26",
+      "category": "03 It & Office Equipments",
+      "type": "DIRECT",
+      "amount": 1600.0,
+      "description": "03 It & Office Equipments"
+    },
+    {
+      "id": "EXP60",
+      "date": "2025-08-26",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-09-01",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 82900.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-09-01",
+      "category": "10 - Finance & Professional Services",
+      "type": "DIRECT",
+      "amount": 13500.0,
+      "description": "10 - Finance & Professional Services"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-09-02",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 3000.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP49",
+      "date": "2025-09-02",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 14999.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP50",
+      "date": "2025-09-02",
+      "category": "09 - Salaries & Staff",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "09 - Salaries & Staff"
+    },
+    {
+      "id": "EXP51",
+      "date": "2025-09-02",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 34900.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP52",
+      "date": "2025-09-07",
+      "category": "05 - Utilities",
+      "type": "DIRECT",
+      "amount": 3543.54,
+      "description": "05 - Utilities"
+    },
+    {
+      "id": "EXP53",
+      "date": "2025-09-07",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 4200.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP54",
+      "date": "2025-09-07",
+      "category": "Mohan Chettan",
+      "type": "DIRECT",
+      "amount": 2000.0,
+      "description": "Mohan Chettan"
+    },
+    {
+      "id": "EXP55",
+      "date": "2025-09-08",
+      "category": "05 - Utilities",
+      "type": "DIRECT",
+      "amount": 1289.0,
+      "description": "05 - Utilities"
+    },
+    {
+      "id": "EXP56",
+      "date": "2025-09-10",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 30000.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP57",
+      "date": "2025-09-12",
+      "category": "05 - Utilities",
+      "type": "DIRECT",
+      "amount": 14603.0,
+      "description": "05 - Utilities"
+    },
+    {
+      "id": "EXP58",
+      "date": "2025-09-13",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 730.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP59",
+      "date": "2025-09-13",
+      "category": "08 - Branding & External Services",
+      "type": "DIRECT",
+      "amount": 1890.0,
+      "description": "08 - Branding & External Services"
+    },
+    {
+      "id": "EXP60",
+      "date": "2025-09-18",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 100500.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP61",
+      "date": "2025-09-18",
+      "category": "10 - Finance & Professional Services",
+      "type": "DIRECT",
+      "amount": 1500.0,
+      "description": "10 - Finance & Professional Services"
+    },
+    {
+      "id": "EXP64",
+      "date": "2025-09-18",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 1000.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP62",
+      "date": "2025-09-19",
+      "category": "01 Cleaning & Hygiene",
+      "type": "DIRECT",
+      "amount": 1100.0,
+      "description": "01 Cleaning & Hygiene"
+    },
+    {
+      "id": "EXP63",
+      "date": "2025-09-19",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP63",
+      "date": "2025-09-19",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 500.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP65",
+      "date": "2025-09-21",
+      "category": "Calicut Flat",
+      "type": "DIRECT",
+      "amount": 10000.0,
+      "description": "Calicut Flat"
+    },
+    {
+      "id": "EXP66",
+      "date": "2025-10-08",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 4900.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP67",
+      "date": "2025-10-13",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 210.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP68",
+      "date": "2025-10-17",
+      "category": "Forun Rent",
+      "type": "DIRECT",
+      "amount": 105000.0,
+      "description": "Forun Rent"
+    },
+    {
+      "id": "EXP69",
+      "date": "2025-10-24",
+      "category": "Mohan Chettan",
+      "type": "DIRECT",
+      "amount": 1000.0,
+      "description": "Mohan Chettan"
+    },
+    {
+      "id": "EXP70",
+      "date": "2025-10-24",
+      "category": "05 - Utilities",
+      "type": "DIRECT",
+      "amount": 11952.0,
+      "description": "05 - Utilities"
+    },
+    {
+      "id": "EXP71",
+      "date": "2025-10-29",
+      "category": "02 Maintenance & Repair",
+      "type": "DIRECT",
+      "amount": 5500.0,
+      "description": "02 Maintenance & Repair"
+    },
+    {
+      "id": "EXP72",
+      "date": "2025-10-31",
+      "category": "06 - Rent & Space",
+      "type": "DIRECT",
+      "amount": 4700.0,
+      "description": "06 - Rent & Space"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-11-10",
+      "category": "07 - Assets & Hardware",
+      "type": "DIRECT",
+      "amount": 600.0,
+      "description": "07 - Assets & Hardware"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-11-10",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 10443.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-11-10",
+      "category": "Electricity Bill",
+      "type": "DIRECT",
+      "amount": 15206.0,
+      "description": "Electricity Bill"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-11-10",
+      "category": "Waste Clearance",
+      "type": "DIRECT",
+      "amount": 800.0,
+      "description": "Waste Clearance"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-11-13",
+      "category": "10 - Finance & Professional Services",
+      "type": "DIRECT",
+      "amount": 9328.22,
+      "description": "10 - Finance & Professional Services"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-11-13",
+      "category": "10 - Finance & Professional Services",
+      "type": "DIRECT",
+      "amount": 5000.0,
+      "description": "10 - Finance & Professional Services"
+    },
+    {
+      "id": "EXP46",
+      "date": "2025-11-20",
+      "category": "01 Cleaning & Hygiene",
+      "type": "DIRECT",
+      "amount": 1122.0,
+      "description": "01 Cleaning & Hygiene"
+    },
+    {
+      "id": "EXP47",
+      "date": "2025-11-24",
+      "category": "Chartered Accountant",
+      "type": "DIRECT",
+      "amount": 1500.0,
+      "description": "Chartered Accountant"
+    },
+    {
+      "id": "EXP48",
+      "date": "2025-11-24",
+      "category": "04 - Office Supplies & Sationery",
+      "type": "DIRECT",
+      "amount": 1878.0,
+      "description": "04 - Office Supplies & Sationery"
+    },
+    {
+      "id": "EXP45",
+      "date": "2025-11-28",
+      "category": "03 It & Office Equipments",
+      "type": "DIRECT",
+      "amount": 18000.0,
+      "description": "03 It & Office Equipments"
+    }
+  ]
+}

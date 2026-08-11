@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ---------- Kimi design tokens (light) ---------- */
+    /* labels */
+    --k-label-primary: rgba(0, 0, 0, 0.9);
+    --k-label-secondary: rgba(0, 0, 0, 0.6);
+    --k-label-tertiary: rgba(0, 0, 0, 0.45);
+    --k-label-quaternary: rgba(0, 0, 0, 0.3);
+    /* backgrounds */
+    --k-bg-primary: #ffffff;
+    --k-bg-primary70: rgba(255, 255, 255, 0.7);
+    --k-bg-secondary: #f5f5f5;
+    --k-bg-tertiary: #ffffff;
+    --k-bg-ground: #f9fbfc;
+    /* fills */
+    --k-fill-f1: rgba(0, 0, 0, 0.03);
+    --k-fill-f1-hover: rgba(0, 0, 0, 0.059);
+    --k-fill-f2: rgba(0, 0, 0, 0.05);
+    --k-fill-f2-hover: rgba(0, 0, 0, 0.079);
+    --k-fill-f3: rgba(0, 0, 0, 0.15);
+    /* separator + mask */
+    --k-separator: rgba(0, 0, 0, 0.13);
+    --k-mask-base: rgba(0, 0, 0, 0.4);
+    /* status */
+    --k-danger: #ff3849;
+    --k-danger-hover: rgba(247, 54, 71, 1);
+    --k-positive: #16c456;
+    --k-blue: #1783ff;
+    --k-blue-hover: rgba(22, 127, 247, 1);
+    --k-orange: #ff9500;
+    --k-purple: #985ffb;
+    /* light status backgrounds */
+    --k-bg-red-light: rgba(255, 77, 77, 0.1);
+    --k-bg-orange-light: rgba(255, 149, 0, 0.1);
+    --k-bg-green-light: rgba(22, 196, 86, 0.1);
+    --k-bg-blue-light: rgba(23, 131, 255, 0.1);
+    /* chart sequential (blue) */
+    --k-chart-blue-25: #c5e0ff;
+    --k-chart-blue-40: #a2cdff;
+    --k-chart-blue-50: #8bc1ff;
+    --k-chart-blue-70: #5ca8ff;
+    --k-chart-blue-100: #1783ff;
+    --k-chart-neutral: #b2b2b2;
+    /* z-index layers */
+    --z-header: 500;
+    --z-modal-backdrop: 800;
+    --z-modal: 810;
+    --z-dialog-backdrop: 850;
+    --z-dialog: 860;
+    --z-tooltip: 900;
+    --z-toast: 1000;
+
+    /* ---------- Finance theme: deep emerald + gold ---------- */
+    --f-emerald-950: #022c22;
+    --f-emerald-900: #064e3b;
+    --f-emerald-800: #065f46;
+    --f-emerald-700: #047857;
+    --f-emerald-600: #059669;
+    --f-emerald-500: #10b981;
+    --f-emerald-100: #d1fae5;
+    --f-emerald-50: #ecfdf5;
+    --f-gold-600: #b8860b;
+    --f-gold-500: #d4a017;
+    --f-gold-400: #e3b93f;
+    --f-gold-100: #faf0d2;
+    --f-gold-50: #fdf8e7;
+    --f-sidebar-bg: linear-gradient(180deg, #04382c 0%, #022c22 100%);
+    --f-header-bg: linear-gradient(100deg, #065f46 0%, #047857 52%, #0f766e 100%);
+    --f-btn-bg: linear-gradient(135deg, #059669 0%, #047857 100%);
+    --f-btn-bg-hover: linear-gradient(135deg, #10b981 0%, #059669 100%);
+
+    /* ---------- shadcn compatibility (mapped to Kimi tokens) ---------- */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 350 100% 61%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 87%;
+    --input: 0 0% 87%;
+    --ring: 214 100% 55%;
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  /* keyboard focus per Kimi: color.status.kimiBlue */
+  :focus-visible {
+    outline: 2px solid var(--k-blue);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Kimi webUI typography scale */
+  .k-large-title { font-size: 20px; font-weight: 600; line-height: 30px; color: var(--f-emerald-900); }
+  .k-t2 { font-size: 16px; font-weight: 400; line-height: 24px; color: var(--k-label-primary); }
+  .k-t2-em { font-size: 16px; font-weight: 500; line-height: 24px; color: var(--k-label-primary); }
+  .k-b1 { font-size: 15px; font-weight: 400; line-height: 22px; color: var(--k-label-primary); }
+  .k-b1-em { font-size: 15px; font-weight: 500; line-height: 22px; color: var(--k-label-primary); }
+  .k-b2 { font-size: 14px; font-weight: 400; line-height: 20px; color: var(--k-label-primary); }
+  .k-b2-em { font-size: 14px; font-weight: 500; line-height: 20px; color: var(--k-label-primary); }
+  .k-b2-secondary { font-size: 14px; font-weight: 400; line-height: 20px; color: var(--k-label-secondary); }
+  .k-c1 { font-size: 12px; font-weight: 400; line-height: 18px; color: var(--k-label-tertiary); }
+  .k-c1-em { font-size: 12px; font-weight: 500; line-height: 18px; color: var(--k-label-secondary); }
+
+  .k-text-primary { color: var(--k-label-primary); }
+  .k-text-secondary { color: var(--k-label-secondary); }
+  .k-text-tertiary { color: var(--k-label-tertiary); }
+
+  .k-card {
+    background: var(--k-bg-primary);
+    border: 0.5px solid var(--k-separator);
+    border-radius: 12px;
+  }
+  .k-surface { background: var(--k-bg-secondary); }
+
+  /* micro-interactions per animation.md */
+  .k-press { transition: transform 120ms ease-out, background-color 150ms ease, color 150ms ease; }
+  .k-press:active { transform: scale(0.97); }
+  @media (prefers-reduced-motion: reduce) {
+    .k-press, .k-press:active { transition: none; transform: none; }
+  }
+}
+
+/* Invoice printing — only the invoice sheet is printed, A4 */
+@media print {
+  @page { size: A4; margin: 10mm; }
+  body * { visibility: hidden; }
+  #invoice-print-area, #invoice-print-area * { visibility: visible; }
+  #invoice-print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none !important;
+    box-shadow: none !important;
+  }
+}
