@@ -19,21 +19,6 @@ export default function DashboardPage() {
 
   const isLoading = isAuthLoading || invoicesLoading || expensesLoading || cashLoading;
 
-  if (isLoading) {
-    return <LoadingPage />;
-  }
-
-  if (!user) {
-    return (
-      <div className="page-enter flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-money-gold">Connection Required</h2>
-          <p className="text-text-secondary">Please sign in to access the dashboard.</p>
-        </div>
-      </div>
-    );
-  }
-
   const totalIncome = useMemo(() => {
     if (!invoices) return 0;
     return invoices
@@ -95,6 +80,21 @@ export default function DashboardPage() {
       .slice(0, 5)
       .map(([name, value]) => ({ name, value }));
   }, [expenses]);
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
+
+  if (!user) {
+    return (
+      <div className="page-enter flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-money-gold">Connection Required</h2>
+          <p className="text-text-secondary">Please sign in to access the dashboard.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-enter space-y-8">

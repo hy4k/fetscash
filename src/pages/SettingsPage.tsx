@@ -79,21 +79,6 @@ export default function SettingsPage() {
     categoriesLoading ||
     productsLoading;
 
-  if (isLoading) {
-    return <LoadingPage />;
-  }
-
-  if (!user) {
-    return (
-      <div className="page-enter flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-money-gold">Connection Required</h2>
-          <p className="text-text-secondary">Please sign in to access settings.</p>
-        </div>
-      </div>
-    );
-  }
-
   const totalIncome = useMemo(() => {
     if (!invoices) return 0;
     return invoices
@@ -217,6 +202,21 @@ export default function SettingsPage() {
     ],
     []
   );
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
+
+  if (!user) {
+    return (
+      <div className="page-enter flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-money-gold">Connection Required</h2>
+          <p className="text-text-secondary">Please sign in to access settings.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-enter space-y-8">
