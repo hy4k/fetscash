@@ -26,9 +26,13 @@ export interface Settings {
   // FETS Cash opening balances per division
   openingCalicut: string
   openingCochin: string
+  // Monthly recurring expense templates
+  recurring: { name: string; amount: string; category: string; centre: LocationType | '' }[]
+  // People who can claim reimbursements
+  reimbursePersons: string[]
 }
 
-export const DEFAULT_CATEGORIES = ['Rent', 'Salaries', 'Utilities', 'Supplies', 'Travel', 'Maintenance', 'Interior Works', 'Marketing', 'Courier', 'GST Payment', 'Cash Transfer', 'Misc']
+export const DEFAULT_CATEGORIES = ['Rent', 'Salaries', 'Utilities', 'Supplies', 'Travel', 'Maintenance', 'Interior Works', 'Marketing', 'Courier', 'GST Payment', 'Cash Transfer', 'Reimbursement', 'Misc']
 
 export const DEFAULT_SETTINGS: Settings = {
   businessName: 'Forun Testing & Educational Services',
@@ -49,6 +53,10 @@ export const DEFAULT_SETTINGS: Settings = {
   categories: DEFAULT_CATEGORIES,
   openingCalicut: '0',
   openingCochin: '0',
+  recurring: [
+    { name: 'Office rent — Calicut (Mariyam)', amount: '105000', category: 'Rent', centre: 'calicut' },
+  ],
+  reimbursePersons: ['Mithun', 'Partner'],
 }
 
 const KEY = 'fets-accounts-settings-v1'

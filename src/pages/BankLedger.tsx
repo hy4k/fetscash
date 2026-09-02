@@ -301,11 +301,26 @@ export default function BankLedger() {
   if (loading && !data) return <PageSkeleton />
   if (!data) return null
 
+  /* Auto-analysis — computed from the ledger (follows the global period selector) */
+  const incomeTotal = data.payments.reduce((s, p) => s + (p.amount_inr || p.amount), 0)
+  const expenseTotal = data.expenses.reduce((s, e) => s + e.amount, 0)
+  const net = incomeTotal - expenseTotal
+  const topCategories = [...data.categoryBreakdown].sort((a, b) => b.amount - a.amount).slice(0, 6)
+  const maxCat = topCategories[0]?.amount || 1
+  const incomeBySource = new Map<string, number>()
+  for (const p of data.payments) {
+    const src = p.invoice_id
+      ? (data.invoices.find((i) => i.id === p.invoice_id)?.customer_name ?? p.invoice_id)
+      : (p.reference_number || 'Direct receipt')
+    incomeBySource.set(src, (incomeBySource.get(src) ?? 0) + (p.amount_inr || p.amount))
+  }
+  const topSources = [...incomeBySource.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5)
+
   return (
     <>
       <PageHeader
-        title="Bank Ledger"
-        description="Every bank & non-cash transaction — upload a statement or add manually"
+        title="Vault"
+        description="Bank ledger with auto-analysis — upload a statement or add manually"
         actions={
           <div className="flex items-center gap-2">
             <KimiButton variant="outline" leftIcon={<Plus />} onClick={() => setAddOpen(true)}>Add transaction</KimiButton>
@@ -313,6 +328,60 @@ export default function BankLedger() {
           </div>
         }
       />
+
+      {/* Auto-analysis strip */}
+      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="k-card p-5">
+          <p className="k-b2-secondary">Income ({data.periodLabel})</p>
+          <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--f-emerald-700)]">{formatINR(incomeTotal)}</p>
+        </div>
+        <div className="k-card p-5">
+          <p className="k-b2-secondary">Expenses ({data.periodLabel})</p>
+          <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--k-danger)]">{formatINR(expenseTotal)}</p>
+        </div>
+        <div className="k-card p-5">
+          <p className="k-b2-secondary">Net ({data.periodLabel})</p>
+          <p className={`mt-1 text-[20px] font-semibold leading-[30px] ${net >= 0 ? 'text-[var(--f-emerald-700)]' : 'text-[var(--k-danger)]'}`}>
+            {net >= 0 ? '+' : '−'}{formatINR(Math.abs(net))}
+          </p>
+        </div>
+      </div>
+      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <KimiCard title="Expenses by category">
+          {topCategories.length === 0 ? (
+            <p className="k-b2-secondary py-4 text-center">No expenses in this period.</p>
+          ) : (
+            <div className="space-y-2.5 pt-1">
+              {topCategories.map((c) => (
+                <div key={c.category}>
+                  <div className="flex justify-between text-[13px]">
+                    <span className="text-[var(--k-label-secondary)]">{c.category}</span>
+                    <span className="font-medium">{formatINR(c.amount)}</span>
+                  </div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--k-fill-f1)]">
+                    <div className="h-full rounded-full bg-[var(--f-emerald-600)]" style={{ width: `${Math.max(4, (c.amount / maxCat) * 100)}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </KimiCard>
+        <KimiCard title="Income by source">
+          {topSources.length === 0 ? (
+            <p className="k-b2-secondary py-4 text-center">No income in this period.</p>
+          ) : (
+            <ul className="space-y-2 pt-1">
+              {topSources.map(([src, amt]) => (
+                <li key={src} className="flex items-center justify-between gap-3 text-[13px]">
+                  <span className="min-w-0 truncate text-[var(--k-label-secondary)]">{src}</span>
+                  <span className="shrink-0 font-medium text-[var(--f-emerald-700)]">{formatINR(amt)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </KimiCard>
+      </div>
+
       <KimiCard pad={false}>
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4">
           <div className="flex items-center gap-2">

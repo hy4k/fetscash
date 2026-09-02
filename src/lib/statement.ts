@@ -76,8 +76,7 @@ function parseExcelRows(matrix: unknown[][]): StatementRow[] {
 /** PDF bank statement — extract text lines, split columns, classify by running balance. */
 async function parsePdf(file: File): Promise<StatementRow[]> {
   const pdfjs = await import('pdfjs-dist')
-  const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url')
-  pdfjs.GlobalWorkerOptions.workerSrc = worker.default
+  pdfjs.GlobalWorkerOptions.workerSrc = '/assets/pdf.worker.min.mjs'
   const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise
 
   const lines: string[] = []

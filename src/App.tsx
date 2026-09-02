@@ -5,6 +5,8 @@ import Overview from '@/pages/Overview'
 import Invoices from '@/pages/Invoices'
 import BankLedger from '@/pages/BankLedger'
 import FetsCash from '@/pages/FetsCash'
+import Recurring from '@/pages/Recurring'
+import Reimburse from '@/pages/Reimburse'
 import Reports from '@/pages/Reports'
 import Gst from '@/pages/Gst'
 import Clients from '@/pages/Clients'
@@ -20,6 +22,8 @@ export default function App() {
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/ledger" element={<BankLedger />} />
           <Route path="/cash" element={<FetsCash />} />
+          <Route path="/recurring" element={<Recurring />} />
+          <Route path="/reimburse" element={<Reimburse />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/gst" element={<Gst />} />
           <Route path="/settings" element={<SettingsPage />} />
