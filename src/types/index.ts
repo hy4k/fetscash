@@ -24,6 +24,7 @@ export interface CashTxnRow {
   location?: LocationType
   type: 'replenishment' | 'expense' | 'adjustment'
   description?: string
+  category?: string
   amount: number
   date: string
 }

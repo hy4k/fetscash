@@ -54,6 +54,7 @@ interface AccountState {
   deleteCashTxn: (id: string) => void
   setInvoiceCentre: (invoiceId: string, centre: LocationType) => void
   recordPayment: (invoice: InvoiceRow, p: PaymentInput) => Promise<boolean>
+  importRows: (expenses: Omit<ExpenseRow, 'id'>[], payments: Omit<PaymentRow, 'id'>[]) => Promise<boolean>
 }
 
 const AccountContext = createContext<AccountState | null>(null)
@@ -126,15 +127,41 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  /** Persist one row to Supabase in the background; refresh on success, toast on failure. */
+  /** Persist one row to Supabase in the background; refresh on success, toast on failure.
+   *  If the row carries a `category` the table doesn't have yet, retry without it. */
   const persist = useCallback((table: string, row: object) => {
     if (!isSupabaseConfigured) return
     void (async () => {
-      const { error } = await supabase.from(table).insert(row)
+      let { error } = await supabase.from(table).insert(row)
+      if (error && 'category' in row && /category/i.test(error.message)) {
+        const { category: _dropped, ...rest } = row as Record<string, unknown>
+        ;({ error } = await supabase.from(table).insert(rest))
+      }
       if (error) toast.error(`Could not save to Supabase: ${error.message}`)
       await refresh()
     })()
   }, [refresh])
+
+  /** Bulk-import statement rows (expenses + receipts) with a single refresh. */
+  const importRows = useCallback(async (expenses: Omit<ExpenseRow, 'id'>[], payments: Omit<PaymentRow, 'id'>[]) => {
+    const expRows = expenses.map((e) => ({ ...e, id: uid('exp') }))
+    const payRows = payments.map((p) => ({ ...p, id: uid('pay') }))
+    if (isSupabaseConfigured) {
+      if (expRows.length) {
+        const { error } = await supabase.from(TABLES.expenses).insert(expRows)
+        if (error) { toast.error(`Expenses import failed: ${error.message}`); return false }
+      }
+      if (payRows.length) {
+        const { error } = await supabase.from(TABLES.payments).insert(payRows)
+        if (error) { toast.error(`Receipts import failed: ${error.message}`); return false }
+      }
+      await refresh()
+    } else {
+      update((l) => ({ ...l, expenses: [...l.expenses, ...expRows], payments: [...l.payments, ...payRows] }))
+    }
+    toast.success(`Imported ${expRows.length + payRows.length} transactions`)
+    return true
+  }, [update, refresh])
 
   /** Edit any entity: patch the local overlay (raw rows are copied in first), then Supabase. */
   const patchEntity = useCallback(<T extends { id: string }>(key: EntityKey, table: string, id: string, patch: Partial<T>) => {
@@ -150,7 +177,11 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     })
     if (isSupabaseConfigured) {
       void (async () => {
-        const { error } = await supabase.from(table).update(patch as object).eq('id', id)
+        let { error } = await supabase.from(table).update(patch as object).eq('id', id)
+        if (error && 'category' in (patch as object) && /category/i.test(error.message)) {
+          const { category: _dropped, ...rest } = patch as Record<string, unknown>
+          ;({ error } = await supabase.from(table).update(rest).eq('id', id))
+        }
         if (error) toast.error(`Could not update in Supabase: ${error.message}`)
         await refresh()
       })()
@@ -346,7 +377,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         addExpense, updateExpense, deleteExpense,
         addPayment, updatePayment, deletePayment,
         addCashTxn, updateCashTxn, deleteCashTxn,
-        setInvoiceCentre, recordPayment,
+        setInvoiceCentre, recordPayment, importRows,
       }}
     >
       {children}

@@ -1,12 +1,12 @@
 import { NavLink, Outlet } from 'react-router'
 import {
   LayoutDashboard,
-  FileText,
-  Vault,
+  Coins,
+  Landmark,
+  Wallet,
   BarChart3,
   RefreshCw,
   Database,
-  Landmark,
   ChevronRight,
   CalendarDays,
   Settings2,
@@ -19,8 +19,9 @@ import type { PeriodKind } from '@/types'
 /** Each menu button gets its own tinted icon chip (reference-style pills). */
 const NAV = [
   { to: '/', label: 'Overview', icon: LayoutDashboard, end: true, chip: 'bg-emerald-100 text-emerald-700' },
-  { to: '/invoices', label: 'Invoices', icon: FileText, chip: 'bg-amber-100 text-amber-700' },
-  { to: '/treasury', label: 'Treasury', icon: Vault, chip: 'bg-teal-100 text-teal-700' },
+  { to: '/invoices', label: 'Mint', icon: Coins, chip: 'bg-amber-100 text-amber-700' },
+  { to: '/ledger', label: 'Bank Ledger', icon: Landmark, chip: 'bg-teal-100 text-teal-700' },
+  { to: '/cash', label: 'FETS Cash', icon: Wallet, chip: 'bg-orange-100 text-orange-700' },
   { to: '/reports', label: 'Reports', icon: BarChart3, chip: 'bg-rose-100 text-rose-700' },
   { to: '/gst', label: 'GST', icon: Landmark, chip: 'bg-[var(--f-gold-100)] text-[var(--f-gold-600)]' },
   { to: '/settings', label: 'Settings', icon: Settings2, chip: 'bg-slate-200 text-slate-700' },

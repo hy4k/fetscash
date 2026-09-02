@@ -3,7 +3,8 @@ import { AccountProvider } from '@/lib/AccountContext'
 import { AppShell } from '@/layouts/AppShell'
 import Overview from '@/pages/Overview'
 import Invoices from '@/pages/Invoices'
-import Treasury from '@/pages/Treasury'
+import BankLedger from '@/pages/BankLedger'
+import FetsCash from '@/pages/FetsCash'
 import Reports from '@/pages/Reports'
 import Gst from '@/pages/Gst'
 import Clients from '@/pages/Clients'
@@ -17,7 +18,8 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route path="/" element={<Overview />} />
           <Route path="/invoices" element={<Invoices />} />
-          <Route path="/treasury" element={<Treasury />} />
+          <Route path="/ledger" element={<BankLedger />} />
+          <Route path="/cash" element={<FetsCash />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/gst" element={<Gst />} />
           <Route path="/settings" element={<SettingsPage />} />
@@ -25,8 +27,9 @@ export default function App() {
           <Route path="/clients" element={<Clients />} />
           <Route path="/products" element={<Products />} />
           {/* Legacy paths */}
-          <Route path="/transactions" element={<Navigate to="/treasury" replace />} />
-          <Route path="/cashbook" element={<Navigate to="/treasury" replace />} />
+          <Route path="/treasury" element={<Navigate to="/ledger" replace />} />
+          <Route path="/transactions" element={<Navigate to="/ledger" replace />} />
+          <Route path="/cashbook" element={<Navigate to="/cash" replace />} />
         </Route>
       </Routes>
     </AccountProvider>

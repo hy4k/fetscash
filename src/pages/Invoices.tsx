@@ -317,6 +317,7 @@ export default function Invoices() {
   const [selected, setSelected] = useState<InvoiceRow | null>(null)
   const [payFor, setPayFor] = useState<InvoiceRow | null>(null)
   const [editing, setEditing] = useState<InvoiceRow | null>(null)
+  const [collapsed, setCollapsed] = useState<Partial<Record<LocationType, boolean>>>({})
 
   if (loading && !data) return <PageSkeleton />
   if (!data) return null
@@ -339,8 +340,8 @@ export default function Invoices() {
   return (
     <>
       <PageHeader
-        title="Invoices"
-        description="Billing register by centre and client, plus the invoice generator"
+        title="Mint"
+        description="Invoices & billing — organized by centre and client"
         actions={
           <CreateButton onClick={() => document.getElementById('invoice-generator')?.scrollIntoView({ behavior: 'smooth' })}>
             New invoice
@@ -385,14 +386,22 @@ export default function Invoices() {
               key={loc}
               pad={false}
               title={
-                <span className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setCollapsed((c) => ({ ...c, [loc]: !c[loc] }))}
+                  className="flex w-full items-center gap-2.5 text-left"
+                >
+                  <ChevronRight
+                    className={cn('h-4 w-4 text-[var(--k-label-tertiary)] transition-transform duration-150', !collapsed[loc] && 'rotate-90')}
+                    aria-hidden
+                  />
                   {centreLabel(loc)}
                   <KimiBadge tone="neutral">{count} invoice{count === 1 ? '' : 's'}</KimiBadge>
                   <span className="text-[13px] font-medium text-[var(--f-emerald-700)]">{formatINR(billed)}</span>
-                </span>
+                </button>
               }
             >
-              {count === 0 ? (
+              {collapsed[loc] ? null : count === 0 ? (
                 <p className="k-b2-secondary px-5 py-8 text-center">No invoices under {centreLabel(loc)} yet.</p>
               ) : (
                 <div className="pt-1">

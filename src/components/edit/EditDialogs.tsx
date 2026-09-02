@@ -392,11 +392,16 @@ export function EditPaymentDialog({ payment, onClose }: { payment: PaymentRow; o
 
 export function EditCashDialog({ txn, onClose }: { txn: CashTxnRow; onClose: () => void }) {
   const { updateCashTxn } = useAccount()
+  const [settings] = useSettings()
+  const categories = txn.category && !settings.categories.includes(txn.category)
+    ? [...settings.categories, txn.category]
+    : settings.categories
   const [form, setForm] = useState({
     date: txn.date,
     amount: String(txn.amount),
     type: txn.type,
     location: txn.location ?? 'calicut',
+    category: txn.category ?? 'Misc',
     description: txn.description ?? '',
   })
   const save = () => {
@@ -407,6 +412,7 @@ export function EditCashDialog({ txn, onClose }: { txn: CashTxnRow; onClose: () 
       amount,
       type: form.type,
       location: form.location as 'calicut' | 'cochin',
+      category: form.type === 'expense' ? form.category : undefined,
       description: form.description || undefined,
     })
     toast.success('Cash entry updated')
@@ -452,6 +458,17 @@ export function EditCashDialog({ txn, onClose }: { txn: CashTxnRow; onClose: () 
               </Select>
             </div>
           </div>
+          {form.type === 'expense' && (
+            <div className="grid gap-1.5">
+              <Label>Category</Label>
+              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="grid gap-1.5">
             <Label htmlFor="ecash-desc">Description</Label>
             <Input id="ecash-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />

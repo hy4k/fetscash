@@ -4,7 +4,6 @@ import { KpiCards } from '@/sections/KpiCards'
 import { CashflowChart } from '@/sections/CashflowChart'
 import { OutstandingInvoices } from '@/sections/OutstandingInvoices'
 import { ActivityFeed } from '@/sections/ActivityFeed'
-import { QuickAdd } from '@/sections/QuickAdd'
 
 export default function Overview() {
   const { data, loading } = useAccount()
@@ -17,7 +16,6 @@ export default function Overview() {
       <PageHeader
         title="Overview"
         description="The money picture at a glance"
-        actions={<QuickAdd />}
       />
       <div className="space-y-6">
         <KpiCards data={data} />
