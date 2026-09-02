@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { Package } from 'lucide-react'
 import { useAccount } from '@/lib/AccountContext'
-import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
-import { KimiCard } from '@/components/kimi/Card'
-import { KimiBadge } from '@/components/kimi/Badge'
+import { PageSkeleton } from '@/components/kimi/PageHeader'
+import { PageHero, M, StatusText } from '@/components/ledger'
 import { AddProductDialog } from '@/components/create/CreateDialogs'
 import { EditProductDialog, RowActions } from '@/components/edit/EditDialogs'
 import { formatINR } from '@/lib/data'
@@ -20,65 +18,57 @@ export default function Products() {
 
   return (
     <>
-      <PageHeader
-        title="Products & Services"
-        description={`${products.length} billable items in the catalog`}
+      <PageHero
+        index="09"
+        section="SETTINGS · PRODUCTS"
+        title="Products"
+        lede={`${products.length} billable items in the catalog — rates, HSN codes and tax as printed on invoices.`}
         actions={<AddProductDialog />}
       />
 
-      <KimiCard pad={false}>
-        {products.length === 0 ? (
-          <p className="k-b2-secondary px-5 py-12 text-center">No products imported yet.</p>
-        ) : (
-          <table className="mt-1 w-full text-left">
-            <thead>
-              <tr className="border-b-[0.5px] border-[var(--k-separator)]">
-                <th className="k-c1-em px-5 py-2 pt-4 font-medium">Item</th>
-                <th className="k-c1-em hidden px-3 py-2 pt-4 font-medium md:table-cell">HSN / SAC</th>
-                <th className="k-c1-em hidden px-3 py-2 pt-4 font-medium lg:table-cell">Description</th>
-                <th className="k-c1-em px-3 py-2 pt-4 text-right font-medium">Rate</th>
-                <th className="k-c1-em px-3 py-2 pt-4 font-medium">Tax</th>
-                <th className="k-c1-em px-5 py-2 pt-4 text-right font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
-              {products.map((p) => {
-                const gst = p.tax_list?.match(/IGST : (\d+)%/)
-                const gstRate = gst ? parseInt(gst[1], 10) : 0
-                return (
-                  <tr key={p.id} className="transition-colors duration-150 hover:bg-[var(--k-fill-f1)]">
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--f-gold-50)] text-[var(--f-gold-600)]">
-                          <Package className="h-4 w-4" aria-hidden />
-                        </span>
-                        <span className="k-b2-em">{p.name}</span>
-                      </div>
-                    </td>
-                    <td className="k-b2-secondary hidden whitespace-nowrap px-3 py-3 md:table-cell">{p.hsn || '—'}</td>
-                    <td className="k-b2-secondary hidden max-w-[280px] truncate px-3 py-3 lg:table-cell">{p.description || '—'}</td>
-                    <td className="k-b2-em whitespace-nowrap px-3 py-3 text-right">{formatINR(p.sale_rate)}</td>
-                    <td className="px-3 py-3">
-                      {gstRate > 0
-                        ? <KimiBadge tone="blue">IGST {gstRate}%</KimiBadge>
-                        : <KimiBadge tone="neutral">No tax</KimiBadge>}
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <RowActions
-                        onEdit={() => setEditing(p)}
-                        onDelete={() => deleteProduct(p.id)}
-                        deleteTitle={`Delete "${p.name}"?`}
-                        deleteDescription="Existing invoices keep their own line items — only the catalog entry is removed."
-                      />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-        <p className="k-c1 px-5 py-3">{products.length} item{products.length === 1 ? '' : 's'}</p>
-      </KimiCard>
+      <div className="f-kicker grid grid-cols-[minmax(0,1.6fr)_auto] gap-x-6 border-b border-[var(--f-hairline)] py-4 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)_110px_100px_60px]">
+        <span>ITEM</span>
+        <span className="hidden sm:block">HSN / SAC</span>
+        <span className="text-right">RATE</span>
+        <span className="hidden text-right sm:block">TAX</span>
+        <span className="hidden text-right sm:block">EDIT</span>
+      </div>
+
+      {products.length === 0 ? (
+        <p className="k-b2-secondary py-12 text-center">No products imported yet.</p>
+      ) : (
+        products.map((p) => {
+          const gst = p.tax_list?.match(/IGST : (\d+)%/)
+          const gstRate = gst ? parseInt(gst[1], 10) : 0
+          return (
+            <div
+              key={p.id}
+              className="grid grid-cols-[minmax(0,1.6fr)_auto] items-center gap-x-6 border-b border-[var(--f-hairline-soft)] py-5 transition-colors hover:bg-[rgba(17,23,19,0.035)] sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)_110px_100px_60px]"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-[16px] font-medium">{p.name}</p>
+                {p.description && <p className="k-c1 mt-1 truncate">{p.description}</p>}
+              </div>
+              <M className="hidden text-[12px] text-[var(--k-label-secondary)] sm:block">{p.hsn || '—'}</M>
+              <M className="text-right text-[13px]">{formatINR(p.sale_rate)}</M>
+              <span className="hidden text-right sm:block">
+                <StatusText tone={gstRate > 0 ? 'muted' : 'muted'}>{gstRate > 0 ? `IGST ${gstRate}%` : 'NO TAX'}</StatusText>
+              </span>
+              <span className="hidden justify-end sm:flex">
+                <RowActions
+                  onEdit={() => setEditing(p)}
+                  onDelete={() => deleteProduct(p.id)}
+                  deleteTitle={`Delete "${p.name}"?`}
+                  deleteDescription="Existing invoices keep their own line items — only the catalog entry is removed."
+                />
+              </span>
+            </div>
+          )
+        })
+      )}
+      <p className="f-mono py-4 text-[11px] tracking-[0.10em] text-[var(--k-label-tertiary)]">
+        {products.length} ITEM{products.length === 1 ? '' : 'S'}
+      </p>
       {editing && <EditProductDialog product={editing} onClose={() => setEditing(null)} />}
     </>
   )

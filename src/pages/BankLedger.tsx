@@ -1,14 +1,14 @@
 import { useMemo, useRef, useState } from 'react'
-import { Search, Landmark, Upload, Plus, Loader2 } from 'lucide-react'
+import { Search, Upload, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
 import { useSettings } from '@/lib/settings'
 import { parseStatement, guessCategory, type StatementRow } from '@/lib/statement'
-import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
-import { KimiCard } from '@/components/kimi/Card'
+import { PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiBadge } from '@/components/kimi/Badge'
 import { KimiButton } from '@/components/kimi/Button'
 import { KimiSegmentedControl } from '@/components/kimi/SegmentedControl'
+import { PageHero, StatStrip, Pill, Kicker, M, StatusText } from '@/components/ledger'
 import { EditExpenseDialog, EditPaymentDialog, RowActions } from '@/components/edit/EditDialogs'
 import {
   Dialog,
@@ -316,157 +316,156 @@ export default function BankLedger() {
   }
   const topSources = [...incomeBySource.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5)
 
+  const miscCount = data.expenses.filter((e) => e.category === 'Misc').length
+
   return (
     <>
-      <PageHeader
-        title="Vault"
-        description="Bank ledger with auto-analysis — upload a statement or add manually"
+      <PageHero
+        index="03"
+        section="VAULT"
+        title="Bank ledger"
+        lede="Statement lines imported from Federal Bank, categorised and reconciled against invoices, cash and recurring schedules."
         actions={
-          <div className="flex items-center gap-2">
-            <KimiButton variant="outline" leftIcon={<Plus />} onClick={() => setAddOpen(true)}>Add transaction</KimiButton>
-            <KimiButton leftIcon={<Upload />} onClick={() => setUploadOpen(true)}>Upload statement</KimiButton>
-          </div>
+          <>
+            <Pill outline onClick={() => setAddOpen(true)}>Add transaction</Pill>
+            <Pill onClick={() => setUploadOpen(true)}>Import statement</Pill>
+          </>
         }
       />
 
-      {/* Auto-analysis strip */}
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="k-card p-5">
-          <p className="k-b2-secondary">Income ({data.periodLabel})</p>
-          <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--f-emerald-700)]">{formatINR(incomeTotal)}</p>
-        </div>
-        <div className="k-card p-5">
-          <p className="k-b2-secondary">Expenses ({data.periodLabel})</p>
-          <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--k-danger)]">{formatINR(expenseTotal)}</p>
-        </div>
-        <div className="k-card p-5">
-          <p className="k-b2-secondary">Net ({data.periodLabel})</p>
-          <p className={`mt-1 text-[20px] font-semibold leading-[30px] ${net >= 0 ? 'text-[var(--f-emerald-700)]' : 'text-[var(--k-danger)]'}`}>
-            {net >= 0 ? '+' : '−'}{formatINR(Math.abs(net))}
-          </p>
-        </div>
-      </div>
-      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <KimiCard title="Expenses by category">
+      <StatStrip
+        stats={[
+          { label: `CREDITS · ${data.periodLabel.toUpperCase()}`, value: formatINR(incomeTotal), tone: 'green' },
+          { label: `DEBITS · ${data.periodLabel.toUpperCase()}`, value: formatINR(expenseTotal) },
+          { label: 'NET', value: `${net >= 0 ? '+' : '−'}${formatINR(Math.abs(net))}`, tone: net >= 0 ? 'green' : 'red' },
+          { label: 'UNCATEGORISED', value: String(miscCount), tone: miscCount > 0 ? 'gold' : 'ink', sub: 'CATEGORY = MISC' },
+        ]}
+      />
+
+      {/* Auto-analysis — where it went / who it came from */}
+      <section className="grid border-b border-[var(--f-hairline)] lg:grid-cols-2">
+        <div className="min-w-0 py-10 lg:pr-10">
+          <Kicker className="mb-6">WHERE IT WENT · {data.periodLabel.toUpperCase()}</Kicker>
           {topCategories.length === 0 ? (
-            <p className="k-b2-secondary py-4 text-center">No expenses in this period.</p>
+            <p className="k-b2-secondary py-4">No expenses in this period.</p>
           ) : (
-            <div className="space-y-2.5 pt-1">
+            <div className="grid gap-5">
               {topCategories.map((c) => (
                 <div key={c.category}>
-                  <div className="flex justify-between text-[13px]">
-                    <span className="text-[var(--k-label-secondary)]">{c.category}</span>
-                    <span className="font-medium">{formatINR(c.amount)}</span>
+                  <div className="flex justify-between gap-4 text-[14px]">
+                    <span>{c.category}</span>
+                    <M>{formatINR(c.amount)}</M>
                   </div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--k-fill-f1)]">
-                    <div className="h-full rounded-full bg-[var(--f-emerald-600)]" style={{ width: `${Math.max(4, (c.amount / maxCat) * 100)}%` }} />
+                  <div className="mt-2 h-[8px] bg-[rgba(17,23,19,0.08)]">
+                    <div className="h-full bg-[var(--f-green)]" style={{ width: `${Math.max(2, (c.amount / maxCat) * 100)}%` }} />
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </KimiCard>
-        <KimiCard title="Income by source">
+        </div>
+        <div className="min-w-0 border-t border-[var(--f-hairline-soft)] py-10 lg:border-l lg:border-t-0 lg:pl-10">
+          <Kicker className="mb-6">WHO IT CAME FROM · {data.periodLabel.toUpperCase()}</Kicker>
           {topSources.length === 0 ? (
-            <p className="k-b2-secondary py-4 text-center">No income in this period.</p>
+            <p className="k-b2-secondary py-4">No income in this period.</p>
           ) : (
-            <ul className="space-y-2 pt-1">
+            <div className="grid gap-5">
               {topSources.map(([src, amt]) => (
-                <li key={src} className="flex items-center justify-between gap-3 text-[13px]">
-                  <span className="min-w-0 truncate text-[var(--k-label-secondary)]">{src}</span>
-                  <span className="shrink-0 font-medium text-[var(--f-emerald-700)]">{formatINR(amt)}</span>
-                </li>
+                <div key={src}>
+                  <div className="flex justify-between gap-4 text-[14px]">
+                    <span className="min-w-0 truncate">{src}</span>
+                    <M>{formatINR(amt)}</M>
+                  </div>
+                  <div className="mt-2 h-[8px] bg-[rgba(17,23,19,0.08)]">
+                    <div className="h-full bg-[var(--f-gold)]" style={{ width: `${Math.max(2, (amt / (topSources[0]?.[1] || 1)) * 100)}%` }} />
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-        </KimiCard>
-      </div>
+        </div>
+      </section>
 
-      <KimiCard pad={false}>
-        <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4">
-          <div className="flex items-center gap-2">
-            <Landmark className="h-4 w-4 text-[var(--f-emerald-600)]" aria-hidden />
-            <KimiSegmentedControl
-              ariaLabel="Transaction type"
-              size="sm"
-              value={kind}
-              onChange={(v) => setKind(v as typeof kind)}
-              options={[
-                { value: 'all', label: 'All' },
-                { value: 'income', label: 'Income' },
-                { value: 'expense', label: 'Expenses' },
-              ]}
-            />
-          </div>
+      {/* Ledger */}
+      <section className="pt-10">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-2">
+          <KimiSegmentedControl
+            ariaLabel="Transaction type"
+            size="sm"
+            value={kind}
+            onChange={(v) => setKind(v as typeof kind)}
+            options={[
+              { value: 'all', label: 'All' },
+              { value: 'income', label: 'Income' },
+              { value: 'expense', label: 'Expenses' },
+            ]}
+          />
           <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--k-label-quaternary)]" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search the ledger"
-              className="h-8 w-56 rounded-[10px] border-[0.5px] border-[var(--k-separator)] bg-[var(--k-bg-primary)] pl-8 pr-3 text-[14px] leading-5 text-[var(--k-label-primary)] placeholder:text-[var(--k-label-quaternary)] focus:outline-none focus-visible:outline-2 focus-visible:outline-[var(--k-blue)]"
+              className="h-9 w-56 rounded-full border border-[var(--k-separator)] bg-[var(--f-card)] pl-8 pr-3 text-[14px] leading-5 text-[var(--k-label-primary)] placeholder:text-[var(--k-label-quaternary)] focus:outline-none focus-visible:outline-2 focus-visible:outline-[var(--f-green)]"
             />
           </div>
         </div>
 
+        <div className="f-kicker grid grid-cols-[76px_minmax(0,1fr)_auto] gap-x-5 border-b border-[var(--f-hairline)] py-4 sm:grid-cols-[90px_minmax(0,1.6fr)_minmax(0,1fr)_90px_110px_60px]">
+          <span>DATE</span><span>NARRATION</span>
+          <span className="hidden sm:block">DETAILS</span>
+          <span className="hidden sm:block">TYPE</span>
+          <span className="text-right">AMOUNT</span>
+          <span className="hidden text-right sm:block">EDIT</span>
+        </div>
+
         {rows.length === 0 ? (
-          <p className="k-b2-secondary px-5 py-12 text-center">
+          <p className="k-b2-secondary py-12 text-center">
             {query ? `No transactions match “${query}”.` : 'No transactions yet.'}
           </p>
         ) : (
-          <table className="mt-3 w-full text-left">
-            <thead>
-              <tr className="border-b-[0.5px] border-[var(--k-separator)]">
-                <th className="k-c1-em px-5 py-2 font-medium">Date</th>
-                <th className="k-c1-em px-3 py-2 font-medium">Description</th>
-                <th className="k-c1-em hidden px-3 py-2 font-medium md:table-cell">Details</th>
-                <th className="k-c1-em px-3 py-2 font-medium">Type</th>
-                <th className="k-c1-em px-3 py-2 text-right font-medium">Amount</th>
-                <th className="k-c1-em px-5 py-2 text-right font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
-              {rows.map((r) => (
-                <tr key={r.id} className="transition-colors duration-150 hover:bg-[var(--k-fill-f1)]">
-                  <td className="k-b2-secondary whitespace-nowrap px-5 py-3">
-                    {new Date(r.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </td>
-                  <td className="k-b2-em max-w-[280px] truncate px-3 py-3">{r.label}</td>
-                  <td className="k-b2-secondary hidden max-w-[220px] truncate px-3 py-3 md:table-cell">{r.detail}</td>
-                  <td className="px-3 py-3">
-                    <KimiBadge tone={r.kind === 'income' ? 'green' : 'red'}>
-                      {r.kind === 'income' ? 'Income' : 'Expense'}
-                    </KimiBadge>
-                  </td>
-                  <td className={`k-b2-em whitespace-nowrap px-3 py-3 text-right ${r.amount >= 0 ? 'text-[var(--f-emerald-600)]' : 'text-[var(--k-danger)]'}`}>
-                    {r.amount >= 0 ? '+' : '−'}{formatINR(Math.abs(r.amount))}
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-3 text-right">
-                    {r.expense && (
-                      <RowActions
-                        onEdit={() => setEditExpense(r.expense!)}
-                        onDelete={() => deleteExpense(r.expense!.id)}
-                        deleteTitle="Delete this expense?"
-                      />
-                    )}
-                    {r.payment && (
-                      <RowActions
-                        onEdit={() => setEditPayment(r.payment!)}
-                        onDelete={() => deletePayment(r.payment!.id)}
-                        deleteTitle="Delete this receipt?"
-                        deleteDescription={r.payment!.invoice_id
-                          ? `Linked to invoice ${r.payment!.invoice_id} — the invoice's received total will not change automatically.`
-                          : 'This cannot be undone.'}
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          rows.map((r) => (
+            <div
+              key={r.id}
+              className="grid grid-cols-[76px_minmax(0,1fr)_auto] items-center gap-x-5 border-b border-[var(--f-hairline-soft)] py-4 transition-colors hover:bg-[rgba(17,23,19,0.035)] sm:grid-cols-[90px_minmax(0,1.6fr)_minmax(0,1fr)_90px_110px_60px]"
+            >
+              <M className="text-[12px] text-[var(--k-label-secondary)]">
+                {new Date(r.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }).toUpperCase()}
+              </M>
+              <span className="truncate text-[14px] font-medium">{r.label}</span>
+              <span className="hidden truncate text-[13px] text-[var(--k-label-secondary)] sm:block">{r.detail}</span>
+              <span className="hidden sm:block">
+                <StatusText tone={r.kind === 'income' ? 'green' : 'muted'}>{r.kind === 'income' ? 'CREDIT' : 'DEBIT'}</StatusText>
+              </span>
+              <M className={`whitespace-nowrap text-right text-[13px] ${r.amount >= 0 ? 'text-[var(--f-green)]' : ''}`}>
+                {r.amount >= 0 ? '+' : '−'}{formatINR(Math.abs(r.amount))}
+              </M>
+              <span className="hidden justify-end sm:flex">
+                {r.expense && (
+                  <RowActions
+                    onEdit={() => setEditExpense(r.expense!)}
+                    onDelete={() => deleteExpense(r.expense!.id)}
+                    deleteTitle="Delete this expense?"
+                  />
+                )}
+                {r.payment && (
+                  <RowActions
+                    onEdit={() => setEditPayment(r.payment!)}
+                    onDelete={() => deletePayment(r.payment!.id)}
+                    deleteTitle="Delete this receipt?"
+                    deleteDescription={r.payment!.invoice_id
+                      ? `Linked to invoice ${r.payment!.invoice_id} — the invoice's received total will not change automatically.`
+                      : 'This cannot be undone.'}
+                  />
+                )}
+              </span>
+            </div>
+          ))
         )}
-        <p className="k-c1 px-5 py-3">{rows.length} record{rows.length === 1 ? '' : 's'}</p>
-      </KimiCard>
+        <p className="f-mono py-4 text-[11px] tracking-[0.10em] text-[var(--k-label-tertiary)]">
+          {rows.length} RECORD{rows.length === 1 ? '' : 'S'}
+        </p>
+      </section>
       {editExpense && <EditExpenseDialog expense={editExpense} onClose={() => setEditExpense(null)} />}
       {editPayment && <EditPaymentDialog payment={editPayment} onClose={() => setEditPayment(null)} />}
       {uploadOpen && <StatementUploadDialog onClose={() => setUploadOpen(false)} />}

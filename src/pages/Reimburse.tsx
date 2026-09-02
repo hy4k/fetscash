@@ -1,13 +1,10 @@
 import { useState } from 'react'
-import { HandCoins, Plus, Paperclip, Trash2, CheckCheck } from 'lucide-react'
+import { Paperclip, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
 import { useSettings } from '@/lib/settings'
 import { useReimbursements, type ReimbEntry } from '@/lib/reimburse'
-import { PageHeader } from '@/components/kimi/PageHeader'
-import { KimiCard } from '@/components/kimi/Card'
-import { KimiBadge } from '@/components/kimi/Badge'
-import { KimiButton } from '@/components/kimi/Button'
+import { PageHero, StatStrip, Pill, Kicker, M, StatusText } from '@/components/ledger'
 import {
   Dialog,
   DialogContent,
@@ -36,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatINR } from '@/lib/data'
+import { cn } from '@/lib/utils'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const MAX_RECEIPT = 2 * 1024 * 1024 // 2 MB
@@ -120,7 +118,7 @@ function AddClaimDialog({ add, onClose }: { add: (e: Omit<ReimbEntry, 'id'>) => 
           </div>
           <div className="grid gap-1.5">
             <Label>Receipt / document (optional, max 2 MB)</Label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-xl border-[0.5px] border-dashed border-[var(--k-separator)] px-3 py-2.5 text-[13px] text-[var(--k-label-secondary)] hover:border-[var(--f-emerald-600)]">
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-[var(--k-separator)] px-3 py-2.5 text-[13px] text-[var(--k-label-secondary)] hover:border-[var(--f-green)]">
               <Paperclip className="h-4 w-4" aria-hidden />
               {receipt ? receipt.name : 'Attach image or PDF'}
               <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }} />
@@ -128,14 +126,14 @@ function AddClaimDialog({ add, onClose }: { add: (e: Omit<ReimbEntry, 'id'>) => 
           </div>
         </div>
         <DialogFooter>
-          <KimiButton onClick={() => void save()} loading={saving}>Save claim</KimiButton>
+          <Pill small onClick={() => void save()} disabled={saving}>{saving ? 'Saving…' : 'Save claim'}</Pill>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
 
-function PersonCard({ person, entries, onSettle, onDelete }: {
+function PersonLedger({ person, entries, onSettle, onDelete }: {
   person: string
   entries: ReimbEntry[]
   onSettle: (person: string) => void
@@ -146,71 +144,77 @@ function PersonCard({ person, entries, onSettle, onDelete }: {
   const due = unsettled.reduce((s, e) => s + e.amount, 0)
 
   const row = (e: ReimbEntry) => (
-    <li key={e.id} className="flex items-center gap-3 py-2.5">
-      <div className="min-w-0 flex-1">
-        <p className="k-b2-em truncate">{e.description || e.category || 'Claim'}</p>
-        <p className="k-c1">
-          {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-          {e.category ? ` · ${e.category}` : ''}
-          {e.settled_on && ` · settled ${new Date(e.settled_on).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
-        </p>
+    <div
+      key={e.id}
+      className="grid grid-cols-[76px_minmax(0,1fr)_auto_auto] items-center gap-4 border-t border-[var(--f-hairline-soft)] py-3 transition-colors hover:bg-[rgba(17,23,19,0.035)]"
+    >
+      <M className="text-[11.5px] text-[var(--k-label-tertiary)]">
+        {new Date(e.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }).toUpperCase()}
+      </M>
+      <div className="min-w-0">
+        <p className="truncate text-[14px] font-medium">{e.description || e.category || 'Claim'}</p>
+        {e.settled_on && (
+          <p className="k-c1 mt-0.5">settled {new Date(e.settled_on).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
+        )}
       </div>
-      {e.receipt_data && (
-        <a
-          href={e.receipt_data}
-          target="_blank"
-          rel="noreferrer"
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[var(--k-label-tertiary)] hover:bg-[var(--k-fill-f2)] hover:text-[var(--f-emerald-700)]"
-          title={e.receipt_name ?? 'View receipt'}
-        >
-          <Paperclip className="h-3.5 w-3.5" aria-hidden />
-        </a>
-      )}
-      <span className="k-b2-em shrink-0">{formatINR(e.amount)}</span>
-      {!e.settled_on && (
+      <span className="flex items-center gap-2">
+        {e.receipt_data && (
+          <a
+            href={e.receipt_data}
+            target="_blank"
+            rel="noreferrer"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--k-label-tertiary)] hover:bg-[var(--k-fill-f2)] hover:text-[var(--f-green)]"
+            title={e.receipt_name ?? 'View receipt'}
+          >
+            <Paperclip className="h-3.5 w-3.5" aria-hidden />
+          </a>
+        )}
+        <M className="text-[13px]">{formatINR(e.amount)}</M>
+      </span>
+      {e.settled_on ? (
+        <StatusText tone="green">SETTLED</StatusText>
+      ) : (
         <button
           type="button"
           title="Delete claim"
           onClick={() => onDelete(e.id)}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[var(--k-label-tertiary)] hover:bg-[var(--k-fill-f2)] hover:text-[var(--k-danger)]"
+          className="flex h-7 w-7 items-center justify-center justify-self-end rounded-lg text-[var(--k-label-tertiary)] hover:bg-[var(--k-fill-f2)] hover:text-[var(--k-danger)]"
         >
           <Trash2 className="h-3.5 w-3.5" aria-hidden />
         </button>
       )}
-      {e.settled_on && <KimiBadge tone="green">Settled</KimiBadge>}
-    </li>
+    </div>
   )
 
   return (
-    <KimiCard pad={false} title={
-      <span className="flex items-center gap-2">
-        <HandCoins className="h-4 w-4 text-[var(--f-gold-600)]" aria-hidden />
-        {person}
-      </span>
-    }>
-      <div className="flex items-center justify-between px-5 pt-3">
-        <div>
-          <p className="k-c1">Owed to {person}</p>
-          <p className="text-[20px] font-semibold leading-[28px] text-[var(--f-gold-600)]">{formatINR(due)}</p>
-        </div>
-        <KimiButton size={26} leftIcon={<CheckCheck />} disabled={due <= 0} onClick={() => onSettle(person)}>
+    <section>
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border-b border-[var(--f-hairline)] pb-5">
+        <h2 className="m-0 text-[clamp(26px,2.8vw,38px)] font-medium tracking-[-0.02em]">{person}</h2>
+        <M className="text-[12px] tracking-[0.10em] text-[var(--k-label-tertiary)]">
+          {unsettled.length} OPEN · {settled.length} SETTLED
+        </M>
+        <span className="flex-1" />
+        <M className={cn('text-[clamp(22px,2.4vw,30px)] font-medium', due > 0 ? 'text-[var(--f-gold-dark)]' : 'text-[var(--k-label-quaternary)]')}>
+          {formatINR(due)}
+        </M>
+        <Pill small outline disabled={due <= 0} onClick={() => onSettle(person)}>
           Settle {due > 0 ? formatINR(due) : ''}
-        </KimiButton>
+        </Pill>
       </div>
       {entries.length === 0 ? (
-        <p className="k-b2-secondary px-5 py-8 text-center">No claims yet.</p>
+        <p className="k-b2-secondary py-8 text-center">No claims yet.</p>
       ) : (
-        <>
-          {unsettled.length > 0 && <ul className="divide-y divide-[rgba(0,0,0,0.06)] px-5 pt-2">{unsettled.map(row)}</ul>}
+        <div className="pt-2">
+          {unsettled.map(row)}
           {settled.length > 0 && (
             <>
-              <p className="k-c1 px-5 pt-3">Settled history</p>
-              <ul className="divide-y divide-[rgba(0,0,0,0.06)] px-5 pb-3 opacity-70">{settled.map(row)}</ul>
+              <Kicker className="pb-1 pt-5">SETTLED HISTORY</Kicker>
+              <div className="opacity-70">{settled.map(row)}</div>
             </>
           )}
-        </>
+        </div>
       )}
-    </KimiCard>
+    </section>
   )
 }
 
@@ -238,22 +242,38 @@ export default function Reimburse() {
   }
 
   const persons = settings.reimbursePersons
+  const openTotal = entries.filter((e) => !e.settled_on).reduce((s, e) => s + e.amount, 0)
+  const settledThisMonth = entries
+    .filter((e) => e.settled_on?.startsWith(today().slice(0, 7)))
+    .reduce((s, e) => s + e.amount, 0)
 
   return (
     <>
-      <PageHeader
-        title="Reimburse"
-        description="Personal money spent for the company — claim it, then settle"
-        actions={<KimiButton leftIcon={<Plus />} onClick={() => setAddOpen(true)}>Add claim</KimiButton>}
+      <PageHero
+        index="06"
+        section="REIMBURSE"
+        title="Claims"
+        lede="What you and your partner spent out of pocket for the company — claim it with a receipt, then settle it off in one bank expense."
+        actions={<Pill onClick={() => setAddOpen(true)}>Add claim</Pill>}
       />
+
       {!cloud && loaded && (
-        <p className="k-c1 mb-4 rounded-xl bg-[var(--f-gold-50)] px-4 py-2.5 text-[var(--f-gold-600)]">
+        <p className="k-c1 mb-6 rounded-xl border border-[rgba(201,162,39,0.4)] bg-[var(--f-gold-50)] px-4 py-2.5 text-[var(--f-gold-dark)]">
           Saving to this browser only — run the reimbursements SQL in Supabase to sync across devices.
         </p>
       )}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+
+      <StatStrip
+        stats={[
+          { label: 'AWAITING SETTLEMENT', value: formatINR(openTotal), tone: openTotal > 0 ? 'gold' : 'ink' },
+          { label: `SETTLED · ${new Date().toLocaleDateString('en-IN', { month: 'short' }).toUpperCase()}`, value: formatINR(settledThisMonth), tone: 'green' },
+          { label: 'CLAIMANTS', value: String(persons.length), sub: 'SETTINGS → PEOPLE' },
+        ]}
+      />
+
+      <div className="grid gap-14 pt-12 xl:grid-cols-2">
         {persons.map((p) => (
-          <PersonCard
+          <PersonLedger
             key={p}
             person={p}
             entries={entries.filter((e) => e.person === p)}

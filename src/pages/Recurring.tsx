@@ -1,12 +1,10 @@
 import { useMemo, useState } from 'react'
-import { CalendarClock, Plus, Trash2, CheckCircle2, CircleDot, Landmark } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
 import { useSettings, type Settings } from '@/lib/settings'
-import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
-import { KimiCard } from '@/components/kimi/Card'
-import { KimiBadge } from '@/components/kimi/Badge'
-import { KimiButton } from '@/components/kimi/Button'
+import { PageSkeleton } from '@/components/kimi/PageHeader'
+import { PageHero, StatStrip, Pill, StatusText, M } from '@/components/ledger'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -24,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatINR } from '@/lib/data'
+import { cn } from '@/lib/utils'
 import type { LocationType } from '@/types'
 
 type Template = Settings['recurring'][number]
@@ -80,7 +79,7 @@ function AddTemplateDialog({ onClose }: { onClose: () => void }) {
           </div>
         </div>
         <DialogFooter>
-          <KimiButton onClick={save}>Save template</KimiButton>
+          <Pill small onClick={save}>Save template</Pill>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -129,84 +128,82 @@ export default function Recurring() {
 
   return (
     <>
-      <PageHeader
-        title="Recurring"
-        description="Monthly repeating expenses — rent, salaries, utilities"
+      <PageHero
+        index="05"
+        section="RECURRING"
+        title={<>Every month,<br />without asking.</>}
+        lede={`${templates.length} schedules totalling ${formatINR(total)} a month. A template shows paid the moment a matching bank expense exists.`}
         actions={
-          <div className="flex items-center gap-2">
+          <>
             <input
               type="month"
               value={month}
               onChange={(e) => e.target.value && setMonth(e.target.value)}
-              className="h-9 rounded-[10px] border-[0.5px] border-[var(--k-separator)] bg-[var(--k-bg-primary)] px-3 text-[13px] font-medium text-[var(--k-label-primary)]"
+              aria-label="Month"
+              className="f-mono h-12 rounded-full border border-[rgba(17,23,19,0.22)] bg-[var(--f-card)] px-5 text-[13px] font-medium text-[var(--k-label-primary)] outline-none"
             />
-            <KimiButton leftIcon={<Plus />} onClick={() => setAddOpen(true)}>Add recurring</KimiButton>
-          </div>
+            <Pill onClick={() => setAddOpen(true)}>Add recurring</Pill>
+          </>
         }
       />
 
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="k-card p-5">
-          <p className="k-b2-secondary">Monthly commitment</p>
-          <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--k-label-primary)]">{formatINR(total)}</p>
-        </div>
-        <div className="k-card p-5">
-          <p className="k-b2-secondary">Paid in {monthLabel}</p>
-          <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--f-emerald-700)]">{formatINR(paid)}</p>
-        </div>
-        <div className="k-card p-5">
-          <p className="k-b2-secondary">Pending in {monthLabel}</p>
-          <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--f-gold-600)]">{formatINR(Math.max(0, total - paid))}</p>
-        </div>
-      </div>
+      <StatStrip
+        stats={[
+          { label: 'MONTHLY COMMITMENT', value: formatINR(total) },
+          { label: `PAID · ${monthLabel.toUpperCase()}`, value: formatINR(paid), tone: 'green' },
+          { label: `PENDING · ${monthLabel.toUpperCase()}`, value: formatINR(Math.max(0, total - paid)), tone: total - paid > 0 ? 'gold' : 'ink' },
+        ]}
+      />
 
-      <KimiCard pad={false} title={
-        <span className="flex items-center gap-2">
-          <CalendarClock className="h-4 w-4 text-[var(--f-emerald-600)]" aria-hidden />
-          {monthLabel}
-        </span>
-      }>
+      <section className="pt-10">
+        <div className="f-kicker grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-5 border-b border-[var(--f-hairline)] py-4 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)_110px_150px_36px]">
+          <span>SCHEDULE</span>
+          <span className="hidden sm:block">CENTRE</span>
+          <span className="text-right">AMOUNT</span>
+          <span className="text-right">STATUS</span>
+          <span className="hidden sm:block" />
+        </div>
         {templates.length === 0 ? (
-          <p className="k-b2-secondary px-5 py-10 text-center">No recurring expenses yet — add rent, salaries, utilities…</p>
+          <p className="k-b2-secondary py-10 text-center">No recurring expenses yet — add rent, salaries, utilities…</p>
         ) : (
-          <ul className="divide-y divide-[rgba(0,0,0,0.06)] px-5 pb-2">
-            {status.map(({ t, idx, match }) => (
-              <li key={idx} className="flex items-center gap-3 py-3.5">
-                {match
-                  ? <CheckCircle2 className="h-5 w-5 shrink-0 text-[var(--f-emerald-600)]" aria-hidden />
-                  : <CircleDot className="h-5 w-5 shrink-0 text-[var(--f-gold-600)]" aria-hidden />}
-                <div className="min-w-0 flex-1">
-                  <p className="k-b2-em truncate">{t.name}</p>
-                  <p className="k-c1">
-                    {t.category}
-                    {t.centre ? ` · ${t.centre === 'cochin' ? 'Cochin' : 'Calicut'}` : ' · Company-wide'}
-                    {match && ` · paid ${new Date(match.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
-                  </p>
-                </div>
-                <span className="k-b2-em shrink-0">{formatINR(parseFloat(t.amount) || 0)}</span>
+          status.map(({ t, idx, match }) => (
+            <div
+              key={idx}
+              className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-5 border-b border-[var(--f-hairline-soft)] py-5 transition-colors hover:bg-[rgba(17,23,19,0.035)] sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)_110px_150px_36px]"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-[15px] font-medium">{t.name}</p>
+                <p className="k-c1 mt-0.5">
+                  {t.category}
+                  {match && ` · paid ${new Date(match.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
+                </p>
+              </div>
+              <M className="hidden text-[11px] tracking-[0.10em] text-[var(--k-label-secondary)] sm:block">
+                {t.centre ? (t.centre === 'cochin' ? 'COCHIN' : 'CALICUT') : 'COMPANY-WIDE'}
+              </M>
+              <M className="text-right text-[13px]">{formatINR(parseFloat(t.amount) || 0)}</M>
+              <span className="text-right">
                 {match ? (
-                  <KimiBadge tone="green">Paid</KimiBadge>
+                  <StatusText tone="green">PAID</StatusText>
                 ) : (
-                  <KimiButton size={26} variant="outline" leftIcon={<Landmark />} onClick={() => record(t)}>
-                    Record payment
-                  </KimiButton>
+                  <Pill small outline onClick={() => record(t)}>Record payment</Pill>
                 )}
-                <button
-                  type="button"
-                  title="Remove template"
-                  onClick={() => saveSettings({ recurring: templates.filter((_, i) => i !== idx) })}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[var(--k-label-tertiary)] hover:bg-[var(--k-fill-f2)] hover:text-[var(--k-danger)]"
-                >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                </button>
-              </li>
-            ))}
-          </ul>
+              </span>
+              <button
+                type="button"
+                title="Remove template"
+                onClick={() => saveSettings({ recurring: templates.filter((_, i) => i !== idx) })}
+                className="hidden h-7 w-7 items-center justify-center justify-self-end rounded-lg text-[var(--k-label-tertiary)] hover:bg-[var(--k-fill-f2)] hover:text-[var(--k-danger)] sm:flex"
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden />
+              </button>
+            </div>
+          ))
         )}
-        <p className="k-c1 px-5 py-3">
-          A template shows Paid when a matching bank expense (same category &amp; amount) exists for the month — recorded here or imported from a statement.
+        <p className={cn('f-mono py-4 text-[11px] tracking-[0.08em] text-[var(--k-label-tertiary)]')}>
+          PAID = MATCHING BANK EXPENSE (SAME CATEGORY &amp; AMOUNT) IN {monthLabel.toUpperCase()}
         </p>
-      </KimiCard>
+      </section>
 
       {addOpen && <AddTemplateDialog onClose={() => setAddOpen(false)} />}
     </>

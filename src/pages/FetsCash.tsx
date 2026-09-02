@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { Wallet, Plus, Tag } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
 import { useSettings } from '@/lib/settings'
-import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
-import { KimiCard } from '@/components/kimi/Card'
-import { KimiBadge } from '@/components/kimi/Badge'
+import { PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiButton } from '@/components/kimi/Button'
+import { PageHero, Pill, Kicker, M } from '@/components/ledger'
 import { EditCashDialog, RowActions } from '@/components/edit/EditDialogs'
 import {
   Dialog,
@@ -26,6 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatINR } from '@/lib/data'
+import { cn } from '@/lib/utils'
 import type { CashTxnRow, LocationType } from '@/types'
 
 const today = () => new Date().toISOString().slice(0, 10)
@@ -127,7 +126,7 @@ function AddCashTxnDialog({ defaultLocation, onClose }: { defaultLocation?: Loca
                 type="checkbox"
                 checked={form.fromBank}
                 onChange={(e) => setForm({ ...form, fromBank: e.target.checked })}
-                className="h-4 w-4 accent-[var(--f-emerald-600)]"
+                className="h-4 w-4 accent-[var(--f-green)]"
               />
               Also record a cash withdrawal in the Bank Ledger
             </label>
@@ -145,7 +144,7 @@ function AddCashTxnDialog({ defaultLocation, onClose }: { defaultLocation?: Loca
   )
 }
 
-function Division({ location, onAdd }: { location: LocationType; onAdd: (loc: LocationType) => void }) {
+function DivisionLedger({ location, onAdd }: { location: LocationType; onAdd: (loc: LocationType) => void }) {
   const { data, deleteCashTxn } = useAccount()
   const [settings] = useSettings()
   const [editing, setEditing] = useState<CashTxnRow | null>(null)
@@ -173,83 +172,66 @@ function Division({ location, onAdd }: { location: LocationType; onAdd: (loc: Lo
   })
 
   return (
-    <KimiCard pad={false} title={
-      <span className="flex items-center gap-2">
-        <Wallet className="h-4 w-4 text-[var(--f-gold-600)]" aria-hidden />
-        {centreLabel(location)}
-      </span>
-    }>
-      <div className="grid grid-cols-3 gap-4 px-5 pt-3">
-        <div>
-          <p className="k-c1">Opening balance</p>
-          <p className="text-[16px] font-semibold text-[var(--k-label-primary)]">{formatINR(opening)}</p>
-        </div>
-        <div>
-          <p className="k-c1">Net movement</p>
-          <p className={`text-[16px] font-semibold ${movement >= 0 ? 'text-[var(--f-emerald-700)]' : 'text-[var(--k-danger)]'}`}>
-            {movement >= 0 ? '+' : '−'}{formatINR(Math.abs(movement))}
-          </p>
-        </div>
-        <div>
-          <p className="k-c1">Cash in hand</p>
-          <p className="text-[16px] font-semibold text-[var(--f-emerald-700)]">{formatINR(balance)}</p>
-        </div>
-      </div>
-      <div className="px-5 py-3">
-        <KimiButton size={26} leftIcon={<Plus />} onClick={() => onAdd(location)}>
-          Add transaction
-        </KimiButton>
+    <section>
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border-b border-[var(--f-hairline)] pb-5">
+        <h2 className="m-0 text-[clamp(26px,2.8vw,38px)] font-medium tracking-[-0.02em]">{centreLabel(location)}</h2>
+        <M className="text-[12px] tracking-[0.10em] text-[var(--k-label-tertiary)]">
+          OPENING {formatINR(opening)} · {entries.length} MOVEMENTS
+        </M>
+        <span className="flex-1" />
+        <M className={cn('text-[clamp(22px,2.4vw,30px)] font-medium', balance >= 0 ? 'text-[var(--f-green)]' : 'text-[var(--f-red)]')}>
+          {formatINR(balance)}
+        </M>
+        <Pill small outline onClick={() => onAdd(location)}>Add transaction</Pill>
       </div>
 
       {entries.length === 0 ? (
-        <p className="k-b2-secondary px-5 py-8 text-center">No cash entries for {centreLabel(location)} yet.</p>
+        <p className="k-b2-secondary py-8 text-center">No cash entries for {centreLabel(location)} yet.</p>
       ) : (
-        <div className="border-t-[0.5px] border-[var(--k-separator)]">
+        <div className="pt-2">
           {orderedKeys.map((key) => {
             const list = groups.get(key)!
             const net = list.reduce((s, t) => s + (t.type === 'expense' ? -t.amount : t.amount), 0)
             return (
-              <div key={key} className="border-b-[0.5px] border-[var(--k-separator)] last:border-b-0">
-                <div className="flex items-center gap-2 px-5 pb-1 pt-3">
-                  <Tag className="h-3.5 w-3.5 text-[var(--k-label-tertiary)]" aria-hidden />
-                  <span className="text-[12px] font-semibold uppercase tracking-wide text-[var(--k-label-secondary)]">{key}</span>
-                  <KimiBadge tone="neutral">{list.length}</KimiBadge>
-                  <span className={`ml-auto text-[12px] font-semibold ${net >= 0 ? 'text-[var(--f-emerald-700)]' : 'text-[var(--k-danger)]'}`}>
+              <div key={key} className="py-3">
+                <div className="flex items-baseline gap-4 pb-1">
+                  <Kicker>{key}</Kicker>
+                  <M className="text-[10.5px] text-[var(--k-label-quaternary)]">{list.length}</M>
+                  <M className={cn('ml-auto text-[12px]', net >= 0 ? 'text-[var(--f-green)]' : 'text-[var(--f-red)]')}>
                     {net >= 0 ? '+' : '−'}{formatINR(Math.abs(net))}
-                  </span>
+                  </M>
                 </div>
-                <ul className="divide-y divide-[rgba(0,0,0,0.06)] px-5 pb-2">
+                <div className="grid">
                   {list.map((t) => {
                     const signed = t.type === 'expense' ? -t.amount : t.amount
                     return (
-                      <li key={t.id} className="flex items-center justify-between gap-3 py-2.5">
-                        <div className="min-w-0">
-                          <p className="k-b2-em truncate">{t.description || key}</p>
-                          <p className="k-c1">
-                            {new Date(t.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                          <span className={`k-b2-em ${signed >= 0 ? 'text-[var(--f-emerald-600)]' : 'text-[var(--k-danger)]'}`}>
-                            {signed >= 0 ? '+' : '−'}{formatINR(Math.abs(signed))}
-                          </span>
-                          <RowActions
-                            onEdit={() => setEditing(t)}
-                            onDelete={() => deleteCashTxn(t.id)}
-                            deleteTitle="Delete this cash entry?"
-                          />
-                        </div>
-                      </li>
+                      <div
+                        key={t.id}
+                        className="grid grid-cols-[76px_minmax(0,1fr)_auto_auto] items-center gap-4 border-t border-[var(--f-hairline-soft)] py-3 transition-colors hover:bg-[rgba(17,23,19,0.035)]"
+                      >
+                        <M className="text-[11.5px] text-[var(--k-label-tertiary)]">
+                          {new Date(t.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }).toUpperCase()}
+                        </M>
+                        <span className="truncate text-[14px] font-medium">{t.description || key}</span>
+                        <M className={cn('text-right text-[13px]', signed >= 0 ? 'text-[var(--f-green)]' : '')}>
+                          {signed >= 0 ? '+' : '−'}{formatINR(Math.abs(signed))}
+                        </M>
+                        <RowActions
+                          onEdit={() => setEditing(t)}
+                          onDelete={() => deleteCashTxn(t.id)}
+                          deleteTitle="Delete this cash entry?"
+                        />
+                      </div>
                     )
                   })}
-                </ul>
+                </div>
               </div>
             )
           })}
         </div>
       )}
       {editing && <EditCashDialog txn={editing} onClose={() => setEditing(null)} />}
-    </KimiCard>
+    </section>
   )
 }
 
@@ -262,14 +244,35 @@ export default function FetsCash() {
 
   return (
     <>
-      <PageHeader
-        title="FETS Cash"
-        description="Office cash accounts — Calicut and Cochin, each its own book"
-        actions={<KimiButton leftIcon={<Plus />} onClick={() => setAddFor('calicut')}>Add transaction</KimiButton>}
+      <PageHero
+        index="04"
+        section="FETS CASH"
+        title="Cash in hand"
+        lede="Petty cash held at Cochin and Calicut. Replenished from the bank, spent on the floor, counted at close."
+        actions={<Pill onClick={() => setAddFor('calicut')}>Add transaction</Pill>}
       />
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <Division location="calicut" onAdd={setAddFor} />
-        <Division location="cochin" onAdd={setAddFor} />
+
+      {/* Division balances — one hairline strip */}
+      <section className="grid border-b border-t border-[var(--f-hairline)] sm:grid-cols-3">
+        {(['cochin', 'calicut'] as LocationType[]).map((loc, i) => (
+          <div key={loc} className={cn('min-w-0 py-9 sm:px-8', i > 0 && 'border-t border-[var(--f-hairline-soft)] sm:border-l sm:border-t-0')} style={i === 0 ? { paddingLeft: 0 } : undefined}>
+            <Kicker>{loc === 'cochin' ? 'COCHIN' : 'CALICUT'}</Kicker>
+            <div className="f-stat mt-4 !text-[clamp(30px,3.4vw,44px)]">{formatINR(data.cashByLocation[loc])}</div>
+            <div className="f-mono mt-3 text-[11px] tracking-[0.08em] text-[var(--k-label-secondary)]">
+              {data.cashTxns.filter((t) => t.location === loc).length} MOVEMENTS
+            </div>
+          </div>
+        ))}
+        <div className="min-w-0 border-t border-[var(--f-hairline-soft)] py-9 sm:border-l sm:border-t-0 sm:px-8 sm:pr-0">
+          <Kicker>TOTAL</Kicker>
+          <div className="f-stat mt-4 !text-[clamp(30px,3.4vw,44px)] text-[var(--f-green)]">{formatINR(data.cashBalance)}</div>
+          <div className="f-mono mt-3 text-[11px] tracking-[0.08em] text-[var(--k-label-secondary)]">BOTH DIVISIONS</div>
+        </div>
+      </section>
+
+      <div className="grid gap-14 pt-12 xl:grid-cols-2">
+        <DivisionLedger location="calicut" onAdd={setAddFor} />
+        <DivisionLedger location="cochin" onAdd={setAddFor} />
       </div>
       {addFor && <AddCashTxnDialog defaultLocation={addFor} onClose={() => setAddFor(null)} />}
     </>

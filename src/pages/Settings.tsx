@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import {
-  Building2, Landmark, SlidersHorizontal, Database, Download, RotateCcw, Save,
-  Users, Package, Tags, X, Plus,
+  Building2, Landmark, SlidersHorizontal, Database, Download, RotateCcw,
+  Tags, X, Plus,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
 import { DEFAULT_SETTINGS, useSettings, type Settings } from '@/lib/settings'
-import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
+import { PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiCard } from '@/components/kimi/Card'
 import { KimiButton } from '@/components/kimi/Button'
 import { KimiBadge } from '@/components/kimi/Badge'
+import { PageHero, Pill } from '@/components/ledger'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -106,16 +107,14 @@ export default function SettingsPage() {
     key: SectionKey | 'clients' | 'products'
     label: string
     detail: string
-    icon: React.ElementType
-    chip: string
   }[] = [
-    { key: 'business', label: 'Business Profile', detail: 'Name, GSTIN, letterhead', icon: Building2, chip: 'bg-emerald-100 text-emerald-700' },
-    { key: 'banking', label: 'Invoice & Banking', detail: 'Bank footer, currency, tax', icon: Landmark, chip: 'bg-[var(--f-gold-100)] text-[var(--f-gold-600)]' },
-    { key: 'clients', label: 'Clients', detail: `${data?.customers.length ?? 0} organizations`, icon: Users, chip: 'bg-sky-100 text-sky-700' },
-    { key: 'products', label: 'Products', detail: `${data?.products.length ?? 0} billable items`, icon: Package, chip: 'bg-violet-100 text-violet-700' },
-    { key: 'categories', label: 'Categories', detail: `${form.categories.length} expense categories`, icon: Tags, chip: 'bg-rose-100 text-rose-700' },
-    { key: 'preferences', label: 'Preferences', detail: 'Centre, FY, cash openings', icon: SlidersHorizontal, chip: 'bg-[var(--k-fill-f2)] text-[var(--k-label-secondary)]' },
-    { key: 'data', label: 'Data & Backup', detail: 'Export, storage mode', icon: Database, chip: 'bg-teal-100 text-teal-700' },
+    { key: 'business', label: 'Business Profile', detail: 'Name, GSTIN, letterhead' },
+    { key: 'banking', label: 'Invoice & Banking', detail: 'Bank footer, currency, tax' },
+    { key: 'clients', label: 'Clients', detail: `${data?.customers.length ?? 0} organizations` },
+    { key: 'products', label: 'Products', detail: `${data?.products.length ?? 0} billable items` },
+    { key: 'categories', label: 'Categories', detail: `${form.categories.length} expense categories` },
+    { key: 'preferences', label: 'Preferences', detail: 'Centre, FY, cash openings' },
+    { key: 'data', label: 'Data & Backup', detail: 'Export, storage mode' },
   ]
 
   const pick = (key: (typeof tiles)[number]['key']) => {
@@ -126,34 +125,34 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader
-        title="Settings"
-        description="Everything that configures how FETS CASH works"
+      <PageHero
+        index="09"
+        section="SETTINGS"
+        title="The set-up"
+        lede="Clients, products, categories, centres, invoice numbering and the data backend, all in one place."
         actions={
-          <KimiButton leftIcon={<Save />} onClick={save} disabled={!dirty}>
+          <Pill onClick={save} disabled={!dirty}>
             {dirty ? 'Save changes' : 'Saved'}
-          </KimiButton>
+          </Pill>
         }
       />
 
-      {/* Mini-dashboard tiles */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
-        {tiles.map((t) => {
+      {/* Section picker — numbered hairline tiles */}
+      <div className="mb-10 grid grid-cols-2 border-b border-t border-l border-[var(--f-hairline)] sm:grid-cols-3 lg:grid-cols-4">
+        {tiles.map((t, i) => {
           const active = section === t.key
           return (
             <button
               key={t.key}
               type="button"
               onClick={() => pick(t.key)}
-              className={`k-press k-card flex flex-col items-start gap-2 p-4 text-left transition-all duration-150 ${
-                active ? 'ring-2 ring-[var(--f-emerald-600)] shadow-[0_4px_14px_rgba(4,56,44,0.15)]' : 'hover:shadow-[0_4px_14px_rgba(0,0,0,0.08)]'
+              className={`flex flex-col items-start gap-1.5 border-b border-r border-[var(--f-hairline-soft)] p-5 text-left transition-colors hover:bg-[rgba(17,23,19,0.035)] ${
+                active ? 'bg-[var(--f-card)] shadow-[inset_0_0_0_1.5px_var(--f-ink)]' : ''
               }`}
             >
-              <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${t.chip} [&_svg]:h-4.5 [&_svg]:w-4.5`}>
-                <t.icon aria-hidden />
-              </span>
-              <span className="text-[13px] font-semibold leading-[18px] text-[var(--k-label-primary)]">{t.label}</span>
-              <span className="text-[11px] leading-[14px] text-[var(--k-label-tertiary)]">{t.detail}</span>
+              <span className="f-mono text-[11px] tracking-[0.14em] text-[var(--f-gold-deep)]">{String(i + 1).padStart(2, '0')}</span>
+              <span className="text-[15px] font-medium leading-5 text-[var(--k-label-primary)]">{t.label}</span>
+              <span className="text-[12px] leading-4 text-[var(--k-label-tertiary)]">{t.detail}</span>
             </button>
           )
         })}

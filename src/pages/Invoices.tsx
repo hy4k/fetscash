@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { ArrowLeftRight, ChevronRight, FilePlus2, IndianRupee } from 'lucide-react'
+import { ArrowLeftRight, ChevronRight, IndianRupee } from 'lucide-react'
 import { useAccount } from '@/lib/AccountContext'
-import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
-import { KimiCard } from '@/components/kimi/Card'
-import { KimiBadge } from '@/components/kimi/Badge'
+import { PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiButton } from '@/components/kimi/Button'
-import { CreateButton } from '@/components/create/CreateDialogs'
+import { PageHero, StatStrip, Pill, Kicker, StatusText, M } from '@/components/ledger'
 import { EditInvoiceDialog, RowActions } from '@/components/edit/EditDialogs'
 import InvoiceGenerator from '@/sections/InvoiceGenerator'
 import { InvoiceStatusBadge } from '@/sections/OutstandingInvoices'
@@ -113,11 +111,11 @@ function RecordPaymentDialog({ invoice, onClose }: { invoice: InvoiceRow; onClos
           </div>
           {form.currency === 'USD' && rate > 0 && amount > 0 && (
             <p className="text-[13px] leading-5 text-[var(--k-label-secondary)]">
-              = <span className="font-semibold text-[var(--f-emerald-700)]">{formatINR(amountInr)}</span> in the books
+              = <span className="font-semibold text-[var(--f-green)]">{formatINR(amountInr)}</span> in the books
             </p>
           )}
           {overpay && (
-            <p className="text-[13px] leading-5 text-[var(--f-gold-600)]">
+            <p className="text-[13px] leading-5 text-[var(--f-gold-dark)]">
               More than the remaining balance — invoice will be marked fully paid.
             </p>
           )}
@@ -171,14 +169,14 @@ function InvoiceDetail({ invoice, onEdit, onDelete, onRecordPayment, onClose }: 
             {invoice.items && invoice.items.length > 0 ? (
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b-[0.5px] border-[var(--k-separator)]">
-                    <th className="k-c1-em py-2 font-medium">Item</th>
-                    <th className="k-c1-em py-2 text-right font-medium">Qty</th>
-                    <th className="k-c1-em py-2 text-right font-medium">Rate</th>
-                    <th className="k-c1-em py-2 text-right font-medium">Amount</th>
+                  <tr className="border-b border-[var(--f-hairline)]">
+                    <th className="f-kicker py-2 font-medium">Item</th>
+                    <th className="f-kicker py-2 text-right font-medium">Qty</th>
+                    <th className="f-kicker py-2 text-right font-medium">Rate</th>
+                    <th className="f-kicker py-2 text-right font-medium">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
+                <tbody className="divide-y divide-[rgba(17,23,19,0.09)]">
                   {invoice.items.map((it, idx) => (
                     <tr key={idx}>
                       <td className="k-b2 py-2.5">
@@ -196,7 +194,7 @@ function InvoiceDetail({ invoice, onEdit, onDelete, onRecordPayment, onClose }: 
               <p className="k-b2-secondary py-2">No line items on record.</p>
             )}
 
-            <div className="space-y-1.5 border-t-[0.5px] border-[var(--k-separator)] pt-3">
+            <div className="space-y-1.5 border-t border-[var(--f-hairline)] pt-3">
               <div className="flex justify-between text-[14px] leading-5">
                 <span className="text-[var(--k-label-secondary)]">Total</span>
                 <span className="font-medium text-[var(--k-label-primary)]">{formatINR(invoice.total_amount)}</span>
@@ -212,16 +210,16 @@ function InvoiceDetail({ invoice, onEdit, onDelete, onRecordPayment, onClose }: 
               )}
               <div className="flex justify-between text-[14px] leading-5">
                 <span className="text-[var(--k-label-secondary)]">Received</span>
-                <span className="font-medium text-[var(--f-emerald-600)]">{formatINR(invoice.paid_amount)}</span>
+                <span className="font-medium text-[var(--f-green)]">{formatINR(invoice.paid_amount)}</span>
               </div>
               <div className="flex justify-between text-[14px] leading-5">
                 <span className="text-[var(--k-label-secondary)]">Balance due</span>
-                <span className="font-semibold text-[var(--f-gold-600)]">{formatINR(invoice.total_amount - invoice.paid_amount)}</span>
+                <span className="font-semibold text-[var(--f-gold-dark)]">{formatINR(invoice.total_amount - invoice.paid_amount)}</span>
               </div>
             </div>
 
             {invoice.status !== 'cancelled' && (
-              <div className="flex items-center justify-between gap-2 border-t-[0.5px] border-[var(--k-separator)] pt-3">
+              <div className="flex items-center justify-between gap-2 border-t border-[var(--f-hairline)] pt-3">
                 <RowActions
                   onEdit={() => { onEdit(invoice); onClose() }}
                   onDelete={() => { onDelete(invoice.id); onClose() }}
@@ -256,55 +254,56 @@ function ClientGroup({ client, invoices, onSelect, onToggleCentre }: {
   const [open, setOpen] = useState(false)
   const total = invoices.reduce((s, i) => s + i.total_amount, 0)
   return (
-    <div className="border-b-[0.5px] border-[var(--k-separator)] last:border-b-0">
+    <div className="border-b border-[var(--f-hairline-soft)] last:border-b-0">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors duration-150 hover:bg-[var(--k-fill-f1)]"
+        className="flex w-full items-center gap-4 py-4 text-left transition-colors hover:bg-[rgba(17,23,19,0.03)]"
       >
         <ChevronRight className={cn('h-4 w-4 shrink-0 text-[var(--k-label-tertiary)] transition-transform duration-150', open && 'rotate-90')} aria-hidden />
-        <span className="k-b2-em min-w-0 flex-1 truncate">{client}</span>
-        <KimiBadge tone="neutral">{invoices.length} invoice{invoices.length === 1 ? '' : 's'}</KimiBadge>
-        <span className="k-b2-em w-28 text-right">{formatINR(total)}</span>
+        <span className="min-w-0 flex-1 truncate text-[16px] font-medium">{client}</span>
+        <M className="text-[11px] tracking-[0.10em] text-[var(--k-label-tertiary)]">{invoices.length} INV</M>
+        <M className="w-32 text-right text-[15px]">{formatINR(total)}</M>
       </button>
       {open && (
-        <table className="w-full text-left">
-          <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
-            {invoices.map((inv) => {
-              const balance = inv.total_amount - inv.paid_amount
-              return (
-                <tr
-                  key={inv.id}
-                  onClick={() => onSelect(inv)}
-                  className="cursor-pointer transition-colors duration-150 hover:bg-[var(--f-emerald-50)]"
+        <div className="mb-2">
+          {invoices.map((inv) => {
+            const balance = inv.total_amount - inv.paid_amount
+            const overdue = inv.status === 'overdue'
+            return (
+              <div
+                key={inv.id}
+                onClick={() => onSelect(inv)}
+                className="grid cursor-pointer grid-cols-[minmax(0,1.1fr)_auto_auto] items-center gap-x-5 border-t border-[var(--f-hairline-soft)] py-3 pl-9 transition-colors hover:bg-[rgba(11,92,67,0.04)] sm:grid-cols-[minmax(0,1fr)_90px_110px_110px_90px_36px]"
+              >
+                <M className="truncate text-[13px] font-medium">{inv.invoice_number}</M>
+                <M className="hidden text-[12px] text-[var(--k-label-secondary)] sm:block">
+                  {new Date(inv.invoice_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }).toUpperCase()}
+                </M>
+                <M className="hidden text-right text-[13px] sm:block">
+                  {formatINR(inv.total_amount)}
+                  {inv.original_currency === 'USD' && <span className="block text-[10px] text-[var(--k-label-tertiary)]">USD</span>}
+                </M>
+                <M className={cn('text-right text-[13px]', balance > 0 ? 'text-[var(--f-gold-dark)]' : 'text-[var(--k-label-quaternary)]')}>
+                  {balance > 0 ? formatINR(balance) : '—'}
+                </M>
+                <span className="text-right">
+                  <StatusText tone={inv.status === 'paid' ? 'green' : overdue ? 'red' : inv.status === 'partially_paid' ? 'gold' : 'muted'}>
+                    {inv.status === 'partially_paid' ? 'PARTIAL' : inv.status.toUpperCase()}
+                  </StatusText>
+                </span>
+                <button
+                  type="button"
+                  title={`Move to ${centreOf(inv, [], {}) === 'cochin' ? 'Calicut' : 'Cochin'}`}
+                  onClick={(e) => { e.stopPropagation(); onToggleCentre(inv) }}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--k-label-tertiary)] transition-colors hover:bg-[var(--k-fill-f2)] hover:text-[var(--f-green)]"
                 >
-                  <td className="k-b2-em whitespace-nowrap py-2.5 pl-12 pr-3">{inv.invoice_number}</td>
-                  <td className="k-b2-secondary hidden whitespace-nowrap px-3 py-2.5 md:table-cell">
-                    {new Date(inv.invoice_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </td>
-                  <td className="k-b2 whitespace-nowrap px-3 py-2.5 text-right">
-                    {formatINR(inv.total_amount)}
-                    {inv.original_currency === 'USD' && <span className="k-c1 block">USD</span>}
-                  </td>
-                  <td className={cn('k-b2-em whitespace-nowrap px-3 py-2.5 text-right', balance > 0 ? 'text-[var(--f-gold-600)]' : 'text-[var(--k-label-tertiary)]')}>
-                    {balance > 0 ? formatINR(balance) : '—'}
-                  </td>
-                  <td className="px-3 py-2.5"><InvoiceStatusBadge inv={inv} /></td>
-                  <td className="py-2.5 pl-3 pr-5">
-                    <button
-                      type="button"
-                      title={`Move to ${centreOf(inv, [], {}) === 'cochin' ? 'Calicut' : 'Cochin'}`}
-                      onClick={(e) => { e.stopPropagation(); onToggleCentre(inv) }}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--k-label-tertiary)] transition-colors hover:bg-[var(--k-fill-f2)] hover:text-[var(--f-emerald-700)]"
-                    >
-                      <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                  <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />
+                </button>
+              </div>
+            )
+          })}
+        </div>
       )}
     </div>
   )
@@ -327,6 +326,9 @@ export default function Invoices() {
     (acc, i) => { acc.billed += i.total_amount; acc.collected += i.paid_amount; return acc },
     { billed: 0, collected: 0 }
   )
+  const overdueTotal = invoices
+    .filter((i) => i.status === 'overdue')
+    .reduce((s, i) => s + (i.total_amount - i.paid_amount), 0)
 
   const byCentre = new Map<LocationType, Map<string, InvoiceRow[]>>()
   for (const loc of CENTRES) byCentre.set(loc, new Map())
@@ -339,41 +341,35 @@ export default function Invoices() {
 
   return (
     <>
-      <PageHeader
-        title="Mint"
-        description="Invoices & billing — organized by centre and client"
+      <PageHero
+        index="02"
+        section="MINT"
+        title="Invoices"
+        lede={`${data.outstandingCount} invoices are open across ${data.customers.length} clients — ${formatINR(data.outstandingTotal)} still to come in.`}
         actions={
-          <CreateButton onClick={() => document.getElementById('invoice-generator')?.scrollIntoView({ behavior: 'smooth' })}>
-            New invoice
-          </CreateButton>
+          <Pill onClick={() => document.getElementById('invoice-generator')?.scrollIntoView({ behavior: 'smooth' })}>
+            Raise an invoice
+          </Pill>
         }
       />
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="k-card p-5">
-            <p className="k-b2-secondary">Total billed</p>
-            <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--k-label-primary)]">{formatINR(totals.billed)}</p>
-          </div>
-          <div className="k-card p-5">
-            <p className="k-b2-secondary">Collected</p>
-            <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--f-emerald-700)]">{formatINR(totals.collected)}</p>
-          </div>
-          <div className="k-card p-5">
-            <p className="k-b2-secondary">Outstanding</p>
-            <p className="mt-1 text-[20px] font-semibold leading-[30px] text-[var(--f-gold-600)]">{formatINR(data.outstandingTotal)}</p>
-          </div>
-        </div>
 
-        {/* Invoice Generator */}
-        <section id="invoice-generator" className="scroll-mt-24">
-          <div className="mb-4 flex items-center gap-2">
-            <FilePlus2 className="h-5 w-5 text-[var(--f-emerald-600)]" aria-hidden />
-            <h2 className="k-t2-em">Invoice Generator</h2>
-          </div>
-          <InvoiceGenerator />
-        </section>
+      <StatStrip
+        stats={[
+          { label: 'OUTSTANDING', value: formatINR(data.outstandingTotal), tone: 'gold' },
+          { label: 'OVERDUE', value: formatINR(overdueTotal), tone: overdueTotal > 0 ? 'red' : 'ink' },
+          { label: 'COLLECTED', value: formatINR(totals.collected), tone: 'green' },
+          { label: 'TOTAL BILLED', value: formatINR(totals.billed), sub: `${invoices.length} INVOICES` },
+        ]}
+      />
 
-        {/* Register by centre → client */}
+      {/* Invoice Generator */}
+      <section id="invoice-generator" className="scroll-mt-24 pt-12">
+        <Kicker green className="mb-4">INVOICE GENERATOR</Kicker>
+        <InvoiceGenerator />
+      </section>
+
+      {/* Register by centre → client */}
+      <div className="pt-14">
         {CENTRES.map((loc) => {
           const groups = byCentre.get(loc)!
           const count = [...groups.values()].reduce((s, list) => s + list.length, 0)
@@ -382,29 +378,25 @@ export default function Invoices() {
             (a, b) => b[1].reduce((s, i) => s + i.total_amount, 0) - a[1].reduce((s, i) => s + i.total_amount, 0)
           )
           return (
-            <KimiCard
-              key={loc}
-              pad={false}
-              title={
-                <button
-                  type="button"
-                  onClick={() => setCollapsed((c) => ({ ...c, [loc]: !c[loc] }))}
-                  className="flex w-full items-center gap-2.5 text-left"
-                >
-                  <ChevronRight
-                    className={cn('h-4 w-4 text-[var(--k-label-tertiary)] transition-transform duration-150', !collapsed[loc] && 'rotate-90')}
-                    aria-hidden
-                  />
-                  {centreLabel(loc)}
-                  <KimiBadge tone="neutral">{count} invoice{count === 1 ? '' : 's'}</KimiBadge>
-                  <span className="text-[13px] font-medium text-[var(--f-emerald-700)]">{formatINR(billed)}</span>
-                </button>
-              }
-            >
+            <section key={loc} className="mb-12">
+              <button
+                type="button"
+                onClick={() => setCollapsed((c) => ({ ...c, [loc]: !c[loc] }))}
+                className="flex w-full flex-wrap items-baseline gap-x-5 gap-y-1 border-b border-[var(--f-hairline)] pb-4 text-left"
+              >
+                <ChevronRight
+                  className={cn('h-4 w-4 self-center text-[var(--k-label-tertiary)] transition-transform duration-150', !collapsed[loc] && 'rotate-90')}
+                  aria-hidden
+                />
+                <span className="text-[clamp(24px,2.6vw,34px)] font-medium tracking-[-0.02em]">{centreLabel(loc)}</span>
+                <M className="text-[12px] tracking-[0.10em] text-[var(--k-label-tertiary)]">{count} INVOICES</M>
+                <span className="flex-1" />
+                <M className="text-[15px] text-[var(--f-green)]">{formatINR(billed)}</M>
+              </button>
               {collapsed[loc] ? null : count === 0 ? (
-                <p className="k-b2-secondary px-5 py-8 text-center">No invoices under {centreLabel(loc)} yet.</p>
+                <p className="k-b2-secondary py-8 text-center">No invoices under {centreLabel(loc)} yet.</p>
               ) : (
-                <div className="pt-1">
+                <div>
                   {sortedClients.map(([client, list]) => (
                     <ClientGroup
                       key={client}
@@ -418,7 +410,7 @@ export default function Invoices() {
                   ))}
                 </div>
               )}
-            </KimiCard>
+            </section>
           )
         })}
       </div>

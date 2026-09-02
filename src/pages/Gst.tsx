@@ -1,10 +1,8 @@
-import { AlertTriangle, BadgeCheck, CalendarClock, Landmark, PiggyBank, Receipt, ShieldCheck, TrendingUp } from 'lucide-react'
 import gstJson from '@/data/gst.json'
-import { PageHeader } from '@/components/kimi/PageHeader'
-import { KimiCard } from '@/components/kimi/Card'
-import { KimiBadge } from '@/components/kimi/Badge'
+import { PageHero, StatStrip, Kicker, M, StatusText } from '@/components/ledger'
 import { AddExpenseDialog } from '@/sections/QuickAdd'
 import { formatINR } from '@/lib/data'
+import { cn } from '@/lib/utils'
 
 interface PeriodSlot {
   status: 'filed' | 'filed_late' | 'pending' | 'overdue'
@@ -60,22 +58,20 @@ function SlotCell({ slot }: { slot: PeriodSlot }) {
   if (slot.status === 'filed')
     return (
       <div className="flex flex-col gap-1">
-        <KimiBadge tone="green"><BadgeCheck className="h-3 w-3" aria-hidden />Filed {fmtDate(slot.filed_on)}</KimiBadge>
-        <span className="text-[11px] leading-4 text-[var(--k-label-secondary)]">ARN {slot.arn}</span>
+        <StatusText tone="green">FILED {fmtDate(slot.filed_on).toUpperCase()}</StatusText>
+        <span className="f-mono text-[10.5px] text-[var(--k-label-tertiary)]">ARN {slot.arn}</span>
       </div>
     )
   if (slot.status === 'filed_late')
     return (
       <div className="flex flex-col gap-1">
-        <KimiBadge tone="orange"><AlertTriangle className="h-3 w-3" aria-hidden />{slot.days_late}d late · {fmtDate(slot.filed_on)}</KimiBadge>
-        <span className="text-[11px] leading-4 text-[var(--k-label-secondary)]">due {fmtDate(slot.due_date)} · ARN {slot.arn}</span>
+        <StatusText tone="gold">{slot.days_late}D LATE · {fmtDate(slot.filed_on).toUpperCase()}</StatusText>
+        <span className="f-mono text-[10.5px] text-[var(--k-label-tertiary)]">DUE {fmtDate(slot.due_date).toUpperCase()} · ARN {slot.arn}</span>
       </div>
     )
   if (slot.status === 'overdue')
-    return <KimiBadge tone="red"><AlertTriangle className="h-3 w-3" aria-hidden />Overdue {slot.days_overdue}d</KimiBadge>
-  return (
-    <KimiBadge tone="blue"><CalendarClock className="h-3 w-3" aria-hidden />{fmtDate(slot.due_date)} · {dueLabel(slot.due_date)}</KimiBadge>
-  )
+    return <StatusText tone="red">OVERDUE {slot.days_overdue}D</StatusText>
+  return <StatusText tone="muted">{fmtDate(slot.due_date).toUpperCase()} · {dueLabel(slot.due_date).toUpperCase()}</StatusText>
 }
 
 export default function Gst() {
@@ -92,149 +88,111 @@ export default function Gst() {
 
   return (
     <>
-      <PageHeader
-        title="GST Compliance"
-        description={`GSTIN ${gst.gstin} · ${gst.filing_frequency} filing · synced ${fmtDate(gst.scraped_at)} from gst.gov.in`}
+      <PageHero
+        index="08"
+        section={`GST · ${gst.gstin}`}
+        title="GST desk"
+        lede={
+          pending.length > 0
+            ? `${pending.map((p) => `${p.rtn} for ${p.period} is ${dueLabel(p.due_date)}`).join('. ')}.`
+            : 'All returns filed on schedule.'
+        }
         actions={<AddExpenseDialog defaultCategory="GST Payment" buttonLabel="Record GST payment" />}
       />
 
-      {/* Upcoming dues banner */}
       {pending.length > 0 && (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-[var(--f-gold-400)]/50 bg-[var(--f-gold-100)] px-5 py-4">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--f-gold-600)]" aria-hidden />
-          <div>
-            <p className="text-[14px] font-semibold leading-5 text-[var(--k-label-primary)]">Upcoming filings</p>
-            {pending.map((p, i) => (
-              <p key={i} className="text-[13px] leading-5 text-[var(--k-label-secondary)]">
-                {p.rtn} for {p.period} — due {fmtDate(p.due_date)} ({dueLabel(p.due_date)})
-              </p>
-            ))}
-          </div>
+        <div className="mb-8 border-b border-t border-[rgba(201,162,39,0.45)] bg-[var(--f-gold-50)] px-5 py-4">
+          {pending.map((p, i) => (
+            <p key={i} className="text-[13px] leading-6 text-[var(--f-gold-dark)]">
+              <span className="f-mono text-[11px] tracking-[0.10em]">{p.rtn} · {p.period.toUpperCase()}</span>
+              {' — '}due {fmtDate(p.due_date)} ({dueLabel(p.due_date)})
+            </p>
+          ))}
         </div>
       )}
 
-      {/* Ledger KPI cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <KimiCard>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--k-label-secondary)]">
-            <Landmark className="h-4 w-4 text-[var(--f-emerald-600)]" aria-hidden />ITC available
-          </div>
-          <p className="mt-2 text-[24px] font-semibold leading-8 text-[var(--f-emerald-700)]">{formatINR(gst.itc_balance.total)}</p>
-          <p className="mt-1 text-[12px] leading-4 text-[var(--k-label-secondary)]">
-            IGST {formatINR(gst.itc_balance.igst)} · CGST {formatINR(gst.itc_balance.cgst)} · SGST {formatINR(gst.itc_balance.sgst)} · Cess {formatINR(gst.itc_balance.cess)}
-          </p>
-        </KimiCard>
-        <KimiCard>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--k-label-secondary)]">
-            <PiggyBank className="h-4 w-4 text-[var(--f-gold-600)]" aria-hidden />Cash ledger
-          </div>
-          <p className="mt-2 text-[24px] font-semibold leading-8 text-[var(--k-label-primary)]">{formatINR(gst.cash_ledger_balance)}</p>
-          <p className="mt-1 text-[12px] leading-4 text-[var(--k-label-secondary)]">Electronic cash ledger balance</p>
-        </KimiCard>
-        <KimiCard>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--k-label-secondary)]">
-            <ShieldCheck className="h-4 w-4 text-[var(--f-emerald-600)]" aria-hidden />Open liabilities
-          </div>
-          <p className="mt-2 text-[24px] font-semibold leading-8 text-[var(--f-emerald-700)]">{formatINR(gst.open_liabilities)}</p>
-          <p className="mt-1 text-[12px] leading-4 text-[var(--k-label-secondary)]">No outstanding dues on the portal</p>
-        </KimiCard>
-        <KimiCard>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--k-label-secondary)]">
-            <TrendingUp className="h-4 w-4 text-[var(--f-emerald-600)]" aria-hidden />Turnover FY 2025-26
-          </div>
-          <p className="mt-2 text-[24px] font-semibold leading-8 text-[var(--k-label-primary)]">{formatINR(fy2526?.system_calculated ?? 0)}</p>
-          <p className="mt-1 text-[12px] leading-4 text-[var(--k-label-secondary)]">System-calculated from filed returns</p>
-        </KimiCard>
-      </div>
+      <StatStrip
+        stats={[
+          { label: 'ITC AVAILABLE', value: formatINR(gst.itc_balance.total), tone: 'green', sub: `CGST ${formatINR(gst.itc_balance.cgst)} · SGST ${formatINR(gst.itc_balance.sgst)}` },
+          { label: 'CASH LEDGER', value: formatINR(gst.cash_ledger_balance) },
+          { label: 'OPEN LIABILITIES', value: formatINR(gst.open_liabilities), tone: gst.open_liabilities > 0 ? 'gold' : 'green', sub: gst.open_liabilities > 0 ? 'DUES ON PORTAL' : 'NOTHING DUE' },
+          { label: 'TURNOVER · FY 2025-26', value: formatINR(fy2526?.system_calculated ?? 0), sub: 'SYSTEM-CALCULATED' },
+        ]}
+      />
 
       {/* Filing register */}
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <KimiCard title="Monthly filing register" pad={false} className="lg:col-span-2">
-          <table className="mt-1 w-full text-left">
-            <thead>
-              <tr className="border-b-[0.5px] border-[var(--k-separator)]">
-                <th className="k-c1-em px-5 py-2 pt-4 font-medium">Period</th>
-                <th className="k-c1-em px-3 py-2 pt-4 font-medium">GSTR-1 <span className="font-normal text-[var(--k-label-secondary)]">(due 11th)</span></th>
-                <th className="k-c1-em px-5 py-2 pt-4 font-medium">GSTR-3B <span className="font-normal text-[var(--k-label-secondary)]">(due 20th)</span></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
-              {[...gst.periods].reverse().map((p) => (
-                <tr key={p.period_start} className="transition-colors duration-150 hover:bg-[var(--k-fill-f1)]">
-                  <td className="k-b2-em px-5 py-3 whitespace-nowrap">
-                    {fmtPeriod(p.period_start)}
-                    <span className="ml-2 text-[11px] text-[var(--k-label-secondary)]">FY {p.fy}</span>
-                  </td>
-                  <td className="px-3 py-3"><SlotCell slot={p.gstr1} /></td>
-                  <td className="px-5 py-3"><SlotCell slot={p.gstr3b} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </KimiCard>
+      <section className="pt-12">
+        <Kicker className="mb-2 !text-[12px]">MONTHLY FILING REGISTER</Kicker>
+        <div className="f-kicker grid grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)] gap-x-6 border-b border-[var(--f-hairline)] py-4">
+          <span>PERIOD</span>
+          <span>GSTR-1 · DUE 11TH</span>
+          <span>GSTR-3B · DUE 20TH</span>
+        </div>
+        {[...gst.periods].reverse().map((p) => (
+          <div
+            key={p.period_start}
+            className="grid grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-x-6 border-b border-[var(--f-hairline-soft)] py-4 transition-colors hover:bg-[rgba(17,23,19,0.035)]"
+          >
+            <M className="text-[13px] font-medium">
+              {fmtPeriod(p.period_start).toUpperCase()}
+              <span className="block text-[10px] font-normal text-[var(--k-label-tertiary)]">FY {p.fy}</span>
+            </M>
+            <SlotCell slot={p.gstr1} />
+            <SlotCell slot={p.gstr3b} />
+          </div>
+        ))}
+      </section>
 
-        <div className="space-y-6">
-          {/* Filing discipline */}
-          <KimiCard title="Filing discipline">
-            <div className="mt-3 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="k-b2">Returns filed</span>
-                <span className="k-b2-em">{filedTotal} / {gst.periods.length * 2}</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-[var(--k-fill-f2)]">
-                <div
-                  className="h-full rounded-full bg-[var(--f-emerald-500)]"
-                  style={{ width: `${(filedTotal / (gst.periods.length * 2)) * 100}%` }}
-                />
-              </div>
-              <p className="text-[12px] leading-4 text-[var(--k-label-secondary)]">
-                {filedLate} were filed after the due date. Late fees accrue ₹200/day (₹100 CGST + ₹100 SGST) capped per return.
-              </p>
-            </div>
-          </KimiCard>
-
-          {/* Annual returns */}
-          <KimiCard title="Annual returns">
-            <div className="mt-3 space-y-3">
-              {gst.annual_returns.map((a) => (
-                <div key={a.fy} className="rounded-xl bg-[var(--k-fill-f1)] px-4 py-3">
-                  <div className="flex items-center justify-between">
-                    <span className="k-b2-em">FY {a.fy}</span>
-                    <KimiBadge tone={a.gstr9 === 'not_filed' ? 'neutral' : 'blue'}>
-                      {a.gstr9 === 'not_filed' ? 'GSTR-9 not filed' : 'GSTR-9 not due'}
-                    </KimiBadge>
-                  </div>
-                  <p className="mt-1 text-[12px] leading-4 text-[var(--k-label-secondary)]">{a.note}</p>
-                </div>
-              ))}
-            </div>
-          </KimiCard>
-
-          {/* Turnover per FY */}
-          <KimiCard title="Turnover per portal" pad={false}>
-            <table className="mt-1 w-full text-left">
-              <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
-                {gst.turnover.map((t) => (
-                  <tr key={t.fy} className="transition-colors duration-150 hover:bg-[var(--k-fill-f1)]">
-                    <td className="k-b2-em px-5 py-3">FY {t.fy}</td>
-                    <td className="k-b2 px-5 py-3 text-right">
-                      {formatINR(t.system_calculated)}
-                      {t.estimated != null && (
-                        <span className="block text-[11px] text-[var(--k-label-secondary)]">est. {formatINR(t.estimated)}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </KimiCard>
-
-          <p className="flex items-center gap-1.5 px-1 text-[12px] leading-[18px] text-[var(--k-label-secondary)]">
-            <Receipt className="h-3.5 w-3.5" aria-hidden />
-            Registered since Sep 2024 · returns before that do not exist on the portal
+      {/* Discipline + annual + turnover */}
+      <section className="grid border-b border-[var(--f-hairline)] lg:grid-cols-3">
+        <div className="min-w-0 py-10 lg:pr-10">
+          <Kicker className="mb-6">FILING DISCIPLINE</Kicker>
+          <div className="flex items-baseline justify-between">
+            <span className="text-[15px]">Returns filed</span>
+            <M className="text-[15px] font-medium">{filedTotal} / {gst.periods.length * 2}</M>
+          </div>
+          <div className="mt-3 h-[10px] bg-[rgba(17,23,19,0.08)]">
+            <div className="h-full bg-[var(--f-green)]" style={{ width: `${(filedTotal / (gst.periods.length * 2)) * 100}%` }} />
+          </div>
+          <p className="k-c1 mt-4">
+            {filedLate} were filed after the due date. Late fees accrue ₹200/day (₹100 CGST + ₹100 SGST) capped per return.
           </p>
         </div>
-      </div>
+        <div className="min-w-0 border-t border-[var(--f-hairline-soft)] py-10 lg:border-l lg:border-t-0 lg:px-10">
+          <Kicker className="mb-6">ANNUAL RETURNS</Kicker>
+          <div className="grid gap-5">
+            {gst.annual_returns.map((a) => (
+              <div key={a.fy} className="flex items-baseline justify-between gap-4">
+                <div>
+                  <p className="text-[15px] font-medium">FY {a.fy}</p>
+                  <p className="k-c1 mt-1">{a.note}</p>
+                </div>
+                <StatusText tone={a.gstr9 === 'not_filed' ? 'muted' : 'muted'}>
+                  {a.gstr9 === 'not_filed' ? 'GSTR-9 NOT FILED' : 'NOT DUE'}
+                </StatusText>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="min-w-0 border-t border-[var(--f-hairline-soft)] py-10 lg:border-l lg:border-t-0 lg:pl-10">
+          <Kicker className="mb-6">TURNOVER PER PORTAL</Kicker>
+          <div className="grid gap-4">
+            {gst.turnover.map((t) => (
+              <div key={t.fy} className="flex items-baseline justify-between gap-4">
+                <span className="text-[15px] font-medium">FY {t.fy}</span>
+                <M className="text-[13px]">
+                  {formatINR(t.system_calculated)}
+                  {t.estimated != null && <span className="block text-right text-[10px] text-[var(--k-label-tertiary)]">EST {formatINR(t.estimated)}</span>}
+                </M>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <p className={cn('f-mono pt-6 text-[11px] tracking-[0.10em] text-[var(--k-label-tertiary)]')}>
+        GSTIN {gst.gstin} · {gst.filing_frequency.toUpperCase()} FILING · SYNCED {fmtDate(gst.scraped_at).toUpperCase()} FROM GST.GOV.IN
+      </p>
     </>
   )
 }

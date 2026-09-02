@@ -1,12 +1,10 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useAccount } from '@/lib/AccountContext'
-import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
-import { KimiCard } from '@/components/kimi/Card'
+import { PageSkeleton } from '@/components/kimi/PageHeader'
+import { PageHero, Kicker, M } from '@/components/ledger'
 import { AddExpenseDialog, AddIncomeDialog } from '@/sections/QuickAdd'
 import { formatINR } from '@/lib/data'
-
-/** Vibrant finance palette — emerald, gold, teal, violet, sky, slate. */
-const PIE_COLORS = ['#059669', '#d4a017', '#0d9488', '#8b5cf6', '#0ea5e9', '#94a3b8']
+import { cn } from '@/lib/utils'
 
 export default function Reports() {
   const { data, loading } = useAccount()
@@ -17,111 +15,149 @@ export default function Reports() {
   const totalExpenses = data.monthly.reduce((s, m) => s + m.expenses, 0)
   const totalIncome = data.monthly.reduce((s, m) => s + m.income, 0)
   const net = totalIncome - totalExpenses
-  // Prefer expense categories; fall back to billing-by-client when no expense data exists.
-  const byExpense = data.categoryBreakdown.length > 0
-  const breakdown = byExpense ? data.categoryBreakdown : data.clientBreakdown
-  const breakdownTitle = byExpense ? 'Spending by category' : 'Billing by client'
-  const catTotal = breakdown.reduce((s, c) => s + c.amount, 0)
+
+  const byCategory = [...data.categoryBreakdown].sort((a, b) => b.amount - a.amount).slice(0, 6)
+  const maxCat = byCategory[0]?.amount || 1
+  const byClient = [...data.clientBreakdown].sort((a, b) => b.amount - a.amount).slice(0, 6)
+  const maxClient = byClient[0]?.amount || 1
 
   return (
     <>
-      <PageHeader
-        title="Reports"
-        description="Six-month summary and spending mix"
+      <PageHero
+        index="07"
+        section="REPORTS"
+        title={<>Six months,<br />plainly.</>}
+        lede="Where the money went and who it came from. Add a manual entry any time with the buttons."
         actions={
-          <div className="flex items-center gap-2">
+          <>
             <AddExpenseDialog />
             <AddIncomeDialog />
-          </div>
+          </>
         }
       />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Monthly summary table */}
-        <KimiCard title="Monthly summary" pad={false} className="lg:col-span-2">
-          <table className="mt-1 w-full text-left">
-            <thead>
-              <tr className="border-b-[0.5px] border-[var(--k-separator)]">
-                <th className="k-c1-em px-5 py-2 pt-4 font-medium">Month</th>
-                <th className="k-c1-em px-3 py-2 pt-4 text-right font-medium">{data.incomeLabel}</th>
-                <th className="k-c1-em px-3 py-2 pt-4 text-right font-medium">Expenses</th>
-                <th className="k-c1-em px-5 py-2 pt-4 text-right font-medium">Net</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
-              {data.monthly.map((m) => {
-                const mNet = m.income - m.expenses
-                return (
-                  <tr key={m.month} className="transition-colors duration-150 hover:bg-[var(--k-fill-f1)]">
-                    <td className="k-b2-em px-5 py-3">{m.month}</td>
-                    <td className="k-b2 px-3 py-3 text-right text-[var(--f-emerald-600)]">{formatINR(m.income)}</td>
-                    <td className="k-b2 px-3 py-3 text-right text-[var(--k-danger)]">{formatINR(m.expenses)}</td>
-                    <td className={`k-b2-em px-5 py-3 text-right ${mNet >= 0 ? 'text-[var(--k-label-primary)]' : 'text-[var(--k-danger)]'}`}>
-                      {mNet >= 0 ? '+' : '−'}{formatINR(Math.abs(mNet))}
-                    </td>
-                  </tr>
-                )
-              })}
-              <tr className="border-t-[0.5px] border-[var(--k-separator)] bg-[var(--k-fill-f1)]">
-                <td className="k-b2-em px-5 py-3">Total</td>
-                <td className="k-b2-em px-3 py-3 text-right text-[var(--f-emerald-600)]">{formatINR(totalIncome)}</td>
-                <td className="k-b2-em px-3 py-3 text-right text-[var(--k-danger)]">{formatINR(totalExpenses)}</td>
-                <td className={`k-b2-em px-5 py-3 text-right ${net >= 0 ? 'text-[var(--k-label-primary)]' : 'text-[var(--k-danger)]'}`}>
-                  {net >= 0 ? '+' : '−'}{formatINR(Math.abs(net))}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <p className="k-c1 px-5 py-3">Last 6 months · INR</p>
-        </KimiCard>
 
-        {/* Category breakdown donut */}
-        <KimiCard title={breakdownTitle} actions={<span className="k-c1">{byExpense ? 'All time' : '6 months'}</span>} pad={false}>
-          {breakdown.length === 0 ? (
-            <p className="k-b2-secondary px-5 py-12 text-center">No expenses in this period.</p>
+      {/* Invoiced against expenses */}
+      <section className="border-t border-[var(--f-hairline)] py-12">
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <h2 className="m-0 text-[clamp(22px,2.4vw,30px)] font-medium tracking-[-0.02em]">{data.incomeLabel} against expenses</h2>
+          <div className="f-mono flex gap-6 text-[11px] tracking-[0.12em] text-[var(--k-label-secondary)]">
+            <span className="flex items-center gap-2"><span className="h-[11px] w-[11px] bg-[var(--f-green)]" />{data.incomeLabel.toUpperCase()}</span>
+            <span className="flex items-center gap-2"><span className="h-[11px] w-[11px] bg-[var(--f-gold)]" />EXPENSES</span>
+          </div>
+        </div>
+        <div className="mt-10 h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data.monthly} margin={{ top: 4, right: 4, left: 4, bottom: 0 }} barGap={8}>
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 12, fill: 'rgba(17,23,19,0.5)', fontFamily: 'JetBrains Mono, monospace' }}
+                axisLine={{ stroke: 'rgba(17,23,19,0.18)' }}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: 'rgba(17,23,19,0.4)', fontFamily: 'JetBrains Mono, monospace' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v: number) => (v >= 100000 ? `${(v / 100000).toFixed(1)}L` : v >= 1000 ? `${Math.round(v / 1000)}k` : `${v}`)}
+                width={44}
+              />
+              <Tooltip
+                formatter={(value: number, name: string) => [formatINR(value), name === 'income' ? data.incomeLabel : 'Expenses']}
+                cursor={{ fill: 'rgba(17,23,19,0.04)' }}
+                contentStyle={{
+                  borderRadius: 10,
+                  border: '1px solid rgba(17,23,19,0.14)',
+                  background: '#FCFBF7',
+                  fontSize: 13,
+                  fontFamily: 'JetBrains Mono, monospace',
+                  boxShadow: '0 4px 16px rgba(17,23,19,0.10)',
+                }}
+              />
+              <Bar dataKey="income" fill="#0B5C43" radius={[4, 4, 0, 0]} maxBarSize={30} />
+              <Bar dataKey="expenses" fill="#C9A227" radius={[4, 4, 0, 0]} maxBarSize={30} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Where it went / who it came from */}
+      <section className="grid border-t border-[var(--f-hairline)] lg:grid-cols-2">
+        <div className="min-w-0 py-12 lg:pr-10">
+          <Kicker className="mb-8 !text-[12px]">WHERE IT WENT</Kicker>
+          {byCategory.length === 0 ? (
+            <p className="k-b2-secondary">No expenses in this period.</p>
           ) : (
-            <>
-              <div className="h-[200px] px-5 pt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={breakdown}
-                      dataKey="amount"
-                      nameKey="category"
-                      innerRadius={56}
-                      outerRadius={84}
-                      paddingAngle={2}
-                      strokeWidth={0}
-                    >
-                      {breakdown.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value: number, name: string) => [formatINR(value), name]}
-                      contentStyle={{
-                        borderRadius: 8,
-                        border: '0.5px solid rgba(0,0,0,0.13)',
-                        fontSize: 13,
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <ul className="space-y-2 px-5 pb-5 pt-2">
-                {breakdown.map((c, i) => (
-                  <li key={c.category} className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                    <span className="k-b2 flex-1 truncate">{c.category}</span>
-                    <span className="k-c1">{catTotal > 0 ? Math.round((c.amount / catTotal) * 100) : 0}%</span>
-                    <span className="k-b2-em w-20 text-right">{formatINR(c.amount)}</span>
-                  </li>
-                ))}
-              </ul>
-            </>
+            <div className="grid gap-6">
+              {byCategory.map((c) => (
+                <div key={c.category}>
+                  <div className="flex justify-between gap-4 text-[15px]">
+                    <span>{c.category}</span>
+                    <M>{formatINR(c.amount)}</M>
+                  </div>
+                  <div className="mt-2.5 h-[10px] bg-[rgba(17,23,19,0.08)]">
+                    <div className="h-full bg-[var(--f-green)]" style={{ width: `${Math.max(2, (c.amount / maxCat) * 100)}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
-        </KimiCard>
-      </div>
+        </div>
+        <div className="min-w-0 border-t border-[var(--f-hairline-soft)] py-12 lg:border-l lg:border-t-0 lg:pl-10">
+          <Kicker className="mb-8 !text-[12px]">WHO IT CAME FROM</Kicker>
+          {byClient.length === 0 ? (
+            <p className="k-b2-secondary">No billing in this period.</p>
+          ) : (
+            <div className="grid gap-6">
+              {byClient.map((c) => (
+                <div key={c.category}>
+                  <div className="flex justify-between gap-4 text-[15px]">
+                    <span className="min-w-0 truncate">{c.category}</span>
+                    <M>{formatINR(c.amount)}</M>
+                  </div>
+                  <div className="mt-2.5 h-[10px] bg-[rgba(17,23,19,0.08)]">
+                    <div className="h-full bg-[var(--f-gold)]" style={{ width: `${Math.max(2, (c.amount / maxClient) * 100)}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Monthly summary */}
+      <section className="border-t border-[var(--f-hairline)] pt-12">
+        <Kicker className="mb-2 !text-[12px]">MONTHLY SUMMARY · INR</Kicker>
+        <div className="f-kicker grid grid-cols-[minmax(0,1fr)_auto_auto_auto] gap-x-6 border-b border-[var(--f-hairline)] py-4">
+          <span>MONTH</span>
+          <span className="text-right">{data.incomeLabel.toUpperCase()}</span>
+          <span className="text-right">EXPENSES</span>
+          <span className="text-right">NET</span>
+        </div>
+        {data.monthly.map((m) => {
+          const mNet = m.income - m.expenses
+          return (
+            <div
+              key={m.month}
+              className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-x-6 border-b border-[var(--f-hairline-soft)] py-4 transition-colors hover:bg-[rgba(17,23,19,0.035)]"
+            >
+              <M className="text-[13px] font-medium">{m.month.toUpperCase()}</M>
+              <M className="text-right text-[13px] text-[var(--f-green)]">{formatINR(m.income)}</M>
+              <M className="text-right text-[13px]">{formatINR(m.expenses)}</M>
+              <M className={cn('text-right text-[13px] font-medium', mNet >= 0 ? '' : 'text-[var(--f-red)]')}>
+                {mNet >= 0 ? '+' : '−'}{formatINR(Math.abs(mNet))}
+              </M>
+            </div>
+          )
+        })}
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-x-6 border-b border-[var(--f-hairline)] bg-[rgba(17,23,19,0.035)] py-4">
+          <M className="text-[13px] font-semibold">TOTAL</M>
+          <M className="text-right text-[13px] font-semibold text-[var(--f-green)]">{formatINR(totalIncome)}</M>
+          <M className="text-right text-[13px] font-semibold">{formatINR(totalExpenses)}</M>
+          <M className={cn('text-right text-[13px] font-semibold', net >= 0 ? '' : 'text-[var(--f-red)]')}>
+            {net >= 0 ? '+' : '−'}{formatINR(Math.abs(net))}
+          </M>
+        </div>
+      </section>
     </>
   )
 }
