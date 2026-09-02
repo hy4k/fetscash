@@ -5,11 +5,14 @@ import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiCard } from '@/components/kimi/Card'
 import { KimiBadge } from '@/components/kimi/Badge'
 import { AddClientDialog } from '@/components/create/CreateDialogs'
+import { EditClientDialog, RowActions } from '@/components/edit/EditDialogs'
 import { formatINR } from '@/lib/data'
+import type { CustomerFull } from '@/types'
 
 export default function Clients() {
-  const { data, loading } = useAccount()
+  const { data, loading, deleteCustomer } = useAccount()
   const [query, setQuery] = useState('')
+  const [editing, setEditing] = useState<CustomerFull | null>(null)
 
   if (loading && !data) return <PageSkeleton />
   if (!data) return null
@@ -56,9 +59,19 @@ export default function Clients() {
                     {c.tax_id && <p className="k-c1">GST {c.tax_id}</p>}
                   </div>
                 </div>
-                {c.balance > 0
-                  ? <KimiBadge tone="orange">{formatINR(c.balance)} due</KimiBadge>
-                  : <KimiBadge tone="green">Settled</KimiBadge>}
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  {c.balance > 0
+                    ? <KimiBadge tone="orange">{formatINR(c.balance)} due</KimiBadge>
+                    : <KimiBadge tone="green">Settled</KimiBadge>}
+                  <RowActions
+                    onEdit={() => setEditing(c)}
+                    onDelete={() => deleteCustomer(c.id)}
+                    deleteTitle={`Delete ${c.name}?`}
+                    deleteDescription={c.total_invoices > 0
+                      ? `This client has ${c.total_invoices} invoice(s) on record — those invoices will stay, but the client card is removed.`
+                      : 'This cannot be undone.'}
+                  />
+                </div>
               </div>
 
               {c.address && (
@@ -76,6 +89,7 @@ export default function Clients() {
           ))}
         </div>
       )}
+      {editing && <EditClientDialog client={editing} onClose={() => setEditing(null)} />}
     </>
   )
 }

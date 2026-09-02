@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useAccount } from '@/lib/AccountContext'
+import { useSettings } from '@/lib/settings'
 import { amountInWords } from '@/lib/words'
 import type { InvoiceRow, LocationType } from '@/types'
 
@@ -60,6 +61,7 @@ const num = (s: string) => {
 
 /** Exact replica of the FETS invoice template (sample: INVOICE PRM-02). */
 export function InvoicePreview({ draft, clientAddress }: { draft: Draft; clientAddress: string }) {
+  const [settings] = useSettings()
   const clientName = draft.clientKey === '__new__' ? draft.newClientName : draft.clientKey
   const address = draft.clientKey === '__new__' ? draft.newClientAddress : clientAddress
   const items = draft.items.filter((it) => it.name.trim())
@@ -84,13 +86,13 @@ export function InvoicePreview({ draft, clientAddress }: { draft: Draft; clientA
       <div className="px-10 pb-10 pt-8">
         {/* Letterhead */}
         <div className="flex items-start gap-6">
-          <img src="/assets/fets-logo.png" alt="Forun Educational & Testing Services" className="w-[190px] shrink-0" />
+          <img src="/assets/fets-logo.png" alt={settings.businessName} className="w-[190px] shrink-0" />
           <div className="border-l border-gray-200 pl-6 pt-1">
-            <p className="text-[16px] font-bold">Forun Testing &amp; Educational Services</p>
-            <p className="mt-0.5 text-[11px] text-gray-700">4th Floor, Kadoali Tower, Vandipetta JN, West Nadakkavu, Calicut - 673011</p>
-            <p className="text-[11px] text-gray-700">+91 8089393992</p>
-            <p className="text-[11px] text-gray-700">www.fets.in</p>
-            <p className="text-[11px] text-gray-700">GSTIN : 32AAIFF5955B1ZO</p>
+            <p className="text-[16px] font-bold">{settings.businessName}</p>
+            <p className="mt-0.5 text-[11px] text-gray-700">{settings.businessAddress}</p>
+            {settings.businessPhone && <p className="text-[11px] text-gray-700">{settings.businessPhone}</p>}
+            {settings.businessWebsite && <p className="text-[11px] text-gray-700">{settings.businessWebsite}</p>}
+            {settings.gstin && <p className="text-[11px] text-gray-700">GSTIN : {settings.gstin}</p>}
           </div>
         </div>
 
@@ -188,10 +190,10 @@ export function InvoicePreview({ draft, clientAddress }: { draft: Draft; clientA
         {/* Banking */}
         <div className="mt-4">
           <p className="text-[12px] font-bold">Banking Details</p>
-          <p className="mt-1 text-[11px]">BANK: FEDERAL BANK</p>
-          <p className="text-[11px]">A/C NO: 13160200027156</p>
-          <p className="text-[11px]">BRANCH: PANAMPILLYNAGAR</p>
-          <p className="text-[11px]">IFSC : FDRL0001316</p>
+          <p className="mt-1 text-[11px]">BANK: {settings.bankName}</p>
+          <p className="text-[11px]">A/C NO: {settings.bankAccount}</p>
+          <p className="text-[11px]">BRANCH: {settings.bankBranch}</p>
+          <p className="text-[11px]">IFSC : {settings.bankIfsc}</p>
         </div>
       </div>
     </div>
@@ -200,6 +202,7 @@ export function InvoicePreview({ draft, clientAddress }: { draft: Draft; clientA
 
 export default function InvoiceGenerator() {
   const { data, addInvoice, addCustomer } = useAccount()
+  const [settings] = useSettings()
   const customers = data?.customers ?? []
   const products = data?.products ?? []
   const allInvoices = data?.invoices ?? []
@@ -210,10 +213,10 @@ export default function InvoiceGenerator() {
     newClientAddress: '',
     invoiceNo: '',
     date: today(),
-    currency: 'INR',
+    currency: settings.defaultCurrency,
     inrEquivalent: '',
-    centre: 'calicut',
-    items: [{ name: '', qty: '1', rate: '', tax: '0' }],
+    centre: settings.defaultCentre,
+    items: [{ name: '', qty: '1', rate: '', tax: settings.defaultTaxRate }],
   })
 
   const set = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }))

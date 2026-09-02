@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { toast } from 'sonner'
 import { computeAccountData, loadRawData, TABLES, type RawData } from '@/lib/data'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
-import { loadLocal, saveLocal, uid, type LocalData } from '@/lib/localStore'
+import { loadLocal, saveLocal, uid, type EntityKey, type LocalData } from '@/lib/localStore'
 import type {
   AccountData,
   CashTxnRow,
@@ -35,12 +35,23 @@ interface AccountState {
   invoiceCentres: Record<string, LocationType>
   localInvoiceIds: Set<string>
   addCustomer: (c: Omit<CustomerFull, 'id' | 'balance' | 'total_invoices' | 'unpaid_invoices'>) => CustomerFull
+  updateCustomer: (id: string, patch: Partial<CustomerFull>) => void
+  deleteCustomer: (id: string) => void
   addProduct: (p: Omit<ProductRow, 'id'>) => ProductRow
+  updateProduct: (id: string, patch: Partial<ProductRow>) => void
+  deleteProduct: (id: string) => void
   addInvoice: (i: Omit<InvoiceRow, 'id'> & { id?: string }) => InvoiceRow
+  updateInvoice: (id: string, patch: Partial<InvoiceRow>) => void
   removeInvoice: (id: string) => void
   addExpense: (e: Omit<ExpenseRow, 'id'>) => ExpenseRow
+  updateExpense: (id: string, patch: Partial<ExpenseRow>) => void
+  deleteExpense: (id: string) => void
   addPayment: (p: Omit<PaymentRow, 'id'>) => PaymentRow
+  updatePayment: (id: string, patch: Partial<PaymentRow>) => void
+  deletePayment: (id: string) => void
   addCashTxn: (t: Omit<CashTxnRow, 'id'>) => CashTxnRow
+  updateCashTxn: (id: string, patch: Partial<CashTxnRow>) => void
+  deleteCashTxn: (id: string) => void
   setInvoiceCentre: (invoiceId: string, centre: LocationType) => void
   recordPayment: (invoice: InvoiceRow, p: PaymentInput) => Promise<boolean>
 }
@@ -49,6 +60,7 @@ const AccountContext = createContext<AccountState | null>(null)
 
 const EMPTY_LOCAL: LocalData = {
   customers: [], products: [], invoices: [], expenses: [], payments: [], cashTxns: [], invoiceCentres: {},
+  deleted: { customers: [], products: [], invoices: [], expenses: [], payments: [], cashTxns: [] },
 }
 
 function hasLocalContent(l: LocalData) {
@@ -59,31 +71,28 @@ function hasLocalContent(l: LocalData) {
 }
 
 /** Merge imported/Supabase raw rows with locally-created overlay rows.
- *  Local copies of raw rows (patched invoices) win; local rows already present
- *  in raw (same id — e.g. after a Supabase refresh) are dropped. */
+ *  Local copies of raw rows (edited/patched) win; rows tombstoned in
+ *  local.deleted are filtered out; local rows already present in raw
+ *  (same id — e.g. after a Supabase refresh) are dropped. */
 function merge(raw: RawData, local: LocalData): RawData {
-  const dedupe = <T extends { id: string }>(rawRows: T[], localRows: T[]): T[] => {
-    const ids = new Set(rawRows.map((r) => r.id))
-    return [...rawRows, ...localRows.filter((r) => !ids.has(r.id))]
+  const combine = <T extends { id: string }>(key: EntityKey, rawRows: T[], localRows: T[]): T[] => {
+    const tomb = new Set(local.deleted[key])
+    const localById = new Map(localRows.map((r) => [r.id, r]))
+    const kept = rawRows.filter((r) => !tomb.has(r.id)).map((r) => localById.get(r.id) ?? r)
+    const rawIds = new Set(rawRows.map((r) => r.id))
+    return [...kept, ...localRows.filter((r) => !rawIds.has(r.id))]
   }
-  const localInvById = new Map(local.invoices.map((i) => [i.id, i]))
-  const rawInvIds = new Set(raw.invoices.map((i) => i.id))
-  const invoices: InvoiceRow[] = [
-    ...raw.invoices.map((i) => {
-      const patched = localInvById.get(i.id)
-      if (patched) return patched
-      const centre = local.invoiceCentres[i.id]
-      return centre ? { ...i, location: centre } : i
-    }),
-    ...local.invoices.filter((i) => !rawInvIds.has(i.id)),
-  ]
+  const invoices = combine('invoices', raw.invoices, local.invoices).map((i) => {
+    const centre = local.invoiceCentres[i.id]
+    return centre ? { ...i, location: centre } : i
+  })
   return {
-    expenses: dedupe(raw.expenses, local.expenses),
-    cashTxns: dedupe(raw.cashTxns, local.cashTxns),
+    expenses: combine('expenses', raw.expenses, local.expenses),
+    cashTxns: combine('cashTxns', raw.cashTxns, local.cashTxns),
     invoices,
-    payments: dedupe(raw.payments, local.payments),
-    customers: dedupe(raw.customers, local.customers),
-    products: dedupe(raw.products, local.products),
+    payments: combine('payments', raw.payments, local.payments),
+    customers: combine('customers', raw.customers, local.customers),
+    products: combine('products', raw.products, local.products),
   }
 }
 
@@ -94,6 +103,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const [demo, setDemo] = useState(false)
   const [loading, setLoading] = useState(true)
   const migratedRef = useRef(false)
+  const rawRef = useRef<RawData | null>(null)
+  rawRef.current = raw
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -124,6 +135,43 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       await refresh()
     })()
   }, [refresh])
+
+  /** Edit any entity: patch the local overlay (raw rows are copied in first), then Supabase. */
+  const patchEntity = useCallback(<T extends { id: string }>(key: EntityKey, table: string, id: string, patch: Partial<T>) => {
+    const rawRow = ((rawRef.current?.[key] as unknown) as T[] | undefined)?.find((r) => r.id === id)
+    update((l) => {
+      const rows = (l[key] as unknown) as T[]
+      const next = rows.some((r) => r.id === id)
+        ? rows.map((r) => (r.id === id ? { ...r, ...patch } : r))
+        : rawRow
+          ? [...rows, { ...rawRow, ...patch }]
+          : rows
+      return { ...l, [key]: next }
+    })
+    if (isSupabaseConfigured) {
+      void (async () => {
+        const { error } = await supabase.from(table).update(patch as object).eq('id', id)
+        if (error) toast.error(`Could not update in Supabase: ${error.message}`)
+        await refresh()
+      })()
+    }
+  }, [update, refresh])
+
+  /** Delete any entity: tombstone locally (so a failed remote delete doesn't resurrect it), then Supabase. */
+  const removeEntity = useCallback((key: EntityKey, table: string, id: string) => {
+    update((l) => ({
+      ...l,
+      [key]: (l[key] as { id: string }[]).filter((r) => r.id !== id),
+      deleted: { ...l.deleted, [key]: [...l.deleted[key], id] },
+    }))
+    if (isSupabaseConfigured) {
+      void (async () => {
+        const { error } = await supabase.from(table).delete().eq('id', id)
+        if (error) toast.error(`Could not delete in Supabase: ${error.message}`)
+        await refresh()
+      })()
+    }
+  }, [update, refresh])
 
   /** One-time move of any browser-local records into Supabase, then clear the local copy. */
   useEffect(() => {
@@ -181,16 +229,11 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     return row
   }, [update, persist])
 
-  const removeInvoice = useCallback<AccountState['removeInvoice']>((id) => {
-    update((l) => ({ ...l, invoices: l.invoices.filter((i) => i.id !== id) }))
-    if (isSupabaseConfigured) {
-      void (async () => {
-        const { error } = await supabase.from(TABLES.invoices).delete().eq('id', id)
-        if (error) toast.error(`Could not delete in Supabase: ${error.message}`)
-        await refresh()
-      })()
-    }
-  }, [update, refresh])
+  const updateInvoice = useCallback<AccountState['updateInvoice']>(
+    (id, patch) => patchEntity<InvoiceRow>('invoices', TABLES.invoices, id, patch), [patchEntity])
+
+  const removeInvoice = useCallback<AccountState['removeInvoice']>(
+    (id) => removeEntity('invoices', TABLES.invoices, id), [removeEntity])
 
   const addExpense = useCallback<AccountState['addExpense']>((e) => {
     const row: ExpenseRow = { ...e, id: uid('exp') }
@@ -269,6 +312,27 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const data = useMemo(() => (raw ? computeAccountData(merge(raw, local), period) : null), [raw, local, period])
   const localInvoiceIds = useMemo(() => new Set(local.invoices.map((i) => i.id)), [local.invoices])
 
+  const updateCustomer = useCallback<AccountState['updateCustomer']>(
+    (id, patch) => patchEntity<CustomerFull>('customers', TABLES.customers, id, patch), [patchEntity])
+  const deleteCustomer = useCallback<AccountState['deleteCustomer']>(
+    (id) => removeEntity('customers', TABLES.customers, id), [removeEntity])
+  const updateProduct = useCallback<AccountState['updateProduct']>(
+    (id, patch) => patchEntity<ProductRow>('products', TABLES.products, id, patch), [patchEntity])
+  const deleteProduct = useCallback<AccountState['deleteProduct']>(
+    (id) => removeEntity('products', TABLES.products, id), [removeEntity])
+  const updateExpense = useCallback<AccountState['updateExpense']>(
+    (id, patch) => patchEntity<ExpenseRow>('expenses', TABLES.expenses, id, patch), [patchEntity])
+  const deleteExpense = useCallback<AccountState['deleteExpense']>(
+    (id) => removeEntity('expenses', TABLES.expenses, id), [removeEntity])
+  const updatePayment = useCallback<AccountState['updatePayment']>(
+    (id, patch) => patchEntity<PaymentRow>('payments', TABLES.payments, id, patch), [patchEntity])
+  const deletePayment = useCallback<AccountState['deletePayment']>(
+    (id) => removeEntity('payments', TABLES.payments, id), [removeEntity])
+  const updateCashTxn = useCallback<AccountState['updateCashTxn']>(
+    (id, patch) => patchEntity<CashTxnRow>('cashTxns', TABLES.cashTxns, id, patch), [patchEntity])
+  const deleteCashTxn = useCallback<AccountState['deleteCashTxn']>(
+    (id) => removeEntity('cashTxns', TABLES.cashTxns, id), [removeEntity])
+
   return (
     <AccountContext.Provider
       value={{
@@ -276,7 +340,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         backend: isSupabaseConfigured ? 'supabase' : 'local',
         invoiceCentres: local.invoiceCentres,
         localInvoiceIds,
-        addCustomer, addProduct, addInvoice, removeInvoice, addExpense, addPayment, addCashTxn,
+        addCustomer, updateCustomer, deleteCustomer,
+        addProduct, updateProduct, deleteProduct,
+        addInvoice, updateInvoice, removeInvoice,
+        addExpense, updateExpense, deleteExpense,
+        addPayment, updatePayment, deletePayment,
+        addCashTxn, updateCashTxn, deleteCashTxn,
         setInvoiceCentre, recordPayment,
       }}
     >

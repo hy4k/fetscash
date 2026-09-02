@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { ArrowLeftRight, ChevronRight, FilePlus2, IndianRupee, Trash2 } from 'lucide-react'
+import { ArrowLeftRight, ChevronRight, FilePlus2, IndianRupee } from 'lucide-react'
 import { useAccount } from '@/lib/AccountContext'
 import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiCard } from '@/components/kimi/Card'
 import { KimiBadge } from '@/components/kimi/Badge'
 import { KimiButton } from '@/components/kimi/Button'
 import { CreateButton } from '@/components/create/CreateDialogs'
+import { EditInvoiceDialog, RowActions } from '@/components/edit/EditDialogs'
 import InvoiceGenerator from '@/sections/InvoiceGenerator'
 import { InvoiceStatusBadge } from '@/sections/OutstandingInvoices'
 import { centreLabel, centreOf } from '@/lib/centre'
@@ -144,9 +145,9 @@ function RecordPaymentDialog({ invoice, onClose }: { invoice: InvoiceRow; onClos
   )
 }
 
-function InvoiceDetail({ invoice, isLocal, onDelete, onRecordPayment, onClose }: {
+function InvoiceDetail({ invoice, onEdit, onDelete, onRecordPayment, onClose }: {
   invoice: InvoiceRow | null
-  isLocal: boolean
+  onEdit: (inv: InvoiceRow) => void
   onDelete: (id: string) => void
   onRecordPayment: (inv: InvoiceRow) => void
   onClose: () => void
@@ -219,8 +220,14 @@ function InvoiceDetail({ invoice, isLocal, onDelete, onRecordPayment, onClose }:
               </div>
             </div>
 
-            {(invoice.total_amount - invoice.paid_amount > 0.005 || isLocal) && invoice.status !== 'cancelled' && (
-              <div className="flex items-center justify-end gap-2 border-t-[0.5px] border-[var(--k-separator)] pt-3">
+            {invoice.status !== 'cancelled' && (
+              <div className="flex items-center justify-between gap-2 border-t-[0.5px] border-[var(--k-separator)] pt-3">
+                <RowActions
+                  onEdit={() => { onEdit(invoice); onClose() }}
+                  onDelete={() => { onDelete(invoice.id); onClose() }}
+                  deleteTitle={`Delete invoice ${invoice.invoice_number}?`}
+                  deleteDescription="Payments already recorded against it will remain as unmatched receipts."
+                />
                 {invoice.total_amount - invoice.paid_amount > 0.005 && (
                   <KimiButton
                     size={26}
@@ -228,17 +235,6 @@ function InvoiceDetail({ invoice, isLocal, onDelete, onRecordPayment, onClose }:
                     onClick={() => { onRecordPayment(invoice); onClose() }}
                   >
                     Record payment
-                  </KimiButton>
-                )}
-                {isLocal && (
-                  <KimiButton
-                    variant="outline"
-                    danger
-                    size={26}
-                    leftIcon={<Trash2 />}
-                    onClick={() => { onDelete(invoice.id); onClose() }}
-                  >
-                    Delete
                   </KimiButton>
                 )}
               </div>
@@ -317,9 +313,10 @@ function ClientGroup({ client, invoices, onSelect, onToggleCentre }: {
 const CENTRES: LocationType[] = ['calicut', 'cochin']
 
 export default function Invoices() {
-  const { data, loading, invoiceCentres, setInvoiceCentre, localInvoiceIds, removeInvoice } = useAccount()
+  const { data, loading, invoiceCentres, setInvoiceCentre, removeInvoice } = useAccount()
   const [selected, setSelected] = useState<InvoiceRow | null>(null)
   const [payFor, setPayFor] = useState<InvoiceRow | null>(null)
+  const [editing, setEditing] = useState<InvoiceRow | null>(null)
 
   if (loading && !data) return <PageSkeleton />
   if (!data) return null
@@ -419,12 +416,13 @@ export default function Invoices() {
 
       <InvoiceDetail
         invoice={selected}
-        isLocal={!!selected && localInvoiceIds.has(selected.id)}
+        onEdit={setEditing}
         onDelete={removeInvoice}
         onRecordPayment={setPayFor}
         onClose={() => setSelected(null)}
       />
       {payFor && <RecordPaymentDialog key={payFor.id} invoice={payFor} onClose={() => setPayFor(null)} />}
+      {editing && <EditInvoiceDialog invoice={editing} onClose={() => setEditing(null)} />}
     </>
   )
 }

@@ -9,6 +9,7 @@ import Reports from '@/pages/Reports'
 import Gst from '@/pages/Gst'
 import Clients from '@/pages/Clients'
 import Products from '@/pages/Products'
+import SettingsPage from '@/pages/Settings'
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/cashbook" element={<Cashbook />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/gst" element={<Gst />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </AccountProvider>

@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { useAccount } from '@/lib/AccountContext'
 import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiCard } from '@/components/kimi/Card'
 import { KimiBadge } from '@/components/kimi/Badge'
 import { AddCashDialog } from '@/sections/QuickAdd'
+import { EditCashDialog, RowActions } from '@/components/edit/EditDialogs'
 import { formatINR } from '@/lib/data'
+import type { CashTxnRow } from '@/types'
 
 const typeLabel: Record<string, { label: string; tone: 'green' | 'red' | 'neutral' }> = {
   replenishment: { label: 'Top-up', tone: 'green' },
@@ -12,7 +15,8 @@ const typeLabel: Record<string, { label: string; tone: 'green' | 'red' | 'neutra
 }
 
 export default function Cashbook() {
-  const { data, loading } = useAccount()
+  const { data, loading, deleteCashTxn } = useAccount()
+  const [editing, setEditing] = useState<CashTxnRow | null>(null)
 
   if (loading && !data) return <PageSkeleton />
   if (!data) return null
@@ -64,6 +68,11 @@ export default function Cashbook() {
                         {signed >= 0 ? '+' : '−'}{formatINR(Math.abs(signed))}
                       </span>
                       <KimiBadge tone={meta.tone}>{meta.label}</KimiBadge>
+                      <RowActions
+                        onEdit={() => setEditing(t)}
+                        onDelete={() => deleteCashTxn(t.id)}
+                        deleteTitle="Delete this cash entry?"
+                      />
                     </div>
                   </li>
                 )
@@ -72,6 +81,7 @@ export default function Cashbook() {
           )}
         </KimiCard>
       </div>
+      {editing && <EditCashDialog txn={editing} onClose={() => setEditing(null)} />}
     </>
   )
 }

@@ -6,7 +6,9 @@ import { KimiCard } from '@/components/kimi/Card'
 import { KimiBadge } from '@/components/kimi/Badge'
 import { KimiSegmentedControl } from '@/components/kimi/SegmentedControl'
 import { QuickAdd } from '@/sections/QuickAdd'
+import { EditExpenseDialog, EditPaymentDialog, RowActions } from '@/components/edit/EditDialogs'
 import { formatINR } from '@/lib/data'
+import type { ExpenseRow, PaymentRow } from '@/types'
 
 type Row = {
   id: string
@@ -15,12 +17,16 @@ type Row = {
   label: string
   detail: string
   amount: number
+  expense?: ExpenseRow
+  payment?: PaymentRow
 }
 
 export default function Transactions() {
-  const { data, loading } = useAccount()
+  const { data, loading, deleteExpense, deletePayment } = useAccount()
   const [query, setQuery] = useState('')
   const [kind, setKind] = useState<'all' | 'income' | 'expense'>('all')
+  const [editExpense, setEditExpense] = useState<ExpenseRow | null>(null)
+  const [editPayment, setEditPayment] = useState<PaymentRow | null>(null)
 
   const rows = useMemo<Row[]>(() => {
     if (!data) return []
@@ -32,6 +38,7 @@ export default function Transactions() {
         label: e.description || e.category,
         detail: [e.category, e.payment_mode, e.location ? (e.location === 'cochin' ? 'Cochin' : 'Calicut') : 'Company-wide'].filter(Boolean).join(' · '),
         amount: -e.amount,
+        expense: e,
       })),
       ...data.payments.map((p): Row => ({
         id: `p-${p.id}`,
@@ -40,6 +47,7 @@ export default function Transactions() {
         label: p.invoice_id ? `Payment received — ${p.invoice_id}` : 'Receipt (unmatched)',
         detail: [p.payment_method, p.reference_number, p.exchange_rate ? `@ ₹${p.exchange_rate}/$` : undefined].filter(Boolean).join(' · '),
         amount: p.amount_inr || p.amount,
+        payment: p,
       })),
     ]
     return all
@@ -93,7 +101,8 @@ export default function Transactions() {
                 <th className="k-c1-em px-3 py-2 font-medium">Description</th>
                 <th className="k-c1-em hidden px-3 py-2 font-medium md:table-cell">Details</th>
                 <th className="k-c1-em px-3 py-2 font-medium">Type</th>
-                <th className="k-c1-em px-5 py-2 text-right font-medium">Amount</th>
+                <th className="k-c1-em px-3 py-2 text-right font-medium">Amount</th>
+                <th className="k-c1-em px-5 py-2 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
@@ -109,8 +118,27 @@ export default function Transactions() {
                       {r.kind === 'income' ? 'Income' : 'Expense'}
                     </KimiBadge>
                   </td>
-                  <td className={`k-b2-em whitespace-nowrap px-5 py-3 text-right ${r.amount >= 0 ? 'text-[var(--f-emerald-600)]' : 'text-[var(--k-danger)]'}`}>
+                  <td className={`k-b2-em whitespace-nowrap px-3 py-3 text-right ${r.amount >= 0 ? 'text-[var(--f-emerald-600)]' : 'text-[var(--k-danger)]'}`}>
                     {r.amount >= 0 ? '+' : '−'}{formatINR(Math.abs(r.amount))}
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-3 text-right">
+                    {r.expense && (
+                      <RowActions
+                        onEdit={() => setEditExpense(r.expense!)}
+                        onDelete={() => deleteExpense(r.expense!.id)}
+                        deleteTitle="Delete this expense?"
+                      />
+                    )}
+                    {r.payment && (
+                      <RowActions
+                        onEdit={() => setEditPayment(r.payment!)}
+                        onDelete={() => deletePayment(r.payment!.id)}
+                        deleteTitle="Delete this receipt?"
+                        deleteDescription={r.payment!.invoice_id
+                          ? `Linked to invoice ${r.payment!.invoice_id} — the invoice's received total will not change automatically.`
+                          : 'This cannot be undone.'}
+                      />
+                    )}
                   </td>
                 </tr>
               ))}
@@ -119,6 +147,8 @@ export default function Transactions() {
         )}
         <p className="k-c1 px-5 py-3">{rows.length} record{rows.length === 1 ? '' : 's'}</p>
       </KimiCard>
+      {editExpense && <EditExpenseDialog expense={editExpense} onClose={() => setEditExpense(null)} />}
+      {editPayment && <EditPaymentDialog payment={editPayment} onClose={() => setEditPayment(null)} />}
     </>
   )
 }

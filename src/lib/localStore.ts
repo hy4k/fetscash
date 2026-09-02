@@ -8,6 +8,10 @@ import type {
   ProductRow,
 } from '@/types'
 
+export type EntityKey = 'customers' | 'products' | 'invoices' | 'expenses' | 'payments' | 'cashTxns'
+
+export type DeletedMap = Record<EntityKey, string[]>
+
 /** Records created inside the app (not imported from CSV/bank). Persisted in localStorage. */
 export interface LocalData {
   customers: CustomerFull[]
@@ -18,9 +22,15 @@ export interface LocalData {
   cashTxns: CashTxnRow[]
   /** Manual centre overrides for imported invoices: invoice id -> centre */
   invoiceCentres: Record<string, LocationType>
+  /** Ids of raw (Supabase/imported) rows deleted while offline — merge filters them out. */
+  deleted: DeletedMap
 }
 
 const KEY = 'fets-accounts-local-v1'
+
+const EMPTY_DELETED: DeletedMap = {
+  customers: [], products: [], invoices: [], expenses: [], payments: [], cashTxns: [],
+}
 
 const EMPTY: LocalData = {
   customers: [],
@@ -30,12 +40,13 @@ const EMPTY: LocalData = {
   payments: [],
   cashTxns: [],
   invoiceCentres: {},
+  deleted: EMPTY_DELETED,
 }
 
 export function loadLocal(): LocalData {
   try {
     const raw = localStorage.getItem(KEY)
-    if (!raw) return { ...EMPTY, invoiceCentres: {} }
+    if (!raw) return { ...EMPTY, invoiceCentres: {}, deleted: { ...EMPTY_DELETED } }
     const parsed = JSON.parse(raw) as Partial<LocalData>
     return {
       customers: parsed.customers ?? [],
@@ -45,9 +56,10 @@ export function loadLocal(): LocalData {
       payments: parsed.payments ?? [],
       cashTxns: parsed.cashTxns ?? [],
       invoiceCentres: parsed.invoiceCentres ?? {},
+      deleted: { ...EMPTY_DELETED, ...(parsed.deleted ?? {}) },
     }
   } catch {
-    return { ...EMPTY, invoiceCentres: {} }
+    return { ...EMPTY, invoiceCentres: {}, deleted: { ...EMPTY_DELETED } }
   }
 }
 

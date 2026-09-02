@@ -1,13 +1,17 @@
+import { useState } from 'react'
 import { Package } from 'lucide-react'
 import { useAccount } from '@/lib/AccountContext'
 import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiCard } from '@/components/kimi/Card'
 import { KimiBadge } from '@/components/kimi/Badge'
 import { AddProductDialog } from '@/components/create/CreateDialogs'
+import { EditProductDialog, RowActions } from '@/components/edit/EditDialogs'
 import { formatINR } from '@/lib/data'
+import type { ProductRow } from '@/types'
 
 export default function Products() {
-  const { data, loading } = useAccount()
+  const { data, loading, deleteProduct } = useAccount()
+  const [editing, setEditing] = useState<ProductRow | null>(null)
 
   if (loading && !data) return <PageSkeleton />
   if (!data) return null
@@ -33,7 +37,8 @@ export default function Products() {
                 <th className="k-c1-em hidden px-3 py-2 pt-4 font-medium md:table-cell">HSN / SAC</th>
                 <th className="k-c1-em hidden px-3 py-2 pt-4 font-medium lg:table-cell">Description</th>
                 <th className="k-c1-em px-3 py-2 pt-4 text-right font-medium">Rate</th>
-                <th className="k-c1-em px-5 py-2 pt-4 font-medium">Tax</th>
+                <th className="k-c1-em px-3 py-2 pt-4 font-medium">Tax</th>
+                <th className="k-c1-em px-5 py-2 pt-4 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[rgba(0,0,0,0.06)]">
@@ -53,10 +58,18 @@ export default function Products() {
                     <td className="k-b2-secondary hidden whitespace-nowrap px-3 py-3 md:table-cell">{p.hsn || '—'}</td>
                     <td className="k-b2-secondary hidden max-w-[280px] truncate px-3 py-3 lg:table-cell">{p.description || '—'}</td>
                     <td className="k-b2-em whitespace-nowrap px-3 py-3 text-right">{formatINR(p.sale_rate)}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-3 py-3">
                       {gstRate > 0
                         ? <KimiBadge tone="blue">IGST {gstRate}%</KimiBadge>
                         : <KimiBadge tone="neutral">No tax</KimiBadge>}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <RowActions
+                        onEdit={() => setEditing(p)}
+                        onDelete={() => deleteProduct(p.id)}
+                        deleteTitle={`Delete "${p.name}"?`}
+                        deleteDescription="Existing invoices keep their own line items — only the catalog entry is removed."
+                      />
                     </td>
                   </tr>
                 )
@@ -66,6 +79,7 @@ export default function Products() {
         )}
         <p className="k-c1 px-5 py-3">{products.length} item{products.length === 1 ? '' : 's'}</p>
       </KimiCard>
+      {editing && <EditProductDialog product={editing} onClose={() => setEditing(null)} />}
     </>
   )
 }

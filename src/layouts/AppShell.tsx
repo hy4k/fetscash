@@ -12,6 +12,7 @@ import {
   Landmark,
   ChevronRight,
   CalendarDays,
+  Settings2,
 } from 'lucide-react'
 import { Toaster } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
@@ -28,6 +29,7 @@ const NAV = [
   { to: '/cashbook', label: 'Cashbook', icon: Wallet, chip: 'bg-orange-100 text-orange-700' },
   { to: '/reports', label: 'Reports', icon: BarChart3, chip: 'bg-rose-100 text-rose-700' },
   { to: '/gst', label: 'GST', icon: Landmark, chip: 'bg-[var(--f-gold-100)] text-[var(--f-gold-600)]' },
+  { to: '/settings', label: 'Settings', icon: Settings2, chip: 'bg-slate-200 text-slate-700' },
 ]
 
 const PERIOD_OPTIONS: { value: PeriodKind; label: string }[] = [
