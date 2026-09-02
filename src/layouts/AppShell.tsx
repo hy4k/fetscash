@@ -99,7 +99,7 @@ export function AppShell() {
             ₣=F(ranc) €=E(uro) ₸=T(enge) $=S(dollar) · ¢=C(ent) ₳=A(ustral) ₴=S(–hryvnia) H=H */}
         <div className="flex flex-col items-center justify-center px-5 pb-6 pt-7">
           <p
-            className="whitespace-nowrap text-[30px] font-extrabold leading-[38px] tracking-[0.06em]"
+            className="whitespace-nowrap text-[32px] font-extrabold leading-[40px] tracking-[0.06em]"
             style={{ fontFamily: "'Segoe UI', 'Segoe UI Symbol', Arial, sans-serif" }}
           >
             <span className="text-[#85BB65]">₣</span>
@@ -118,7 +118,7 @@ export function AppShell() {
             <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--f-gold-500)]/60" />
           </div>
           <p
-            className="mt-2 bg-[image:linear-gradient(180deg,var(--f-gold-300),var(--f-gold-500))] bg-clip-text text-[13px] font-semibold uppercase text-transparent"
+            className="mt-2 bg-[image:linear-gradient(180deg,var(--f-gold-400),var(--f-gold-600))] bg-clip-text text-[13px] font-semibold uppercase text-transparent"
             style={{ fontFamily: "Georgia, 'Palatino Linotype', 'Times New Roman', serif", letterSpacing: '0.42em', marginRight: '-0.42em', fontVariant: 'small-caps' }}
           >
             Daylight Robbery
