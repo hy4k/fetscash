@@ -95,18 +95,34 @@ export function AppShell() {
         className="fixed inset-y-0 left-0 z-[var(--z-header)] flex w-64 flex-col"
         style={{ background: 'var(--f-sidebar-bg)' }}
       >
-        {/* Logo: typographic wordmark — ₣(ranc) €(uro) ₹(upee) $(ollar) spell FETS */}
-        <div className="flex h-[72px] items-center gap-3 px-5">
-          <div>
-            <p className="flex items-baseline text-[19px] font-bold leading-[24px] tracking-wide">
-              <span className="text-[#85BB65]">₣</span>
-              <span className="text-[#85BB65]">€</span>
-              <span className="text-[#85BB65]">₹</span>
-              <span className="text-[#85BB65]">$</span>
-              <span className="ml-2 font-semibold text-white">CASH</span>
-            </p>
-            <p className="text-[11px] leading-[14px] tracking-wide text-[var(--f-gold-400)]">FINANCE DASHBOARD</p>
+        {/* Logo: typographic wordmark — every letter a currency symbol.
+            ₣=F(ranc) €=E(uro) ₸=T(enge) $=S(dollar) · ¢=C(ent) ₳=A(ustral) ₴=S(–hryvnia) H=H */}
+        <div className="flex flex-col items-center justify-center px-5 pb-6 pt-7">
+          <p
+            className="whitespace-nowrap text-[30px] font-extrabold leading-[38px] tracking-[0.06em]"
+            style={{ fontFamily: "'Segoe UI', 'Segoe UI Symbol', Arial, sans-serif" }}
+          >
+            <span className="text-[#85BB65]">₣</span>
+            <span className="text-[#85BB65]">€</span>
+            <span className="text-[#85BB65]">₸</span>
+            <span className="text-[#85BB65]">$</span>
+            <span className="mx-1.5 inline-block w-2" />
+            <span className="text-[var(--f-gold-400)]">¢</span>
+            <span className="text-[var(--f-gold-400)]">₳</span>
+            <span className="text-[var(--f-gold-400)]">₴</span>
+            <span className="text-[var(--f-gold-400)]">H</span>
+          </p>
+          <div className="mt-1.5 flex w-full items-center gap-2 px-1">
+            <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--f-gold-500)]/60" />
+            <span className="h-1 w-1 rotate-45 bg-[var(--f-gold-400)]" />
+            <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--f-gold-500)]/60" />
           </div>
+          <p
+            className="mt-2 bg-[image:linear-gradient(180deg,var(--f-gold-300),var(--f-gold-500))] bg-clip-text text-[13px] font-semibold uppercase text-transparent"
+            style={{ fontFamily: "Georgia, 'Palatino Linotype', 'Times New Roman', serif", letterSpacing: '0.42em', marginRight: '-0.42em', fontVariant: 'small-caps' }}
+          >
+            Daylight Robbery
+          </p>
         </div>
 
         <div className="mx-5 border-t border-white/10" />
