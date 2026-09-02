@@ -1,9 +1,13 @@
 import { useState } from 'react'
-import { Building2, Landmark, SlidersHorizontal, Database, Download, RotateCcw, Save } from 'lucide-react'
+import { useNavigate } from 'react-router'
+import {
+  Building2, Landmark, SlidersHorizontal, Database, Download, RotateCcw, Save,
+  Users, Package, Tags, X, Plus,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
 import { DEFAULT_SETTINGS, useSettings, type Settings } from '@/lib/settings'
-import { PageHeader } from '@/components/kimi/PageHeader'
+import { PageHeader, PageSkeleton } from '@/components/kimi/PageHeader'
 import { KimiCard } from '@/components/kimi/Card'
 import { KimiButton } from '@/components/kimi/Button'
 import { KimiBadge } from '@/components/kimi/Badge'
@@ -37,11 +41,18 @@ function Field({ label, children, htmlFor }: { label: string; children: React.Re
   )
 }
 
+type SectionKey = 'business' | 'banking' | 'preferences' | 'categories' | 'data'
+
 export default function SettingsPage() {
-  const { data, backend, refresh } = useAccount()
+  const { data, loading, backend, refresh } = useAccount()
   const [settings, saveSettings] = useSettings()
   const [form, setForm] = useState<Settings>(settings)
+  const [section, setSection] = useState<SectionKey>('business')
   const [confirmClear, setConfirmClear] = useState(false)
+  const [newCategory, setNewCategory] = useState('')
+  const navigate = useNavigate()
+
+  if (loading && !data) return <PageSkeleton />
 
   const set = (patch: Partial<Settings>) => setForm((f) => ({ ...f, ...patch }))
   const dirty = JSON.stringify(form) !== JSON.stringify(settings)
@@ -49,6 +60,16 @@ export default function SettingsPage() {
   const save = () => {
     saveSettings(form)
     toast.success('Settings saved', { description: 'Invoice template and preferences updated.' })
+  }
+
+  const addCategory = () => {
+    const name = newCategory.trim()
+    if (!name) return
+    if (form.categories.some((c) => c.toLowerCase() === name.toLowerCase())) {
+      toast.error(`"${name}" already exists`); return
+    }
+    set({ categories: [...form.categories, name] })
+    setNewCategory('')
   }
 
   const exportData = () => {
@@ -81,11 +102,33 @@ export default function SettingsPage() {
     window.location.reload()
   }
 
+  const tiles: {
+    key: SectionKey | 'clients' | 'products'
+    label: string
+    detail: string
+    icon: React.ElementType
+    chip: string
+  }[] = [
+    { key: 'business', label: 'Business Profile', detail: 'Name, GSTIN, letterhead', icon: Building2, chip: 'bg-emerald-100 text-emerald-700' },
+    { key: 'banking', label: 'Invoice & Banking', detail: 'Bank footer, currency, tax', icon: Landmark, chip: 'bg-[var(--f-gold-100)] text-[var(--f-gold-600)]' },
+    { key: 'clients', label: 'Clients', detail: `${data?.customers.length ?? 0} organizations`, icon: Users, chip: 'bg-sky-100 text-sky-700' },
+    { key: 'products', label: 'Products', detail: `${data?.products.length ?? 0} billable items`, icon: Package, chip: 'bg-violet-100 text-violet-700' },
+    { key: 'categories', label: 'Categories', detail: `${form.categories.length} expense categories`, icon: Tags, chip: 'bg-rose-100 text-rose-700' },
+    { key: 'preferences', label: 'Preferences', detail: 'Centre, FY, cash openings', icon: SlidersHorizontal, chip: 'bg-[var(--k-fill-f2)] text-[var(--k-label-secondary)]' },
+    { key: 'data', label: 'Data & Backup', detail: 'Export, storage mode', icon: Database, chip: 'bg-teal-100 text-teal-700' },
+  ]
+
+  const pick = (key: (typeof tiles)[number]['key']) => {
+    if (key === 'clients') navigate('/clients')
+    else if (key === 'products') navigate('/products')
+    else setSection(key)
+  }
+
   return (
     <>
       <PageHeader
         title="Settings"
-        description="Business profile, invoice banking, and preferences"
+        description="Everything that configures how FETS CASH works"
         actions={
           <KimiButton leftIcon={<Save />} onClick={save} disabled={!dirty}>
             {dirty ? 'Save changes' : 'Saved'}
@@ -93,8 +136,31 @@ export default function SettingsPage() {
         }
       />
 
-      <div className="space-y-6">
-        {/* Business profile */}
+      {/* Mini-dashboard tiles */}
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+        {tiles.map((t) => {
+          const active = section === t.key
+          return (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => pick(t.key)}
+              className={`k-press k-card flex flex-col items-start gap-2 p-4 text-left transition-all duration-150 ${
+                active ? 'ring-2 ring-[var(--f-emerald-600)] shadow-[0_4px_14px_rgba(4,56,44,0.15)]' : 'hover:shadow-[0_4px_14px_rgba(0,0,0,0.08)]'
+              }`}
+            >
+              <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${t.chip} [&_svg]:h-4.5 [&_svg]:w-4.5`}>
+                <t.icon aria-hidden />
+              </span>
+              <span className="text-[13px] font-semibold leading-[18px] text-[var(--k-label-primary)]">{t.label}</span>
+              <span className="text-[11px] leading-[14px] text-[var(--k-label-tertiary)]">{t.detail}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Business profile */}
+      {section === 'business' && (
         <KimiCard title={
           <span className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-[var(--f-emerald-600)]" aria-hidden /> Business profile
@@ -131,8 +197,10 @@ export default function SettingsPage() {
             </div>
           </div>
         </KimiCard>
+      )}
 
-        {/* Banking & invoice defaults */}
+      {/* Banking & invoice defaults */}
+      {section === 'banking' && (
         <KimiCard title={
           <span className="flex items-center gap-2">
             <Landmark className="h-4 w-4 text-[var(--f-gold-600)]" aria-hidden /> Invoice & banking
@@ -177,8 +245,48 @@ export default function SettingsPage() {
             </div>
           </div>
         </KimiCard>
+      )}
 
-        {/* Preferences */}
+      {/* Categories */}
+      {section === 'categories' && (
+        <KimiCard title={
+          <span className="flex items-center gap-2">
+            <Tags className="h-4 w-4 text-rose-600" aria-hidden /> Expense categories
+          </span>
+        }>
+          <p className="k-c1 mb-4">Used in every expense form — Bank Ledger, FETS Cash, and Quick Add.</p>
+          <div className="flex flex-wrap gap-2">
+            {form.categories.map((c) => (
+              <span key={c} className="flex items-center gap-1.5 rounded-xl bg-[var(--k-fill-f1)] py-1.5 pl-3 pr-2 text-[13px] font-medium text-[var(--k-label-primary)]">
+                {c}
+                <button
+                  type="button"
+                  aria-label={`Remove ${c}`}
+                  onClick={() => set({ categories: form.categories.filter((x) => x !== c) })}
+                  className="flex h-5 w-5 items-center justify-center rounded-md text-[var(--k-label-tertiary)] hover:bg-[var(--k-fill-f2)] hover:text-[var(--k-danger)]"
+                >
+                  <X className="h-3 w-3" aria-hidden />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="mt-4 flex gap-2">
+            <Input
+              placeholder="New category name"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+              className="max-w-xs"
+            />
+            <KimiButton variant="outline" size={26} leftIcon={<Plus />} onClick={addCategory}>
+              Add category
+            </KimiButton>
+          </div>
+        </KimiCard>
+      )}
+
+      {/* Preferences */}
+      {section === 'preferences' && (
         <KimiCard title={
           <span className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-[var(--k-blue)]" aria-hidden /> Preferences
@@ -205,10 +313,21 @@ export default function SettingsPage() {
                 </Select>
               </Field>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="FETS Cash opening balance — Calicut (₹)" htmlFor="s-obc">
+                <Input id="s-obc" type="number" min="0" value={form.openingCalicut} onChange={(e) => set({ openingCalicut: e.target.value })} />
+              </Field>
+              <Field label="FETS Cash opening balance — Cochin (₹)" htmlFor="s-obk">
+                <Input id="s-obk" type="number" min="0" value={form.openingCochin} onChange={(e) => set({ openingCochin: e.target.value })} />
+              </Field>
+            </div>
+            <p className="k-c1">Opening balances set the starting cash-in-hand for each FETS Cash division in Treasury.</p>
           </div>
         </KimiCard>
+      )}
 
-        {/* Data */}
+      {/* Data */}
+      {section === 'data' && (
         <KimiCard title={
           <span className="flex items-center gap-2">
             <Database className="h-4 w-4 text-[var(--f-emerald-700)]" aria-hidden /> Data & backup
@@ -229,16 +348,16 @@ export default function SettingsPage() {
             Settings live in this browser. All records (clients, invoices, expenses…) live in Supabase and are shared across devices.
           </p>
         </KimiCard>
+      )}
 
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={() => { setForm(DEFAULT_SETTINGS); toast.info('Defaults restored — press Save to apply') }}
-            className="text-[13px] font-medium text-[var(--k-label-tertiary)] underline-offset-2 hover:text-[var(--k-label-secondary)] hover:underline"
-          >
-            Restore factory defaults
-          </button>
-        </div>
+      <div className="mt-6 flex justify-end">
+        <button
+          type="button"
+          onClick={() => { setForm(DEFAULT_SETTINGS); toast.info('Defaults restored — press Save to apply') }}
+          className="text-[13px] font-medium text-[var(--k-label-tertiary)] underline-offset-2 hover:text-[var(--k-label-secondary)] hover:underline"
+        >
+          Restore factory defaults
+        </button>
       </div>
 
       <AlertDialog open={confirmClear} onOpenChange={setConfirmClear}>

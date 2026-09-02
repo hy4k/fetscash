@@ -21,7 +21,14 @@ export interface Settings {
   defaultTaxRate: string
   defaultCentre: LocationType
   fyStartMonth: string // '04' = April (Indian FY)
+  // Expense categories (editable, used in expense dialogs)
+  categories: string[]
+  // FETS Cash opening balances per division
+  openingCalicut: string
+  openingCochin: string
 }
+
+export const DEFAULT_CATEGORIES = ['Rent', 'Salaries', 'Utilities', 'Supplies', 'Travel', 'Maintenance', 'Interior Works', 'Marketing', 'Courier', 'GST Payment', 'Cash Transfer', 'Misc']
 
 export const DEFAULT_SETTINGS: Settings = {
   businessName: 'Forun Testing & Educational Services',
@@ -39,6 +46,9 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultTaxRate: '0',
   defaultCentre: 'calicut',
   fyStartMonth: '04',
+  categories: DEFAULT_CATEGORIES,
+  openingCalicut: '0',
+  openingCochin: '0',
 }
 
 const KEY = 'fets-accounts-settings-v1'

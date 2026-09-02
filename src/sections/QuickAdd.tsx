@@ -21,8 +21,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useAccount } from '@/lib/AccountContext'
+import { useSettings } from '@/lib/settings'
 
-const CATEGORIES = ['Rent', 'Salaries', 'Utilities', 'Supplies', 'Travel', 'Maintenance', 'Interior Works', 'Marketing', 'Courier', 'GST Payment', 'Misc']
 const PAYMENT_MODES = ['Cash', 'UPI', 'Card', 'Bank Transfer', 'NEFT', 'Cheque']
 
 function today() {
@@ -36,6 +36,8 @@ const num = (s: string) => {
 
 export function AddExpenseDialog({ defaultCategory, buttonLabel = 'Add expense' }: { defaultCategory?: string; buttonLabel?: string }) {
   const { addExpense } = useAccount()
+  const [settings] = useSettings()
+  const categories = settings.categories
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({
     date: today(),
@@ -89,7 +91,7 @@ export function AddExpenseDialog({ defaultCategory, buttonLabel = 'Add expense' 
               <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

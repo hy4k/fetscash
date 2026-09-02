@@ -31,9 +31,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useAccount } from '@/lib/AccountContext'
+import { useSettings } from '@/lib/settings'
 import type { CashTxnRow, CustomerFull, ExpenseRow, InvoiceRow, PaymentRow, ProductRow } from '@/types'
 
-const CATEGORIES = ['Rent', 'Salaries', 'Utilities', 'Supplies', 'Travel', 'Maintenance', 'Interior Works', 'Marketing', 'Courier', 'GST Payment', 'Misc']
 const PAYMENT_MODES = ['Cash', 'UPI', 'Card', 'Bank Transfer', 'NEFT', 'SWIFT', 'Cheque']
 const num = (s: string) => {
   const n = parseFloat(s)
@@ -238,10 +238,14 @@ export function EditProductDialog({ product, onClose }: { product: ProductRow; o
 
 export function EditExpenseDialog({ expense, onClose }: { expense: ExpenseRow; onClose: () => void }) {
   const { updateExpense } = useAccount()
+  const [settings] = useSettings()
+  const categories = settings.categories.includes(expense.category)
+    ? settings.categories
+    : [...settings.categories, expense.category]
   const [form, setForm] = useState({
     date: expense.date,
     amount: String(expense.amount),
-    category: CATEGORIES.includes(expense.category) ? expense.category : 'Misc',
+    category: expense.category || 'Misc',
     location: expense.location ?? 'none',
     payment_mode: expense.payment_mode && PAYMENT_MODES.includes(expense.payment_mode) ? expense.payment_mode : 'Bank Transfer',
     description: expense.description ?? '',
@@ -283,7 +287,7 @@ export function EditExpenseDialog({ expense, onClose }: { expense: ExpenseRow; o
               <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
