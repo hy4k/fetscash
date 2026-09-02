@@ -95,13 +95,16 @@ export function AppShell() {
         className="fixed inset-y-0 left-0 z-[var(--z-header)] flex w-64 flex-col"
         style={{ background: 'var(--f-sidebar-bg)' }}
       >
-        {/* Logo: gold pill badge + wordmark */}
+        {/* Logo: typographic wordmark — ₣(ranc) €(uro) ₹(upee) $(ollar) spell FETS */}
         <div className="flex h-[72px] items-center gap-3 px-5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[image:linear-gradient(135deg,var(--f-gold-400),var(--f-gold-600))] text-[17px] font-bold text-[var(--f-emerald-950)] shadow-[0_3px_8px_rgba(0,0,0,0.35)]">
-            ₹
-          </span>
           <div>
-            <p className="text-[15px] font-semibold leading-[20px] text-white">FETS Accounts</p>
+            <p className="flex items-baseline text-[19px] font-bold leading-[24px] tracking-wide">
+              <span className="text-[#85BB65]">₣</span>
+              <span className="text-[#85BB65]">€</span>
+              <span className="text-[#85BB65]">₹</span>
+              <span className="text-[#85BB65]">$</span>
+              <span className="ml-2 font-semibold text-white">CASH</span>
+            </p>
             <p className="text-[11px] leading-[14px] tracking-wide text-[var(--f-gold-400)]">FINANCE DASHBOARD</p>
           </div>
         </div>
