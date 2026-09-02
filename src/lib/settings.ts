@@ -54,18 +54,38 @@ export const DEFAULT_SETTINGS: Settings = {
   openingCalicut: '0',
   openingCochin: '0',
   recurring: [
-    { name: 'Office rent — Calicut (Mariyam)', amount: '105000', category: 'Rent', centre: 'calicut' },
+    { name: 'Office rent — Calicut (Mariyam)', amount: '110750', category: 'Rent', centre: 'calicut' },
+    { name: 'Staff salary — 1', amount: '16800', category: 'Salaries', centre: '' },
+    { name: 'Staff salary — 2', amount: '17700', category: 'Salaries', centre: '' },
+    { name: 'Staff salary — 3', amount: '15600', category: 'Salaries', centre: '' },
+    { name: 'Staff salary — 4', amount: '15600', category: 'Salaries', centre: '' },
+    { name: 'Airtel — connection 1', amount: '9665.76', category: 'Utilities', centre: '' },
+    { name: 'Airtel — connection 2', amount: '9665.76', category: 'Utilities', centre: '' },
   ],
   reimbursePersons: ['Mithun', 'Partner'],
 }
 
 const KEY = 'fets-accounts-settings-v1'
+/** One-time seed marker: default recurring templates merged into existing installs. */
+const SEED_KEY = 'fets-accounts-recurring-seed-v2'
 
 function load(): Settings {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return DEFAULT_SETTINGS
-    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) }
+    const saved = JSON.parse(raw) as Partial<Settings>
+    const merged = { ...DEFAULT_SETTINGS, ...saved }
+    if (!localStorage.getItem(SEED_KEY)) {
+      const existing = (saved.recurring ?? []).map((t) => ({ ...t }))
+      // keep the user's rent template but correct the amount to the actual bank figure
+      for (const t of existing) if (/mariyam/i.test(t.name)) t.amount = '110750'
+      const names = new Set(existing.map((t) => t.name))
+      const missing = DEFAULT_SETTINGS.recurring.filter((t) => !names.has(t.name))
+      merged.recurring = [...existing, ...missing]
+      localStorage.setItem(SEED_KEY, '1')
+      localStorage.setItem(KEY, JSON.stringify(merged))
+    }
+    return merged
   } catch {
     return DEFAULT_SETTINGS
   }
