@@ -18,6 +18,38 @@ const NAV_ROWS = [
   { to: '/settings', index: '09', label: 'Settings', blurb: 'Clients, products, categories, centres, invoice numbering and the data backend, all in one place.' },
 ]
 
+/* Neumorphic menu buttons (per supplied design) — paper pills with a soft raised
+   shadow that press inward on :active. Settings uses the 50px icon variant. */
+const menuBtnCls =
+  'k-press rounded-[25px] border border-[rgb(36,41,46)] bg-[#e8e8e8] px-[1.7em] py-[0.7em] ' +
+  'text-[16px] leading-none text-[rgb(36,41,46)] transition-all duration-300 ' +
+  'shadow-[6px_6px_12px_#c5c5c5,-6px_-6px_12px_#ffffff] ' +
+  'active:text-[#666666] active:shadow-[inset_4px_4px_12px_#c5c5c5,inset_-4px_-4px_12px_#ffffff]'
+
+function HeroMenu() {
+  const navigate = useNavigate()
+  return (
+    <div className="flex flex-wrap content-start items-start justify-start gap-x-3 gap-y-4 p-6 sm:min-h-[250px] sm:flex-1 sm:justify-end sm:p-8">
+      {NAV_ROWS.filter((r) => r.to !== '/settings').map((r) => (
+        <button key={r.to} type="button" onClick={() => navigate(r.to)} className={menuBtnCls}>
+          {r.label}
+        </button>
+      ))}
+      <button
+        type="button"
+        title="Settings"
+        aria-label="Settings"
+        onClick={() => navigate('/settings')}
+        className="group flex h-[50px] w-[50px] items-center justify-center rounded-2xl border border-[rgba(0,0,0,0.19)] bg-[#e8e8e8] shadow-[0_10px_10px_rgba(0,0,0,0.21)] transition-all duration-300 hover:bg-[rgb(59,59,59)] hover:shadow-[0_10px_10px_rgba(0,0,0,0.11)]"
+      >
+        <svg viewBox="0 0 512 512" className="h-4 w-4 fill-[rgb(77,77,77)] transition-all duration-300 group-hover:fill-white" aria-hidden>
+          <path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
 export default function Overview() {
   const { data, loading } = useAccount()
   const navigate = useNavigate()
@@ -51,13 +83,24 @@ export default function Overview() {
 
   return (
     <>
-      {/* Hero */}
-      <div className="border-b border-[var(--f-hairline)] pb-12 pt-8 sm:pb-16 sm:pt-12">
-        <Kicker green className="mb-6 !text-[12px] !tracking-[0.22em]">01 · DAYBOOK · {today}</Kicker>
-        <h1 className="m-0 max-w-[20ch] text-[clamp(44px,6.5vw,96px)] font-semibold leading-[0.94] tracking-[-0.045em]">
-          The money picture
-        </h1>
-        <p className="f-lede m-0 mt-8 max-w-[58ch]">
+      {/* Hero — banknote banner left (≈6 cm), menu buttons top-right */}
+      <div className="pb-10 pt-8 sm:pb-12 sm:pt-10">
+        <Kicker green className="mb-5 !text-[12px] !tracking-[0.22em]">01 · DAYBOOK · {today}</Kicker>
+        <div className="overflow-hidden rounded-2xl border border-[var(--f-hairline)] bg-[var(--f-card)] shadow-[0_14px_36px_rgba(17,23,19,0.10)]">
+          <div className="flex flex-col sm:flex-row">
+            <div className="relative h-48 shrink-0 sm:h-auto sm:min-h-[250px] sm:w-[52%]">
+              <img
+                src="/assets/hero-note.jpg"
+                alt="FETS CASH banknote"
+                className="absolute inset-0 h-full w-full object-cover object-center"
+              />
+              {/* melt the note's right edge into the card */}
+              <div className="absolute inset-0 hidden bg-gradient-to-r from-transparent via-transparent to-[var(--f-card)] sm:block" />
+            </div>
+            <HeroMenu />
+          </div>
+        </div>
+        <p className="f-lede m-0 mt-7 max-w-[58ch]">
           Everything the accounts of Forum Testing &amp; Educational Services holds {data.periodLabel.toLowerCase()},
           in the order you usually want it.
         </p>
