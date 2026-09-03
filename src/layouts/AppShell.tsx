@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { RefreshCw } from 'lucide-react'
 import { Toaster } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
@@ -104,6 +104,7 @@ export function AppShell() {
   const { entries: claims } = useReimbursements()
   const [indexOpen, setIndexOpen] = useState(false)
   const navigate = useNavigate()
+  const isHome = useLocation().pathname === '/'
 
   const stats = useMemo<Record<string, string>>(() => {
     const next20 = new Date()
@@ -131,7 +132,8 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen bg-[var(--f-paper)] text-[var(--f-ink)]">
-      {/* Top bar — paper, blur, hairline */}
+      {/* Top bar — paper, blur, hairline (hidden on the home page, which carries its own hero) */}
+      {!isHome && (
       <header className="sticky top-0 z-[var(--z-header)] border-b border-[var(--f-hairline)] bg-[rgba(239,237,230,0.92)] backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-8 gap-y-3 px-6 py-4 sm:px-10">
           <NavLink to="/" aria-label="FETS Cash — Daybook" className="shrink-0">
@@ -168,6 +170,7 @@ export function AppShell() {
           </button>
         </div>
       </header>
+      )}
 
       {/* Fullscreen INDEX overlay */}
       {indexOpen && (

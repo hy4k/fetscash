@@ -1,21 +1,20 @@
-import { useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useAccount } from '@/lib/AccountContext'
+import { useSettings } from '@/lib/settings'
+import { useReimbursements } from '@/lib/reimburse'
 import { PageSkeleton } from '@/components/kimi/PageHeader'
-import { Kicker, StatStrip, StatusText, M } from '@/components/ledger'
+import { Kicker, M } from '@/components/ledger'
 import { formatINR } from '@/lib/data'
-import { invoiceIsOverdue } from '@/sections/OutstandingInvoices'
+import { cn } from '@/lib/utils'
 
-const NAV_ROWS = [
-  { to: '/invoices', index: '02', label: 'Mint', blurb: 'Raise, print and track invoices — INR and foreign currency, with the A4 sheet and payment history behind each one.' },
-  { to: '/ledger', index: '03', label: 'Vault', blurb: 'The bank ledger. Every credit and debit imported from statements, categorised, with a running balance.' },
-  { to: '/cash', index: '04', label: 'FETS Cash', blurb: 'Petty cash at both centres — replenishments in, day-to-day spends out, reconciled per location.' },
-  { to: '/recurring', index: '05', label: 'Recurring', blurb: 'Rent, salaries, subscriptions and retainers that repeat — what is due next and what already posted.' },
-  { to: '/reimburse', index: '06', label: 'Reimburse', blurb: 'Partner claims from receipt to payout, grouped by person with a settlement trail.' },
-  { to: '/reports', index: '07', label: 'Reports', blurb: 'Where the money went and who it came from — category and client breakdowns over any period.' },
-  { to: '/gst', index: '08', label: 'GST', blurb: 'Output and input tax per month, export invoices at zero rate, and the net payable before filing.' },
-  { to: '/settings', index: '09', label: 'Settings', blurb: 'Clients, products, categories, centres, invoice numbering and the data backend, all in one place.' },
+const PAGES = [
+  { to: '/invoices', index: '02', label: 'Mint' },
+  { to: '/ledger', index: '03', label: 'Vault' },
+  { to: '/cash', index: '04', label: 'FETS Cash' },
+  { to: '/recurring', index: '05', label: 'Recurring' },
+  { to: '/reimburse', index: '06', label: 'Reimburse' },
+  { to: '/reports', index: '07', label: 'Reports' },
+  { to: '/gst', index: '08', label: 'GST' },
 ]
 
 /* Neumorphic menu buttons (per supplied design) — paper pills with a soft raised
@@ -30,7 +29,7 @@ function HeroMenu() {
   const navigate = useNavigate()
   return (
     <div className="flex flex-wrap content-start items-start justify-start gap-x-3 gap-y-4 p-6 sm:min-h-[250px] sm:flex-1 sm:justify-end sm:p-8">
-      {NAV_ROWS.filter((r) => r.to !== '/settings').map((r) => (
+      {PAGES.map((r) => (
         <button key={r.to} type="button" onClick={() => navigate(r.to)} className={menuBtnCls}>
           {r.label}
         </button>
@@ -50,42 +49,141 @@ function HeroMenu() {
   )
 }
 
+/* ---- live graphics for the page cards ---- */
+
+function Sparkline({ points, color = '#0B5C43', height = 46 }: { points: number[]; color?: string; height?: number }) {
+  if (points.length === 0) return <div style={{ height }} />
+  const w = 100
+  const max = Math.max(...points, 1)
+  const step = points.length > 1 ? w / (points.length - 1) : w
+  const coords = points
+    .map((p, i) => `${(i * step).toFixed(1)},${(height - 4 - (p / max) * (height - 9)).toFixed(1)}`)
+    .join(' ')
+  return (
+    <svg viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" style={{ height, width: '100%' }}>
+      <polyline
+        points={coords}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function MiniBar({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="f-mono w-[96px] shrink-0 truncate text-[10.5px] uppercase tracking-[0.10em] text-[var(--k-label-secondary)]">
+        {label}
+      </span>
+      <span className="h-[5px] min-w-0 flex-1 rounded-full bg-[rgba(17,23,19,0.08)]">
+        <span
+          className="block h-full rounded-full"
+          style={{ width: `${Math.max(3, Math.min(100, (value / (max || 1)) * 100))}%`, background: color }}
+        />
+      </span>
+      <M className="w-[88px] shrink-0 text-right text-[11.5px]">{formatINR(value)}</M>
+    </div>
+  )
+}
+
+function PageCard({ to, index, label, blurb, metric, sub, graphic, className }: {
+  to: string
+  index: string
+  label: string
+  blurb: string
+  metric: React.ReactNode
+  sub?: React.ReactNode
+  graphic?: React.ReactNode
+  className?: string
+}) {
+  const navigate = useNavigate()
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(to)}
+      className={cn(
+        'k-card group flex flex-col p-6 text-left transition-all duration-300',
+        'hover:-translate-y-1 hover:border-[var(--f-ink)] hover:shadow-[0_18px_44px_rgba(17,23,19,0.14)] sm:p-7',
+        className
+      )}
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <Kicker>{index} · {label.toUpperCase()}</Kicker>
+        <span className="f-mono shrink-0 text-[11px] tracking-[0.14em] text-[var(--k-label-tertiary)] transition-colors group-hover:text-[var(--f-green)]">
+          OPEN →
+        </span>
+      </div>
+      <div className="mt-6 text-[clamp(26px,2.6vw,38px)] font-semibold leading-none tracking-[-0.025em]">{metric}</div>
+      {sub && (
+        <div className="f-mono mt-3 text-[10.5px] uppercase tracking-[0.12em] text-[var(--k-label-secondary)]">{sub}</div>
+      )}
+      {graphic && <div className="mt-6 flex flex-1 flex-col justify-end gap-2.5">{graphic}</div>}
+      <p className="m-0 mt-6 border-t border-[var(--f-hairline-soft)] pt-4 text-[13.5px] leading-[1.55] text-[var(--k-label-secondary)]">
+        {blurb}
+      </p>
+    </button>
+  )
+}
+
 export default function Overview() {
   const { data, loading } = useAccount()
-  const navigate = useNavigate()
-
-  const outstandingByClient = useMemo(() => {
-    if (!data) return []
-    const map = new Map<string, { name: string; total: number; count: number; overdue: boolean; due?: string }>()
-    for (const inv of data.unpaidInvoices) {
-      const name = inv.customer_name ?? 'Unknown'
-      const e = map.get(name) ?? { name, total: 0, count: 0, overdue: false, due: inv.due_date }
-      e.total += inv.total_amount - inv.paid_amount
-      e.count += 1
-      if (invoiceIsOverdue(inv)) e.overdue = true
-      if (inv.due_date && (!e.due || inv.due_date < e.due)) e.due = inv.due_date
-      map.set(name, e)
-    }
-    return [...map.values()].sort((a, b) => b.total - a.total).slice(0, 6)
-  }, [data])
+  const [settings] = useSettings()
+  const { entries: claims } = useReimbursements()
 
   if (loading && !data) return <PageSkeleton />
   if (!data) return null
 
-  const netPositive = data.monthNet >= 0
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
-  const rowStats: Record<string, string> = {
-    Mint: `${data.outstandingCount} UNPAID`,
-    Vault: `${data.expenses.length + data.payments.length} LINES`,
-    'FETS Cash': formatINR(data.cashBalance),
-    Reports: '6 MONTHS',
-  }
+  const monthKey = new Date().toISOString().slice(0, 7)
+
+  // Mint
+  const incomePts = data.monthly.map((m) => m.income)
+  // Vault
+  const expensePts = data.monthly.map((m) => m.expenses)
+  const netPositive = data.monthNet >= 0
+  // FETS Cash
+  const cashMax = Math.max(data.cashByLocation.cochin, data.cashByLocation.calicut, 1)
+  // Recurring
+  const templates = settings.recurring
+  const recTotal = templates.reduce((s, t) => s + (parseFloat(t.amount) || 0), 0)
+  const recPaid = templates.map((t) =>
+    data.expenses.some(
+      (e) => e.date.startsWith(monthKey) && e.category === t.category && Math.abs(e.amount - (parseFloat(t.amount) || 0)) <= 1
+    )
+  )
+  const recPaidCount = recPaid.filter(Boolean).length
+  // Reimburse
+  const open = claims.filter((c) => !c.settled_on)
+  const openTotal = open.reduce((s, c) => s + c.amount, 0)
+  const byPerson = Object.entries(
+    open.reduce<Record<string, number>>((m, c) => {
+      m[c.person] = (m[c.person] ?? 0) + c.amount
+      return m
+    }, {})
+  ).sort((a, b) => b[1] - a[1])
+  const personMax = Math.max(...byPerson.map(([, v]) => v), 1)
+  // Reports
+  const cats = [...data.categoryBreakdown].sort((a, b) => b.amount - a.amount).slice(0, 3)
+  const catMax = Math.max(...cats.map((c) => c.amount), 1)
+  // GST
+  const next = new Date()
+  next.setMonth(next.getMonth() + 1)
+  const due = `20 ${next.toLocaleDateString('en-IN', { month: 'short' }).toUpperCase()}`
+  const usdCount = data.invoices.filter((i) => i.currency === 'USD').length
 
   return (
     <>
-      {/* Hero — banknote banner left (≈6 cm), menu buttons top-right */}
-      <div className="pb-10 pt-8 sm:pb-12 sm:pt-10">
-        <Kicker green className="mb-5 !text-[12px] !tracking-[0.22em]">01 · DAYBOOK · {today}</Kicker>
+      {/* Hero — date left, Daylight Robbery right, banknote banner below */}
+      <div className="pb-12 pt-8 sm:pt-10">
+        <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+          <Kicker green className="!text-[12px] !tracking-[0.22em]">{today}</Kicker>
+          <span className="dr-title">Daylight Robbery</span>
+        </div>
         <div className="overflow-hidden rounded-2xl border border-[var(--f-hairline)] bg-[var(--f-card)] shadow-[0_14px_36px_rgba(17,23,19,0.10)]">
           <div className="flex flex-col sm:flex-row">
             <div className="relative h-48 shrink-0 sm:h-auto sm:min-h-[250px] sm:w-[52%]">
@@ -100,162 +198,129 @@ export default function Overview() {
             <HeroMenu />
           </div>
         </div>
-        <p className="f-lede m-0 mt-7 max-w-[58ch]">
-          Everything the accounts of Forum Testing &amp; Educational Services holds {data.periodLabel.toLowerCase()},
-          in the order you usually want it.
-        </p>
       </div>
 
-      {/* KPI strip */}
-      <StatStrip
-        stats={[
-          {
-            label: 'CASH IN HAND',
-            value: formatINR(data.cashBalance),
-            sub: (
-              <span className="flex gap-4">
-                <span>COCHIN {formatINR(data.cashByLocation.cochin).replace('₹', '')}</span>
-                <span>CALICUT {formatINR(data.cashByLocation.calicut).replace('₹', '')}</span>
+      {/* Live page overviews */}
+      <section className="pb-4">
+        <Kicker className="mb-6 !text-[12px] !tracking-[0.22em]">EVERY PAGE, LIVE</Kicker>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-12">
+
+          <PageCard
+            to="/invoices" index="02" label="Mint" className="lg:col-span-7"
+            metric={formatINR(data.outstandingTotal)}
+            sub={`${data.outstandingCount} unpaid of ${data.invoices.length} invoices · ${data.periodLabel}`}
+            graphic={<Sparkline points={incomePts} color="#0B5C43" />}
+            blurb="Raise, print and track invoices — INR and foreign currency, with the A4 sheet and payment history behind each one."
+          />
+
+          <PageCard
+            to="/cash" index="04" label="FETS Cash" className="lg:col-span-5"
+            metric={formatINR(data.cashBalance)}
+            sub="Petty cash across both centres"
+            graphic={
+              <>
+                <MiniBar label="Cochin" value={data.cashByLocation.cochin} max={cashMax} color="#0B5C43" />
+                <MiniBar label="Calicut" value={data.cashByLocation.calicut} max={cashMax} color="#C9A227" />
+              </>
+            }
+            blurb="Replenishments in, day-to-day spends out — reconciled per location by the centre staff."
+          />
+
+          <PageCard
+            to="/ledger" index="03" label="Vault" className="lg:col-span-5"
+            metric={
+              <span className={netPositive ? 'text-[var(--f-green)]' : 'text-[var(--f-red)]'}>
+                {netPositive ? '+' : '−'}{formatINR(Math.abs(data.monthNet))}
               </span>
-            ),
-          },
-          { label: `${data.incomeLabel.toUpperCase()} · ${data.periodLabel.toUpperCase()}`, value: formatINR(data.monthIncome), tone: 'green' },
-          {
-            label: `EXPENSES · ${data.periodLabel.toUpperCase()}`,
-            value: formatINR(data.monthExpenses),
-            sub: <span className={netPositive ? 'text-[var(--f-green)]' : 'text-[var(--f-red)]'}>NET {formatINR(Math.abs(data.monthNet)).toUpperCase()} {netPositive ? 'SURPLUS' : 'DEFICIT'}</span>,
-          },
-          { label: 'OUTSTANDING', value: formatINR(data.outstandingTotal), tone: 'gold', sub: `${data.outstandingCount} UNPAID INVOICES` },
-        ]}
-      />
+            }
+            sub={`In ${formatINR(data.monthIncome)} · out ${formatINR(data.monthExpenses)} · ${data.periodLabel}`}
+            graphic={
+              <>
+                <Sparkline points={incomePts} color="#0B5C43" height={34} />
+                <Sparkline points={expensePts} color="#C9A227" height={34} />
+              </>
+            }
+            blurb="The bank ledger. Every credit and debit imported from statements, categorised, with a running balance."
+          />
 
-      {/* Chart + outstanding */}
-      <section className="mt-9 grid items-start gap-7 lg:grid-cols-2">
-        <div className="k-card p-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <h2 className="m-0 text-[17px] font-semibold tracking-[-0.01em]">{data.incomeLabel} vs expenses</h2>
-            <div className="f-mono flex gap-4 text-[10.5px] tracking-[0.10em] text-[var(--k-label-secondary)]">
-              <span className="flex items-center gap-1.5"><span className="h-[9px] w-[9px] bg-[var(--f-green)]" />{data.incomeLabel.toUpperCase()}</span>
-              <span className="flex items-center gap-1.5"><span className="h-[9px] w-[9px] bg-[var(--f-gold)]" />EXPENSES</span>
-            </div>
-          </div>
-          <div className="mt-6 h-[236px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.monthly} margin={{ top: 4, right: 4, left: 4, bottom: 0 }} barGap={5}>
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 11, fill: 'rgba(17,23,19,0.5)', fontFamily: 'JetBrains Mono, monospace' }}
-                  axisLine={{ stroke: 'rgba(17,23,19,0.18)' }}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 10, fill: 'rgba(17,23,19,0.4)', fontFamily: 'JetBrains Mono, monospace' }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v: number) => (v >= 100000 ? `${(v / 100000).toFixed(1)}L` : v >= 1000 ? `${Math.round(v / 1000)}k` : `${v}`)}
-                  width={40}
-                />
-                <Tooltip
-                  formatter={(value: number, name: string) => [formatINR(value), name === 'income' ? data.incomeLabel : 'Expenses']}
-                  cursor={{ fill: 'rgba(17,23,19,0.04)' }}
-                  contentStyle={{
-                    borderRadius: 10,
-                    border: '1px solid rgba(17,23,19,0.14)',
-                    background: '#FCFBF7',
-                    fontSize: 13,
-                    fontFamily: 'JetBrains Mono, monospace',
-                    boxShadow: '0 4px 16px rgba(17,23,19,0.10)',
-                  }}
-                />
-                <Bar dataKey="income" fill="#0B5C43" radius={[3, 3, 0, 0]} maxBarSize={26} />
-                <Bar dataKey="expenses" fill="#C9A227" radius={[3, 3, 0, 0]} maxBarSize={26} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="k-card p-6">
-          <div className="flex items-baseline justify-between">
-            <h2 className="m-0 text-[17px] font-semibold tracking-[-0.01em]">Outstanding</h2>
-            <button type="button" onClick={() => navigate('/invoices')} className="text-[13px] font-medium text-[var(--f-green)] hover:text-[var(--f-green-deep)]">
-              All {data.outstandingCount}
-            </button>
-          </div>
-          {outstandingByClient.length === 0 ? (
-            <p className="k-b2-secondary py-10 text-center">Nothing pending — all invoices settled.</p>
-          ) : (
-            <div className="mt-4 grid">
-              {outstandingByClient.map((c) => (
-                <div key={c.name} className="flex items-center justify-between gap-4 border-t border-[var(--f-hairline-soft)] py-3.5">
-                  <div className="min-w-0">
-                    <div className="truncate text-[14px] font-medium">{c.name}</div>
-                    <div className="mt-1">
-                      <StatusText tone={c.overdue ? 'red' : 'muted'}>
-                        {c.due
-                          ? `${c.overdue ? 'WAS DUE' : 'DUE'} ${new Date(c.due).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }).toUpperCase()}`
-                          : 'NO DUE DATE'}
-                        {` · ${c.count} INV`}
-                      </StatusText>
-                    </div>
-                  </div>
-                  <M className="shrink-0 text-[14px]">{formatINR(c.total)}</M>
+          <PageCard
+            to="/recurring" index="05" label="Recurring" className="lg:col-span-7"
+            metric={formatINR(recTotal)}
+            sub={`${recPaidCount} of ${templates.length} schedules paid this month`}
+            graphic={
+              templates.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {templates.map((t, i) => (
+                    <span
+                      key={i}
+                      title={t.name}
+                      className={cn(
+                        'h-3.5 w-3.5 rounded-[4px]',
+                        recPaid[i] ? 'bg-[var(--f-green)]' : 'border border-[var(--f-hairline)]'
+                      )}
+                    />
+                  ))}
+                  <span className="f-mono ml-2 text-[10px] uppercase tracking-[0.12em] text-[var(--k-label-tertiary)]">
+                    one square per schedule
+                  </span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+              ) : undefined
+            }
+            blurb="Rent, salaries, utilities and retainers that repeat every month — what is due next and what already posted."
+          />
 
-      {/* Activity */}
-      <section className="k-card mt-7 p-6 pb-2">
-        <div className="flex items-baseline justify-between">
-          <h2 className="m-0 text-[17px] font-semibold tracking-[-0.01em]">Recent activity</h2>
-          <Kicker>{data.periodLabel}</Kicker>
-        </div>
-        {data.activity.length === 0 ? (
-          <p className="k-b2-secondary py-10 text-center">No activity yet.</p>
-        ) : (
-          <div className="mt-3 grid">
-            {data.activity.map((a) => (
-              <div
-                key={a.id}
-                className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-4 border-t border-[var(--f-hairline-soft)] py-3.5 sm:grid-cols-[76px_minmax(0,1fr)_minmax(0,140px)_auto]"
-              >
-                <M className="text-[11.5px] text-[var(--k-label-tertiary)]">
-                  {new Date(a.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }).toUpperCase()}
-                </M>
-                <span className="truncate text-[14px] font-medium">{a.label}</span>
-                <span className="f-mono hidden text-[10.5px] uppercase tracking-[0.10em] text-[var(--k-label-tertiary)] sm:block">
-                  {a.kind}{a.detail ? ` · ${a.detail}` : ''}
-                </span>
-                <M className={`text-right text-[14px] ${a.amount >= 0 ? 'text-[var(--f-green)]' : ''}`}>
-                  {a.amount >= 0 ? '+' : '−'}{formatINR(Math.abs(a.amount))}
-                </M>
+          <PageCard
+            to="/reimburse" index="06" label="Reimburse" className="lg:col-span-4"
+            metric={formatINR(openTotal)}
+            sub={`${open.length} open claim${open.length === 1 ? '' : 's'}`}
+            graphic={
+              byPerson.length > 0 ? (
+                <>
+                  {byPerson.slice(0, 2).map(([person, amt]) => (
+                    <MiniBar key={person} label={person} value={amt} max={personMax} color="#8A6508" />
+                  ))}
+                </>
+              ) : (
+                <span className="f-mono text-[11px] uppercase tracking-[0.12em] text-[var(--f-green)]">All settled</span>
+              )
+            }
+            blurb="Partner claims from receipt to payout, grouped by person with a settlement trail."
+          />
+
+          <PageCard
+            to="/reports" index="07" label="Reports" className="lg:col-span-4"
+            metric={cats[0]?.category ?? '—'}
+            sub={cats[0] ? `${formatINR(cats[0].amount)} · top category · ${data.periodLabel}` : 'No expenses yet'}
+            graphic={
+              <>
+                {cats.map((c, i) => (
+                  <MiniBar
+                    key={c.category}
+                    label={c.category}
+                    value={c.amount}
+                    max={catMax}
+                    color={['#0B5C43', '#C9A227', '#A83A2E'][i % 3]}
+                  />
+                ))}
+              </>
+            }
+            blurb="Where the money went and who it came from — category and client breakdowns over any period."
+          />
+
+          <PageCard
+            to="/gst" index="08" label="GST" className="lg:col-span-4"
+            metric={<span className="f-mono tracking-[0.02em]">DUE {due}</span>}
+            sub={`${data.invoices.length} invoices on file · ${usdCount} zero-rated export${usdCount === 1 ? '' : 's'}`}
+            graphic={
+              <div className="f-mono flex gap-2 text-[10.5px] uppercase tracking-[0.12em] text-[var(--k-label-secondary)]">
+                <span className="rounded-md border border-[var(--f-hairline)] px-2.5 py-1.5">GSTR-1</span>
+                <span className="rounded-md border border-[var(--f-hairline)] px-2.5 py-1.5">GSTR-3B</span>
+                <span className="rounded-md border border-[var(--f-hairline)] px-2.5 py-1.5">File by the 20th</span>
               </div>
-            ))}
-          </div>
-        )}
-      </section>
+            }
+            blurb="Output and input tax per month, export invoices at zero rate, and the net payable before filing."
+          />
 
-      {/* What each ledger holds */}
-      <section className="pt-14">
-        <Kicker className="mb-3 !text-[12px] !tracking-[0.22em]">WHAT EACH LEDGER HOLDS</Kicker>
-        <div className="grid">
-          {NAV_ROWS.map((r, i) => (
-            <button
-              key={r.to}
-              type="button"
-              onClick={() => navigate(r.to)}
-              className={`group grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-4 border-t border-[var(--f-hairline)] py-7 text-left transition-colors hover:bg-[rgba(17,23,19,0.035)] sm:grid-cols-[44px_minmax(0,0.9fr)_minmax(0,1.4fr)_auto] sm:gap-7 ${
-                i === NAV_ROWS.length - 1 ? 'border-b' : ''
-              }`}
-            >
-              <span className="f-mono text-[13px] text-[var(--f-gold-deep)]">{r.index}</span>
-              <span className="text-[clamp(24px,3vw,40px)] font-medium leading-none tracking-[-0.03em]">{r.label}</span>
-              <span className="hidden text-[15px] leading-[1.5] text-[var(--k-label-secondary)] sm:block">{r.blurb}</span>
-              <M className="whitespace-nowrap text-[13px] text-[var(--k-label-secondary)]">{rowStats[r.label] ?? ''}</M>
-            </button>
-          ))}
         </div>
       </section>
     </>

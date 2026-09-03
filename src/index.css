@@ -214,6 +214,21 @@
   }
 }
 
+/* "Daylight Robbery" — royal small-caps serif with a gold gradient fill */
+.dr-title {
+  font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif;
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.34em;
+  background: linear-gradient(180deg, #E3C566 0%, #C9A227 48%, #8A6508 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  user-select: none;
+  white-space: nowrap;
+}
+
 /* Invoice printing — only the invoice sheet is printed, A4 */
 @media print {
   @page { size: A4; margin: 10mm; }
