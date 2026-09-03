@@ -62,7 +62,7 @@ export const DEFAULT_SETTINGS: Settings = {
     { name: 'Airtel — connection 1', amount: '9665.76', category: 'Utilities', centre: '' },
     { name: 'Airtel — connection 2', amount: '9665.76', category: 'Utilities', centre: '' },
   ],
-  reimbursePersons: ['Mithun', 'Partner'],
+  reimbursePersons: ['Mithun', 'Niyas'],
 }
 
 const KEY = 'fets-accounts-settings-v1'
@@ -75,6 +75,12 @@ function load(): Settings {
     if (!raw) return DEFAULT_SETTINGS
     const saved = JSON.parse(raw) as Partial<Settings>
     const merged = { ...DEFAULT_SETTINGS, ...saved }
+    // rename the old generic claimant to the actual name, and persist it
+    const renamed = [...new Set((merged.reimbursePersons ?? []).map((p) => (p === 'Partner' ? 'Niyas' : p)))]
+    if (renamed.join() !== (merged.reimbursePersons ?? []).join()) {
+      merged.reimbursePersons = renamed
+      localStorage.setItem(KEY, JSON.stringify(merged))
+    }
     if (!localStorage.getItem(SEED_KEY)) {
       const existing = (saved.recurring ?? []).map((t) => ({ ...t }))
       // keep the user's rent template but correct the amount to the actual bank figure

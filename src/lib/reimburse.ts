@@ -41,11 +41,24 @@ export function useReimbursements() {
     }
     const { data, error } = await supabase.from(TABLE).select('*').order('date', { ascending: false })
     if (error) {
-      // table missing → browser mode
-      setEntries(loadLocalEntries()); setCloud(false); setLoaded(true)
+      // table missing → browser mode — rename legacy 'Partner' rows locally too
+      const local = loadLocalEntries()
+      if (local.some((r) => r.person === 'Partner')) {
+        saveLocal(local.map((r) => (r.person === 'Partner' ? { ...r, person: 'Niyas' } : r)))
+      } else {
+        setEntries(local)
+      }
+      setCloud(false); setLoaded(true)
       return
     }
-    setEntries((data ?? []) as ReimbEntry[])
+    // one-time rename: the generic 'Partner' claimant is Niyas
+    if ((data ?? []).some((r) => (r as ReimbEntry).person === 'Partner')) {
+      await supabase.from(TABLE).update({ person: 'Niyas' }).eq('person', 'Partner')
+      const again = await supabase.from(TABLE).select('*').order('date', { ascending: false })
+      setEntries((again.data ?? []) as ReimbEntry[])
+    } else {
+      setEntries((data ?? []) as ReimbEntry[])
+    }
     setCloud(true)
     setLoaded(true)
   }, [])

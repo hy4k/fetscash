@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Paperclip, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccount } from '@/lib/AccountContext'
@@ -218,11 +218,94 @@ function PersonLedger({ person, entries, onSettle, onDelete }: {
   )
 }
 
+/** Twelve-month claim history per person — darker square = more claimed that month. */
+function AnalysisDialog({ entries, persons, onClose }: { entries: ReimbEntry[]; persons: string[]; onClose: () => void }) {
+  const months = useMemo(() => {
+    const now = new Date()
+    const arr: string[] = []
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      arr.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+    }
+    return arr
+  }, [])
+
+  const rows = persons.map((p) => {
+    const mine = entries.filter((e) => e.person === p)
+    const byMonth = months.map((mo) =>
+      mine.filter((e) => e.date.startsWith(mo)).reduce((s, e) => s + e.amount, 0)
+    )
+    const openAmt = mine.filter((e) => !e.settled_on).reduce((s, e) => s + e.amount, 0)
+    const settledAmt = mine.filter((e) => e.settled_on).reduce((s, e) => s + e.amount, 0)
+    return { p, byMonth, openAmt, settledAmt, total: openAmt + settledAmt, count: mine.length }
+  })
+  const maxCell = Math.max(1, ...rows.flatMap((r) => r.byMonth))
+  const monthTotals = months.map((_, i) => rows.reduce((s, r) => s + r.byMonth[i], 0))
+  const grand = rows.reduce((s, r) => s + r.total, 0)
+  const abbr = (mo: string) => new Date(mo + '-01T00:00:00').toLocaleDateString('en-IN', { month: 'short' }).toUpperCase()
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="rounded-2xl sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Claims analysis</DialogTitle>
+        </DialogHeader>
+        <p className="k-b2-secondary -mt-1">
+          Twelve months of claims per person. The darker the square, the more was claimed that month — settled or not.
+        </p>
+        <div className="overflow-x-auto py-2">
+          <div className="min-w-[720px]">
+            <div className="f-kicker grid grid-cols-[minmax(120px,1.2fr)_repeat(12,minmax(0,1fr))_96px] gap-x-2 border-b border-[var(--f-hairline)] pb-3">
+              <span>PERSON</span>
+              {months.map((mo) => <span key={mo} className="text-center">{abbr(mo)}</span>)}
+              <span className="text-right">TOTAL</span>
+            </div>
+            {rows.map((r) => (
+              <div
+                key={r.p}
+                className="grid grid-cols-[minmax(120px,1.2fr)_repeat(12,minmax(0,1fr))_96px] items-center gap-x-2 border-b border-[var(--f-hairline-soft)] py-3.5"
+              >
+                <div className="min-w-0 pr-2">
+                  <p className="truncate text-[13.5px] font-medium">{r.p}</p>
+                  <p className="k-c1 mt-0.5">{r.count} CLAIM{r.count === 1 ? '' : 'S'}</p>
+                </div>
+                {r.byMonth.map((v, j) => (
+                  <span
+                    key={j}
+                    title={`${abbr(months[j])} ${months[j].slice(0, 4)} — ${formatINR(v)}`}
+                    className={cn('mx-auto block h-3.5 w-3.5 rounded-[3px]', v === 0 && 'border border-[var(--f-hairline)]')}
+                    style={v > 0 ? { background: `rgba(11,92,67,${(0.25 + 0.75 * (v / maxCell)).toFixed(2)})` } : undefined}
+                  />
+                ))}
+                <M className="text-right text-[12px]">{formatINR(r.total)}</M>
+              </div>
+            ))}
+            <div className="grid grid-cols-[minmax(120px,1.2fr)_repeat(12,minmax(0,1fr))_96px] items-center gap-x-2 pt-3.5">
+              <span className="f-kicker">BOTH</span>
+              {monthTotals.map((t, j) => (
+                <M key={j} className="text-center text-[10px] text-[var(--k-label-secondary)]">
+                  {t > 0 ? `${(t / 100000).toFixed(1)}L` : '—'}
+                </M>
+              ))}
+              <M className="text-right text-[12px] font-semibold">{formatINR(grand)}</M>
+            </div>
+            <p className="f-mono pt-4 text-[11px] tracking-[0.08em] text-[var(--k-label-tertiary)]">
+              {rows.map((r) => `${r.p.toUpperCase()} — OPEN ${formatINR(r.openAmt)} · SETTLED ${formatINR(r.settledAmt)}`).join('  ·  ') || 'NO CLAIMS YET'}
+              {' · MONTHLY TOTALS IN LAKHS (1L = ₹1,00,000)'}
+            </p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export default function Reimburse() {
   const [settings] = useSettings()
   const { entries, cloud, loaded, add, remove, settle } = useReimbursements()
   const { addExpense } = useAccount()
   const [addOpen, setAddOpen] = useState(false)
+  const [analysisOpen, setAnalysisOpen] = useState(false)
   const [settling, setSettling] = useState<string | null>(null)
 
   const doSettle = async (person: string) => {
@@ -251,10 +334,15 @@ export default function Reimburse() {
     <>
       <PageHero
         index="06"
-        section="REIMBURSE"
+        section="ALIMONY"
         title="Claims"
-        lede="What you and your partner spent out of pocket for the company — claim it with a receipt, then settle it off in one bank expense."
-        actions={<Pill onClick={() => setAddOpen(true)}>Add claim</Pill>}
+        lede="What you and Niyas spent out of pocket for the company — claim it with a receipt, then settle it off in one bank expense. Settled claims stay on record."
+        actions={
+          <>
+            <Pill outline onClick={() => setAnalysisOpen(true)}>Analysis</Pill>
+            <Pill onClick={() => setAddOpen(true)}>Add claim</Pill>
+          </>
+        }
       />
 
       {!cloud && loaded && (
@@ -283,6 +371,7 @@ export default function Reimburse() {
         ))}
       </div>
       {addOpen && <AddClaimDialog add={add} onClose={() => setAddOpen(false)} />}
+      {analysisOpen && <AnalysisDialog entries={entries} persons={persons} onClose={() => setAnalysisOpen(false)} />}
       <AlertDialog open={!!settling} onOpenChange={(open) => !open && setSettling(null)}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>

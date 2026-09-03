@@ -12,7 +12,7 @@ const PAGES = [
   { to: '/ledger', index: '03', label: 'Vault' },
   { to: '/cash', index: '04', label: 'FETS Cash' },
   { to: '/recurring', index: '05', label: 'Recurring' },
-  { to: '/reimburse', index: '06', label: 'Reimburse' },
+  { to: '/reimburse', index: '06', label: 'Alimony' },
   { to: '/reports', index: '07', label: 'Reports' },
   { to: '/gst', index: '08', label: 'GST' },
 ]
@@ -270,7 +270,7 @@ export default function Overview() {
           />
 
           <PageCard
-            to="/reimburse" index="06" label="Reimburse" className="lg:col-span-4"
+            to="/reimburse" index="06" label="Alimony" className="lg:col-span-4"
             metric={formatINR(openTotal)}
             sub={`${open.length} open claim${open.length === 1 ? '' : 's'}`}
             graphic={
@@ -284,7 +284,7 @@ export default function Overview() {
                 <span className="f-mono text-[11px] uppercase tracking-[0.12em] text-[var(--f-green)]">All settled</span>
               )
             }
-            blurb="Partner claims from receipt to payout, grouped by person with a settlement trail."
+            blurb="What you and Niyas spend out of pocket for the company — receipts in, one settlement out."
           />
 
           <PageCard
