@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Plus, Printer, Save, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { KimiButton } from '@/components/kimi/Button'
-import { KimiCard } from '@/components/kimi/Card'
+import { Kicker, M, Pill } from '@/components/ledger'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -361,8 +360,8 @@ export default function InvoiceGenerator() {
         <datalist id="gen-products">
           {products.map((p) => <option key={p.id} value={p.name} />)}
         </datalist>
-        <div className="grid grid-cols-[1fr_64px_90px_64px_90px_28px] gap-2 text-[12px] font-medium text-[var(--k-label-secondary)]">
-          <span>Product</span><span>Qty</span><span>Rate</span><span>Tax %</span><span className="text-right">Amount</span><span />
+        <div className="f-kicker grid grid-cols-[1fr_64px_90px_64px_90px_28px] gap-2">
+          <span>PRODUCT</span><span>QTY</span><span>RATE</span><span>TAX %</span><span className="text-right">AMOUNT</span><span />
         </div>
         {draft.items.map((it, idx) => (
           <div key={idx} className="grid grid-cols-[1fr_64px_90px_64px_90px_28px] items-center gap-2">
@@ -388,41 +387,46 @@ export default function InvoiceGenerator() {
             </button>
           </div>
         ))}
-        <KimiButton
-          variant="outline"
-          size={26}
-          leftIcon={<Plus />}
-          className="mt-1 self-start"
+        <Pill
+          small
+          outline
           onClick={() => set({ items: [...draft.items, { name: '', qty: '1', rate: '', tax: '0' }] })}
         >
-          Add item
-        </KimiButton>
+          + Add item
+        </Pill>
       </div>
 
       {/* Totals */}
-      <div className="space-y-1 rounded-xl bg-[var(--k-fill-f1)] px-4 py-3">
-        <div className="flex justify-between text-[13px]"><span className="text-[var(--k-label-secondary)]">SubTotal</span><span className="font-medium">{fmtMoney(sub, draft.currency)}</span></div>
+      <div className="space-y-1.5 border-t border-[var(--f-hairline)] pt-3">
+        <div className="flex items-baseline justify-between">
+          <span className="f-kicker">SUBTOTAL</span>
+          <M className="text-[13px]">{fmtMoney(sub, draft.currency)}</M>
+        </div>
         {taxTotal > 0 && (
-          <div className="flex justify-between text-[13px]"><span className="text-[var(--k-label-secondary)]">Tax</span><span className="font-medium">{fmtMoney(taxTotal, draft.currency)}</span></div>
+          <div className="flex items-baseline justify-between">
+            <span className="f-kicker">TAX</span>
+            <M className="text-[13px]">{fmtMoney(taxTotal, draft.currency)}</M>
+          </div>
         )}
-        <div className="flex justify-between border-t-[0.5px] border-[var(--k-separator)] pt-1.5 text-[14px]">
-          <span className="font-semibold">Grand Total</span>
-          <span className="font-semibold text-[var(--f-emerald-700)]">{fmtMoney(grand, draft.currency)}</span>
+        <div className="flex items-baseline justify-between border-t border-[var(--f-hairline)] pt-2">
+          <span className="text-[15px] font-semibold tracking-[-0.01em]">Grand Total</span>
+          <M className="text-[15px] font-semibold text-[var(--f-green)]">{fmtMoney(grand, draft.currency)}</M>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <KimiButton leftIcon={<Save />} onClick={save}>Save invoice</KimiButton>
-        <KimiButton variant="outline" leftIcon={<Printer />} onClick={() => window.print()}>Print / PDF</KimiButton>
+      <div className="flex items-center gap-2.5 pt-1">
+        <Pill onClick={save}>Save invoice</Pill>
+        <Pill outline onClick={() => window.print()}>Print / PDF</Pill>
       </div>
     </div>
   ), [draft, customers, products, allInvoices, sub, taxTotal, grand, validItems, clientName]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr]">
-      <KimiCard title="New invoice">
-        <div className="pt-1">{formFields}</div>
-      </KimiCard>
+      <div className="k-card self-start p-6">
+        <Kicker className="border-b border-[var(--f-hairline)] pb-4">NEW INVOICE</Kicker>
+        <div className="pt-5">{formFields}</div>
+      </div>
       <div className="overflow-x-auto">
         <InvoicePreview draft={draft} clientAddress={selectedCustomer?.address ?? ''} />
       </div>
