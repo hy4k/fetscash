@@ -54,11 +54,28 @@ export function useReimbursements() {
     // one-time rename: the generic 'Partner' claimant is Niyas
     if ((data ?? []).some((r) => (r as ReimbEntry).person === 'Partner')) {
       await supabase.from(TABLE).update({ person: 'Niyas' }).eq('person', 'Partner')
-      const again = await supabase.from(TABLE).select('*').order('date', { ascending: false })
-      setEntries((again.data ?? []) as ReimbEntry[])
-    } else {
-      setEntries((data ?? []) as ReimbEntry[])
     }
+    // one-time migration: move browser-saved claims into the cloud
+    const local = loadLocalEntries()
+    if (local.length > 0) {
+      const cloudIds = new Set(((data ?? []) as ReimbEntry[]).map((r) => r.id))
+      const toMove = local
+        .filter((r) => !cloudIds.has(r.id))
+        .map((r) => (r.person === 'Partner' ? { ...r, person: 'Niyas' } : r))
+      if (toMove.length > 0) {
+        const { error: upErr } = await supabase.from(TABLE).upsert(toMove)
+        if (upErr) {
+          toast.error(`Could not move browser claims: ${upErr.message}`)
+        } else {
+          try { localStorage.removeItem(LOCAL_KEY) } catch { /* storage unavailable */ }
+          toast.success(`Moved ${toMove.length} claim${toMove.length === 1 ? '' : 's'} from this browser to Supabase`)
+        }
+      } else {
+        try { localStorage.removeItem(LOCAL_KEY) } catch { /* storage unavailable */ }
+      }
+    }
+    const finalQ = await supabase.from(TABLE).select('*').order('date', { ascending: false })
+    setEntries((finalQ.data ?? []) as ReimbEntry[])
     setCloud(true)
     setLoaded(true)
   }, [])
